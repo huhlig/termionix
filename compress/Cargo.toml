@@ -1,0 +1,20 @@
+[package]
+name = "termionix-compress"
+description = "Compression Support for AsyncRead/AsyncWrite"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+keywords.workspace = true
+readme.workspace = true
+license.workspace = true
+
+authors.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+repository.workspace = true
+categories.workspace = true
+
+[dependencies]
+async-compression.workspace = true
+pin-project-lite.workspace = true
+tokio.workspace = true

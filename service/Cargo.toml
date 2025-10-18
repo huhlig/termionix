@@ -1,0 +1,30 @@
+[package]
+name = "termionix-service"
+description = "Termionix Telnet Service"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+keywords.workspace = true
+readme.workspace = true
+license.workspace = true
+authors.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+repository.workspace = true
+categories.workspace = true
+
+[dependencies]
+futures.workspace = true
+futures-util.workspace = true
+termionix-ansicodes.workspace = true
+termionix-codec.workspace = true
+termionix-compress.workspace = true
+termionix-terminal.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+tracing.workspace = true
+tracing-timing.workspace = true
+time = "0.3.44"
+
+[dev-dependencies]
+tracing-test.workspace = true
