@@ -1,0 +1,35 @@
+[workspace]
+resolver = "3"
+members = [
+    "ansicodes",
+    "codec",
+    "service",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+publish = false
+keywords = ["ansi", "telnet", "terminal"]
+readme = "README.md"
+license = "APACHE2 or MIT"
+description = "Ansi and Telnet Library for Rust."
+authors = ["Hans W. Uhlig <huhlig@gmail.com>"]
+documentation = "https://huhlig.github.io/termionix"
+homepage = "https://huhlig.github.io/termionix"
+repository = "https://github.com/huhlig/termionix"
+categories = ["network-programming"]
+
+
+[workspace.dependencies]
+bytes = { version = "1", features = ["default"] }
+futures = { version = "0.3", features = ["default"] }
+futures-util = { version = "0.3", features = ["default"] }
+termionix-ansicodes = { path = "ansicodes" }
+termionix-codec = { path = "codec" }
+termionix-service = { path = "service" }
+tokio = { version = "1", features = ["rt-multi-thread", "tracing", "net", "test-util", "macros"] }
+tokio-util = { version = "0.7", features = ["codec"] }
+tracing = { version = "0.1", features = ["default"] }
+tracing-test = { version = "0.2" }
+tracing-timing = { version = "0.7" }
