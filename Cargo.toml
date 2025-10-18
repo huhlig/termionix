@@ -1,0 +1,47 @@
+[workspace]
+resolver = "3"
+members = [
+    "ansicodec",
+    "compress",
+    "service",
+    "telnetcodec",
+    "terminal",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+publish = false
+keywords = ["ansi", "telnet", "terminal"]
+readme = "README.md"
+license = "APACHE2 or MIT"
+description = "Ansi and Telnet Library for Rust."
+authors = ["Hans W. Uhlig <huhlig@gmail.com>"]
+documentation = "https://huhlig.github.io/termionix"
+homepage = "https://huhlig.github.io/termionix"
+repository = "https://github.com/huhlig/termionix"
+categories = ["network-programming"]
+
+
+[workspace.dependencies]
+async-compression = { version = "0.4", features = ["tokio", "all-algorithms"] }
+async-debug = { version = "0.1" }
+bytes = { version = "1", features = ["default"] }
+byteorder = { version = "1", features = ["default"] }
+criterion = { version = "0.8", features = ["default", "async_tokio", "html_reports"] }
+enum-kinds = { version = "0.5", features = ["default"] }
+futures = { version = "0.3", features = ["default"] }
+futures-util = { version = "0.3", features = ["default"] }
+pin-project-lite = { version = "0.2" }
+termionix-ansicodec = { path = "ansicodec" }
+# termionix-oldansi = { path = "oldansi" }
+termionix-codec = { path = "telnetcodec", package = "termionix-telnetcodec" }
+termionix-compress = { path = "compress" }
+termionix-service = { path = "service" }
+termionix-terminal = { path = "terminal" }
+thiserror = { version = "2", features = ["default"] }
+tokio = { version = "1", features = ["rt-multi-thread", "tracing", "net", "test-util", "macros", "io-util", "signal"] }
+tokio-util = { version = "0.7", features = ["codec"] }
+tracing = { version = "0.1", features = ["default"] }
+tracing-test = { version = "0.2" }
+tracing-timing = { version = "0.7" }

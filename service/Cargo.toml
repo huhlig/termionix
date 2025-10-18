@@ -1,0 +1,51 @@
+[package]
+name = "termionix-service"
+description = "Termionix Telnet Service"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+keywords.workspace = true
+readme.workspace = true
+license.workspace = true
+authors.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+repository.workspace = true
+categories.workspace = true
+
+[dependencies]
+async-debug.workspace = true
+async-trait = "0.1"
+dashmap = "5.5"
+futures.workspace = true
+futures-util.workspace = true
+termionix-ansicodec.workspace = true
+termionix-codec.workspace = true
+termionix-compress.workspace = true
+termionix-terminal.workspace = true
+thiserror = "1.0"
+tokio.workspace = true
+tokio-util.workspace = true
+tracing.workspace = true
+tracing-timing.workspace = true
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["async_tokio", "html_reports"] }
+tracing-subscriber = "0.3"
+tracing-test.workspace = true
+
+[[bench]]
+name = "server_benchmarks"
+harness = false
+
+[[example]]
+name = "echo_server"
+path = "../examples/echo_server.rs"
+
+[[example]]
+name = "simple_server"
+path = "../examples/simple_server.rs"
+
+[[example]]
+name = "terminal_direct"
+path = "../examples/terminal_direct.rs"

@@ -1,0 +1,20 @@
+[package]
+name = "termionix-ansicodec"
+description = "Termionix AnsiCodec is a tokio codec for encoding and decoding ANSI Sequences"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+keywords.workspace = true
+readme.workspace = true
+license.workspace = true
+authors.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+repository.workspace = true
+categories.workspace = true
+
+[dependencies]
+bytes.workspace = true
+termionix-codec.workspace = true
+thiserror.workspace = true
+tokio-util.workspace = true
