@@ -173,7 +173,7 @@ impl ConnectionWorker {
                             self.update_activity();
                             self.set_state(ConnectionState::Active);
                             self.handler.on_event(self.id, &self.connection, event).await;
-                            
+
                             // Flush any protocol responses generated during decode
                             if self.connection.has_pending_responses().await {
                                 if let Err(e) = self.connection.flush_responses().await {
@@ -334,7 +334,8 @@ mod tests {
         let config = WorkerConfig::default();
         let state = Arc::new(AtomicU8::new(ConnectionState::Connecting.as_u8()));
 
-        let (worker, control_tx) = ConnectionWorker::new(id, connection, handler.clone(), config, state);
+        let (worker, control_tx) =
+            ConnectionWorker::new(id, connection, handler.clone(), config, state);
 
         // Start worker
         let worker_task = tokio::spawn(async move {
@@ -379,7 +380,8 @@ mod tests {
         let config = WorkerConfig::default();
         let state = Arc::new(AtomicU8::new(ConnectionState::Connecting.as_u8()));
 
-        let (worker, control_tx) = ConnectionWorker::new(id, connection, handler.clone(), config, state);
+        let (worker, control_tx) =
+            ConnectionWorker::new(id, connection, handler.clone(), config, state);
 
         // Start worker
         let worker_task = tokio::spawn(async move {

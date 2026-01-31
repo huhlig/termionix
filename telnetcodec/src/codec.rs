@@ -64,7 +64,7 @@ impl TelnetCodec {
     pub fn has_pending_responses(&self) -> bool {
         !self.response_queue.is_empty()
     }
-    
+
     /// Encode all pending responses into buffer
     pub fn flush_responses(&mut self, dst: &mut BytesMut) -> Result<(), CodecError> {
         while let Some(response) = self.response_queue.pop_front() {
@@ -543,7 +543,10 @@ impl Decoder for TelnetCodec {
                             match crate::args::naws::WindowSize::decode(&mut buffer) {
                                 Ok(window_size) => TelnetArgument::NAWSWindowSize(window_size),
                                 Err(e) => {
-                                    warn!("Failed to parse NAWS window size: {}, treating as unknown", e);
+                                    warn!(
+                                        "Failed to parse NAWS window size: {}, treating as unknown",
+                                        e
+                                    );
                                     TelnetArgument::Unknown(option, buffer)
                                 }
                             }
@@ -772,11 +775,10 @@ impl Encoder<TelnetFrame> for TelnetCodec {
         while let Some(response) = self.response_queue.pop_front() {
             self.encode_frame(response, dst)?;
         }
-        
+
         // Then encode the requested item
         self.encode_frame(item, dst)
     }
-    
 }
 
 impl Encoder<TelnetEvent> for TelnetCodec {
@@ -1133,7 +1135,7 @@ mod tests {
                 consts::option::BINARY,
                 0x01,
                 consts::IAC,
-                consts::IAC,  // IAC is escaped as IAC IAC
+                consts::IAC, // IAC is escaped as IAC IAC
                 0x03,
                 consts::IAC,
                 consts::SE,

@@ -94,10 +94,8 @@ async fn test_protocol_auto_response() {
 
     // Should receive DO ECHO or DONT ECHO immediately
     let mut buf = [0u8; 3];
-    let result = tokio::time::timeout(
-        Duration::from_millis(500),
-        client.read_exact(&mut buf)
-    ).await;
+    let result =
+        tokio::time::timeout(Duration::from_millis(500), client.read_exact(&mut buf)).await;
 
     match result {
         Ok(Ok(_)) => {
@@ -140,7 +138,7 @@ async fn test_telnet_will_echo() {
     // Send WILL ECHO
     client.write_all(&[IAC, WILL, ECHO]).await.unwrap();
     client.flush().await.unwrap();
-    
+
     // Give the server more time to process and respond
     tokio::time::sleep(Duration::from_millis(300)).await;
 
@@ -153,7 +151,7 @@ async fn test_telnet_will_echo() {
 
     // Verify we got a response
     assert!(n > 0);
-    
+
     // Verify it's a valid telnet response (IAC followed by DO or DONT)
     assert_eq!(buf[0], IAC);
     assert!(buf[1] == DO || buf[1] == DONT);

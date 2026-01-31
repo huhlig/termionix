@@ -44,12 +44,12 @@ impl<I> AnsiCodec<I> {
             parser: AnsiParser::new(),
         }
     }
-    
+
     /// Get a reference to the inner codec
     pub fn inner(&self) -> &I {
         &self.inner
     }
-    
+
     /// Get a mutable reference to the inner codec
     pub fn inner_mut(&mut self) -> &mut I {
         &mut self.inner
