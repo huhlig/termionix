@@ -1,7 +1,7 @@
 # Termionix - Ansi Telnet Library for Tokio 
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Actions Status](https://github.com/huhlig/termionix/workflows/rust/badge.svg)](https://github.com/huhlig/termionix/actions)
+[![Build](https://github.com/huhlig/termionix/actions/workflows/build.yml/badge.svg)](https://github.com/huhlig/termionix/actions/workflows/build.yml)
 
 ([API Docs])
 

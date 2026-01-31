@@ -1,4 +1,4 @@
-name: CI
+name: Build
 
 on:
   push:
@@ -110,11 +110,14 @@ jobs:
           files: ./cobertura.xml
           fail_ci_if_error: false
 
-
   docs:
     name: Deploy Documentation
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: write
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -132,9 +135,9 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
           publish_dir: ./target/doc
           force_orphan: true
-
 
   publish:
     name: Publish to crates.io
