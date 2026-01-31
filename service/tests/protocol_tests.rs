@@ -75,7 +75,7 @@ async fn test_telnet_iac_escape() {
 }
 
 #[tokio::test]
-async fn test_telnet_will_echo() {
+async fn test_protocol_auto_response() {
     let config = ServerConfig::new("127.0.0.1:0".parse().unwrap());
     let server = TelnetServer::new(config).await.unwrap();
     let addr = server.bind_address();
@@ -91,17 +91,73 @@ async fn test_telnet_will_echo() {
     // Send WILL ECHO
     client.write_all(&[IAC, WILL, ECHO]).await.unwrap();
     client.flush().await.unwrap();
+
+    // Should receive DO ECHO or DONT ECHO immediately
+    let mut buf = [0u8; 3];
+    let result = tokio::time::timeout(
+        Duration::from_millis(500),
+        client.read_exact(&mut buf)
+    ).await;
+
+    match result {
+        Ok(Ok(_)) => {
+            // Verify we got a valid telnet response
+            assert_eq!(buf[0], IAC, "First byte should be IAC");
+            assert!(
+                buf[1] == DO || buf[1] == DONT,
+                "Second byte should be DO or DONT, got {}",
+                buf[1]
+            );
+            assert_eq!(buf[2], ECHO, "Third byte should be ECHO option");
+        }
+        Ok(Err(e)) => {
+            panic!("Error reading response: {}", e);
+        }
+        Err(_) => {
+            panic!("Timeout waiting for protocol response - auto-response not working");
+        }
+    }
+
+    drop(client);
     tokio::time::sleep(Duration::from_millis(100)).await;
+    server.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn test_telnet_will_echo() {
+    let config = ServerConfig::new("127.0.0.1:0".parse().unwrap());
+    let server = TelnetServer::new(config).await.unwrap();
+    let addr = server.bind_address();
+
+    let handler = Arc::new(ProtocolTestHandler);
+    server.start(handler).await.unwrap();
+
+    tokio::time::sleep(Duration::from_millis(200)).await;
+
+    let mut client = TcpStream::connect(addr).await.unwrap();
+    tokio::time::sleep(Duration::from_millis(200)).await;
+
+    // Send WILL ECHO
+    client.write_all(&[IAC, WILL, ECHO]).await.unwrap();
+    client.flush().await.unwrap();
+    
+    // Give the server more time to process and respond
+    tokio::time::sleep(Duration::from_millis(300)).await;
 
     // Read server response (should be DO ECHO or DONT ECHO)
     let mut buf = vec![0u8; 1024];
-    let n = tokio::time::timeout(Duration::from_secs(1), client.read(&mut buf))
+    let n = tokio::time::timeout(Duration::from_secs(2), client.read(&mut buf))
         .await
         .unwrap()
         .unwrap();
 
     // Verify we got a response
     assert!(n > 0);
+    
+    // Verify it's a valid telnet response (IAC followed by DO or DONT)
+    assert_eq!(buf[0], IAC);
+    assert!(buf[1] == DO || buf[1] == DONT);
+    assert_eq!(buf[2], ECHO);
 
     drop(client);
     tokio::time::sleep(Duration::from_millis(100)).await;

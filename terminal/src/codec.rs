@@ -62,6 +62,7 @@ impl<I> TerminalCodec<I> {
     pub fn terminal_buffer(&self) -> &TerminalBuffer {
         &self.buffer
     }
+    
 }
 
 impl<I> Decoder for TerminalCodec<I>

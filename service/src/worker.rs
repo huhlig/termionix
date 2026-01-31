@@ -93,9 +93,9 @@ impl ConnectionWorker {
         connection: TelnetConnection,
         handler: Arc<dyn ServerHandler>,
         config: WorkerConfig,
+        state: Arc<AtomicU8>,
     ) -> (Self, mpsc::Sender<ControlMessage>) {
         let (control_tx, control_rx) = mpsc::channel(config.control_buffer_size);
-        let state = Arc::new(AtomicU8::new(ConnectionState::Connecting.as_u8()));
 
         let worker = Self {
             id,
@@ -173,6 +173,17 @@ impl ConnectionWorker {
                             self.update_activity();
                             self.set_state(ConnectionState::Active);
                             self.handler.on_event(self.id, &self.connection, event).await;
+                            
+                            // Flush any protocol responses generated during decode
+                            if self.connection.has_pending_responses().await {
+                                if let Err(e) = self.connection.flush_responses().await {
+                                    tracing::warn!(
+                                        connection_id = %self.id,
+                                        error = ?e,
+                                        "Failed to flush protocol responses"
+                                    );
+                                }
+                            }
                         }
                         Ok(Ok(None)) => {
                             // Connection closed by peer
@@ -321,8 +332,9 @@ mod tests {
         let connection = TelnetConnection::wrap(server, id).unwrap();
         let handler = Arc::new(TestHandler::new());
         let config = WorkerConfig::default();
+        let state = Arc::new(AtomicU8::new(ConnectionState::Connecting.as_u8()));
 
-        let (worker, control_tx) = ConnectionWorker::new(id, connection, handler.clone(), config);
+        let (worker, control_tx) = ConnectionWorker::new(id, connection, handler.clone(), config, state);
 
         // Start worker
         let worker_task = tokio::spawn(async move {
@@ -365,8 +377,9 @@ mod tests {
         let connection = TelnetConnection::wrap(server, id).unwrap();
         let handler = Arc::new(TestHandler::new());
         let config = WorkerConfig::default();
+        let state = Arc::new(AtomicU8::new(ConnectionState::Connecting.as_u8()));
 
-        let (worker, control_tx) = ConnectionWorker::new(id, connection, handler.clone(), config);
+        let (worker, control_tx) = ConnectionWorker::new(id, connection, handler.clone(), config, state);
 
         // Start worker
         let worker_task = tokio::spawn(async move {

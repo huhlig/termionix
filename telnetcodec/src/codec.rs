@@ -34,6 +34,8 @@ pub struct TelnetCodec {
     decoder_buffer: BytesMut,
     decoder_state: DecoderState,
     options: TelnetOptions,
+    /// Queue of response frames to send (from protocol negotiations)
+    response_queue: std::collections::VecDeque<TelnetFrame>,
 }
 
 impl TelnetCodec {
@@ -56,6 +58,19 @@ impl TelnetCodec {
     /// ```
     pub fn new() -> TelnetCodec {
         TelnetCodec::default()
+    }
+
+    /// Check if there are pending protocol responses
+    pub fn has_pending_responses(&self) -> bool {
+        !self.response_queue.is_empty()
+    }
+    
+    /// Encode all pending responses into buffer
+    pub fn flush_responses(&mut self, dst: &mut BytesMut) -> Result<(), CodecError> {
+        while let Some(response) = self.response_queue.pop_front() {
+            self.encode_frame(response, dst)?;
+        }
+        Ok(())
     }
 
     /// Checks if we support the given option locally
@@ -227,6 +242,7 @@ impl Default for TelnetCodec {
             decoder_buffer: BytesMut::new(),
             decoder_state: DecoderState::NormalData,
             options: TelnetOptions::default(),
+            response_queue: std::collections::VecDeque::new(),
         }
     }
 }
@@ -395,8 +411,10 @@ impl Decoder for TelnetCodec {
                         self.options.local_qstate(option),
                         crate::options::QState::Yes
                     );
-                    // Process through QState machine
-                    self.options.handle_received(frame)?;
+                    // Process through QState machine and queue any response
+                    if let Some(response) = self.options.handle_received(frame)? {
+                        self.response_queue.push_back(response);
+                    }
                     // Check if we transitioned to/from Yes state
                     let is_yes = matches!(
                         self.options.local_qstate(option),
@@ -420,8 +438,10 @@ impl Decoder for TelnetCodec {
                         self.options.local_qstate(option),
                         crate::options::QState::Yes
                     );
-                    // Process through QState machine
-                    self.options.handle_received(frame)?;
+                    // Process through QState machine and queue any response
+                    if let Some(response) = self.options.handle_received(frame)? {
+                        self.response_queue.push_back(response);
+                    }
                     // Check if we transitioned to/from Yes state
                     let is_yes = matches!(
                         self.options.local_qstate(option),
@@ -445,8 +465,10 @@ impl Decoder for TelnetCodec {
                         self.options.remote_qstate(option),
                         crate::options::QState::Yes
                     );
-                    // Process through QState machine
-                    self.options.handle_received(frame)?;
+                    // Process through QState machine and queue any response
+                    if let Some(response) = self.options.handle_received(frame)? {
+                        self.response_queue.push_back(response);
+                    }
                     // Check if we transitioned to/from Yes state
                     let is_yes = matches!(
                         self.options.remote_qstate(option),
@@ -470,8 +492,10 @@ impl Decoder for TelnetCodec {
                         self.options.remote_qstate(option),
                         crate::options::QState::Yes
                     );
-                    // Process through QState machine
-                    self.options.handle_received(frame)?;
+                    // Process through QState machine and queue any response
+                    if let Some(response) = self.options.handle_received(frame)? {
+                        self.response_queue.push_back(response);
+                    }
                     // Check if we transitioned to/from Yes state
                     let is_yes = matches!(
                         self.options.remote_qstate(option),
@@ -581,62 +605,9 @@ impl Encoder<&str> for TelnetCodec {
     }
 }
 
-impl Encoder<TelnetFrame> for TelnetCodec {
-    type Error = CodecError;
-
-    /// Encodes a `TelnetFrame` into a byte buffer for transmission over the Telnet protocol.
-    ///
-    /// # Parameters
-    ///
-    /// - `item`: The `TelnetFrame` variant that represents a specific Telnet command, data, or negotiation to be encoded.
-    /// - `dst`: A mutable reference to a [`BytesMut`] buffer where the encoded bytes for the Telnet frame will be appended.
-    ///
-    /// # Returns
-    ///
-    /// - `Ok(())`: If the frame was successfully encoded into the destination buffer.
-    /// - `Err(Self::Error)`: If an error occurs during the encoding process (handler dependent).
-    ///
-    /// # Behavior
-    ///
-    /// The method matches against the specific `TelnetFrame` variants and encodes them
-    /// into the required byte sequences for Telnet protocol specifications. Most frames
-    /// begin with the `IAC` (Interpret As Command) byte, followed by specific command or
-    /// option bytes, and optionally any additional data.
-    ///
-    /// ## Variants:
-    ///
-    /// - `TelnetFrame::Data(ch)`: Encodes a single data byte. If the byte is `IAC` (Interpret As Command),
-    ///   it is escaped by writing `IAC` twice.
-    /// - `TelnetEvent::NoOperation`: Encodes the `NOP` (No Operation) command.
-    /// - `TelnetFrame::DataMark`: Encodes the `DM` (Data Mark) command.
-    /// - `TelnetFrame::Break`: Encodes the `BRK` (Break) command.
-    /// - `TelnetFrame::InterruptProcess`: Encodes the `IP` (Interrupt Process) command.
-    /// - `TelnetFrame::AbortOutput`: Encodes the `AO` (Abort Output) command.
-    /// - `TelnetFrame::AreYouThere`: Encodes the `AYT` (Are You There?) command.
-    /// - `TelnetFrame::EraseCharacter`: Encodes the `EC` (Erase Character) command.
-    /// - `TelnetFrame::EraseLine`: Encodes the `EL` (Erase Line) command.
-    /// - `TelnetFrame::GoAhead`: Encodes the `GA` (Go Ahead) command.
-    /// - `TelnetFrame::Do(option)`: Encodes the `DO` command with the specified `option`.
-    /// - `TelnetFrame::Dont(option)`: Encodes the `DONT` command with the specified `option`.
-    /// - `TelnetFrame::Will(option)`: Encodes the `WILL` command with the specified `option`.
-    /// - `TelnetFrame::Wont(option)`: Encodes the `WONT` command with the specified `option`.
-    /// - `TelnetFrame::Subnegotiate(option, arguments)`: Encodes a subnegotiation sequence, consisting of:
-    ///     - `IAC SB` prefix (Subnegotiation start).
-    ///     - `option`: A byte indicating the option for the subnegotiation.
-    ///     - `arguments`: The subnegotiation payload.
-    ///     - `IAC SE` suffix (Subnegotiation end).
-    ///
-    /// # Encoding Buffer
-    ///
-    /// The method uses an internal buffer `encoder_buffer`, which is first cleared, then used to construct
-    /// the encoded frame. Space is reserved in the buffer prior to encoding to ensure efficiency. After
-    /// encoding, the content of `encoder_buffer` is appended to the `dst` buffer.
-    ///
-    /// # Errors
-    ///
-    /// This method generally does not produce errors unless there's a fault introduced by the implementing
-    /// context (e.g., `Self::Error` defined by the encoder implementation).
-    fn encode(&mut self, item: TelnetFrame, dst: &mut BytesMut) -> Result<(), Self::Error> {
+impl TelnetCodec {
+    /// Internal method to encode a single frame without processing the response queue
+    fn encode_frame(&mut self, item: TelnetFrame, dst: &mut BytesMut) -> Result<(), CodecError> {
         match item {
             TelnetFrame::Data(ch) => {
                 dst.reserve(2);
@@ -731,6 +702,73 @@ impl Encoder<TelnetFrame> for TelnetCodec {
         }
         Ok(())
     }
+}
+
+impl Encoder<TelnetFrame> for TelnetCodec {
+    type Error = CodecError;
+
+    /// Encodes a `TelnetFrame` into a byte buffer for transmission over the Telnet protocol.
+    ///
+    /// # Parameters
+    ///
+    /// - `item`: The `TelnetFrame` variant that represents a specific Telnet command, data, or negotiation to be encoded.
+    /// - `dst`: A mutable reference to a [`BytesMut`] buffer where the encoded bytes for the Telnet frame will be appended.
+    ///
+    /// # Returns
+    ///
+    /// - `Ok(())`: If the frame was successfully encoded into the destination buffer.
+    /// - `Err(Self::Error)`: If an error occurs during the encoding process (handler dependent).
+    ///
+    /// # Behavior
+    ///
+    /// The method matches against the specific `TelnetFrame` variants and encodes them
+    /// into the required byte sequences for Telnet protocol specifications. Most frames
+    /// begin with the `IAC` (Interpret As Command) byte, followed by specific command or
+    /// option bytes, and optionally any additional data.
+    ///
+    /// ## Variants:
+    ///
+    /// - `TelnetFrame::Data(ch)`: Encodes a single data byte. If the byte is `IAC` (Interpret As Command),
+    ///   it is escaped by writing `IAC` twice.
+    /// - `TelnetEvent::NoOperation`: Encodes the `NOP` (No Operation) command.
+    /// - `TelnetFrame::DataMark`: Encodes the `DM` (Data Mark) command.
+    /// - `TelnetFrame::Break`: Encodes the `BRK` (Break) command.
+    /// - `TelnetFrame::InterruptProcess`: Encodes the `IP` (Interrupt Process) command.
+    /// - `TelnetFrame::AbortOutput`: Encodes the `AO` (Abort Output) command.
+    /// - `TelnetFrame::AreYouThere`: Encodes the `AYT` (Are You There?) command.
+    /// - `TelnetFrame::EraseCharacter`: Encodes the `EC` (Erase Character) command.
+    /// - `TelnetFrame::EraseLine`: Encodes the `EL` (Erase Line) command.
+    /// - `TelnetFrame::GoAhead`: Encodes the `GA` (Go Ahead) command.
+    /// - `TelnetFrame::Do(option)`: Encodes the `DO` command with the specified `option`.
+    /// - `TelnetFrame::Dont(option)`: Encodes the `DONT` command with the specified `option`.
+    /// - `TelnetFrame::Will(option)`: Encodes the `WILL` command with the specified `option`.
+    /// - `TelnetFrame::Wont(option)`: Encodes the `WONT` command with the specified `option`.
+    /// - `TelnetFrame::Subnegotiate(option, arguments)`: Encodes a subnegotiation sequence, consisting of:
+    ///     - `IAC SB` prefix (Subnegotiation start).
+    ///     - `option`: A byte indicating the option for the subnegotiation.
+    ///     - `arguments`: The subnegotiation payload.
+    ///     - `IAC SE` suffix (Subnegotiation end).
+    ///
+    /// # Encoding Buffer
+    ///
+    /// The method uses an internal buffer `encoder_buffer`, which is first cleared, then used to construct
+    /// the encoded frame. Space is reserved in the buffer prior to encoding to ensure efficiency. After
+    /// encoding, the content of `encoder_buffer` is appended to the `dst` buffer.
+    ///
+    /// # Errors
+    ///
+    /// This method generally does not produce errors unless there's a fault introduced by the implementing
+    /// context (e.g., `Self::Error` defined by the encoder implementation).
+    fn encode(&mut self, item: TelnetFrame, dst: &mut BytesMut) -> Result<(), Self::Error> {
+        // First, encode any queued response frames from protocol negotiations
+        while let Some(response) = self.response_queue.pop_front() {
+            self.encode_frame(response, dst)?;
+        }
+        
+        // Then encode the requested item
+        self.encode_frame(item, dst)
+    }
+    
 }
 
 impl Encoder<TelnetEvent> for TelnetCodec {

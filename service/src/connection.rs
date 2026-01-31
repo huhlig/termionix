@@ -362,6 +362,41 @@ impl TelnetConnection {
             }
         }
     }
+    
+    /// Check if there are pending protocol responses that need to be flushed
+    pub async fn has_pending_responses(&self) -> bool {
+        let framed = self.framed.lock().await;
+        let codec = framed.codec();
+        
+        // Navigate through the codec stack: TerminalCodec -> AnsiCodec -> TelnetCodec
+        codec.codec().inner().has_pending_responses()
+    }
+    
+    /// Flush any pending protocol responses to the connection
+    pub async fn flush_responses(&self) -> Result<()> {
+        use tokio::io::AsyncWriteExt;
+        
+        let mut framed = self.framed.lock().await;
+        
+        // Create a buffer for the responses
+        let mut buffer = tokio_util::bytes::BytesMut::new();
+        
+        // Navigate through codec stack and flush responses
+        // TerminalCodec -> AnsiCodec -> TelnetCodec
+        {
+            let codec = framed.codec_mut();
+            codec.codec_mut().inner_mut().flush_responses(&mut buffer)?;
+        }
+        
+        // If we have data to send, write it directly to the underlying stream
+        if !buffer.is_empty() {
+            let stream = framed.get_mut().get_mut();
+            stream.write_all(&buffer).await?;
+            stream.flush().await?;
+        }
+        
+        Ok(())
+    }
 }
 
 impl std::fmt::Debug for TelnetConnection {

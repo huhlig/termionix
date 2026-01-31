@@ -151,6 +151,12 @@ impl ConnectionManager {
     ) -> Result<ConnectionId> {
         let id = self.next_connection_id();
 
+        // Create shared state
+        let state = Arc::new(std::sync::atomic::AtomicU8::new(
+            ConnectionState::Connecting.as_u8(),
+        ));
+        let worker_state = state.clone();
+
         // Create worker
         let worker_connection = connection.clone();
         let (worker, control_tx) = crate::ConnectionWorker::new(
@@ -158,13 +164,8 @@ impl ConnectionManager {
             worker_connection,
             handler,
             self.worker_config.clone(),
+            worker_state,
         );
-
-        // Get state reference before moving worker
-        let state = Arc::new(std::sync::atomic::AtomicU8::new(
-            ConnectionState::Connecting.as_u8(),
-        ));
-        let worker_state = state.clone();
 
         // Spawn worker task
         let connections = self.connections.clone();
@@ -184,7 +185,7 @@ impl ConnectionManager {
             connection,
             control_tx,
             worker_handle,
-            state: worker_state,
+            state,
             created_at: Instant::now(),
         };
 
