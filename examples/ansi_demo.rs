@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -301,4 +301,4 @@ impl ServerHandler for AnsiDemoHandler {
     }
 }
 
-// Made with Bob
+

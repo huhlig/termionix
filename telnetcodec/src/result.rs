@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -147,7 +147,10 @@ impl std::fmt::Display for CodecError {
 impl std::fmt::Display for SubnegotiationErrorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            SubnegotiationErrorKind::InsufficientData { required, available } => {
+            SubnegotiationErrorKind::InsufficientData {
+                required,
+                available,
+            } => {
                 write!(
                     f,
                     "insufficient data (required: {}, available: {})",
@@ -177,7 +180,10 @@ impl std::fmt::Display for SubnegotiationErrorKind {
             SubnegotiationErrorKind::IncompleteData { description } => {
                 write!(f, "incomplete data: {}", description)
             }
-            SubnegotiationErrorKind::EncodingFailed { required, available } => {
+            SubnegotiationErrorKind::EncodingFailed {
+                required,
+                available,
+            } => {
                 write!(
                     f,
                     "encoding failed (required: {}, available: {})",

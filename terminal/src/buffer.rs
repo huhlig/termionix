@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 use crate::types::{CursorPosition, TerminalSize};
 use std::collections::BTreeMap;
-use termionix_ansicodec::{AnsiConfig, SegmentedString};
 use termionix_ansicodec::utility::StyledString;
+use termionix_ansicodec::{AnsiConfig, SegmentedString};
 
 /// Virtual Terminal Buffer
 pub struct TerminalBuffer {
@@ -264,7 +264,9 @@ impl TerminalBuffer {
 
     /// Gets the current character count in the current line
     pub fn current_line_length(&self) -> usize {
-        self.current_line.len(Some(&AnsiConfig::strip_all())).unwrap()
+        self.current_line
+            .len(Some(&AnsiConfig::strip_all()))
+            .unwrap()
     }
 
     /// Gets a reference to the current line being typed
@@ -436,7 +438,8 @@ impl TerminalBuffer {
                 // Bell (BEL) - audible alert (no visual effect on buffer)
                 return;
             }
-            '\x09' => { // '\t'
+            '\x09' => {
+                // '\t'
                 // Horizontal Tab (HT) - add tab character
                 self.current_line.push_char(c);
                 // Move cursor to next tab stop (typically 8 columns)
@@ -445,7 +448,8 @@ impl TerminalBuffer {
                 self.cursor.col = next_tab_stop.min(self.size.cols.saturating_sub(1));
                 return;
             }
-            '\x0A' => { // '\n'
+            '\x0A' => {
+                // '\n'
                 // Line Feed (LF) - complete the current line and move down
                 self.complete_line();
                 return;
@@ -461,7 +465,8 @@ impl TerminalBuffer {
                 self.clear_completed_lines();
                 return;
             }
-            '\x0D' => { // '\r'
+            '\x0D' => {
+                // '\r'
                 // Carriage Return (CR) - move the cursor to the beginning of the line
                 self.cursor.col = 0;
                 return;

@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use termionix_codec::{TelnetCodec, TelnetFrame, TelnetOption, TelnetOptions};
+use termionix_telnetcodec::{TelnetCodec, TelnetFrame, TelnetOption, TelnetOptions};
 use tokio::net::TcpStream;
 use tokio::sync::{mpsc, RwLock};
 use tokio::task::JoinHandle;
@@ -237,7 +237,7 @@ impl Terminal {
         match option {
             TelnetOption::NAWS => {
                 // Parse window size
-                use termionix_codec::naws::WindowSize;
+                use termionix_telnetcodec::naws::WindowSize;
                 if let Ok(size) = WindowSize::decode(&mut &data[..]) {
                     self.set_size(size.cols as usize, size.rows as usize).await;
                     let (width, height) = self.size().await;
@@ -346,4 +346,4 @@ impl std::fmt::Debug for Terminal {
     }
 }
 
-// Made with Bob
+

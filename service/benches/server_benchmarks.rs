@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 //! Benchmarks for the Telnet server
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
+use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use std::sync::Arc;
 use std::time::Duration;
 use termionix_service::{
@@ -121,7 +121,7 @@ fn bench_broadcast_scaling(c: &mut Criterion) {
     let runtime = tokio::runtime::Runtime::new().unwrap();
 
     let mut group = c.benchmark_group("broadcast_scaling");
-    
+
     for conn_count in [10, 50, 100, 500].iter() {
         group.bench_with_input(
             BenchmarkId::from_parameter(conn_count),
@@ -220,8 +220,8 @@ fn bench_concurrent_operations(c: &mut Criterion) {
 
 // Benchmark state transitions
 fn bench_state_transitions(c: &mut Criterion) {
-    use termionix_service::ConnectionState;
     use std::sync::atomic::{AtomicU8, Ordering};
+    use termionix_service::ConnectionState;
 
     let state = AtomicU8::new(ConnectionState::Connecting.as_u8());
 
@@ -244,6 +244,333 @@ criterion_group!(
     bench_state_transitions,
 );
 
-criterion_main!(benches);
+// ============================================================================
+// ENHANCED BENCHMARKS - Additional Performance Tests
+// ============================================================================
 
+// Benchmark message throughput
+fn bench_message_throughput(c: &mut Criterion) {
+    let runtime = tokio::runtime::Runtime::new().unwrap();
 
+    let mut group = c.benchmark_group("message_throughput");
+
+    for msg_count in [100, 500, 1000].iter() {
+        group.bench_with_input(
+            BenchmarkId::from_parameter(msg_count),
+            msg_count,
+            |b, &msg_count| {
+                b.to_async(&runtime).iter(|| async move {
+                    let config = ServerConfig::default();
+                    let metrics = Arc::new(ServerMetrics::new());
+                    let worker_config = WorkerConfig {
+                        read_timeout: config.read_timeout,
+                        idle_timeout: config.idle_timeout,
+                        write_timeout: config.write_timeout,
+                        control_buffer_size: 100,
+                    };
+                    let manager = ConnectionManager::new(metrics, worker_config);
+
+                    let (server, _client) = create_test_connection().await;
+                    let id = ConnectionId::new(1);
+                    let connection = TelnetConnection::wrap(server, id).unwrap();
+                    manager
+                        .add_connection(connection, Arc::new(BenchHandler))
+                        .unwrap();
+
+                    // Send multiple messages
+                    for _ in 0..msg_count {
+                        let _ = manager
+                            .send_to_connection(id, TerminalCommand::SendEraseLine)
+                            .await;
+                    }
+
+                    manager.shutdown().await;
+                });
+            },
+        );
+    }
+    group.finish();
+}
+
+// Benchmark connection lifecycle overhead
+fn bench_connection_lifecycle(c: &mut Criterion) {
+    let runtime = tokio::runtime::Runtime::new().unwrap();
+
+    c.bench_function("full_connection_lifecycle", |b| {
+        b.to_async(&runtime).iter(|| async {
+            let config = ServerConfig::default();
+            let metrics = Arc::new(ServerMetrics::new());
+            let worker_config = WorkerConfig {
+                read_timeout: config.read_timeout,
+                idle_timeout: config.idle_timeout,
+                write_timeout: config.write_timeout,
+                control_buffer_size: 100,
+            };
+            let manager = ConnectionManager::new(metrics, worker_config);
+
+            // Create connection
+            let (server, _client) = create_test_connection().await;
+            let id = ConnectionId::new(1);
+            let connection = TelnetConnection::wrap(server, id).unwrap();
+
+            // Add connection
+            let conn_id = manager
+                .add_connection(connection, Arc::new(BenchHandler))
+                .unwrap();
+
+            // Remove connection
+            let _ = manager.remove_connection(conn_id).await;
+
+            manager.shutdown().await;
+        });
+    });
+}
+
+// Benchmark metadata operations
+fn bench_metadata_operations(c: &mut Criterion) {
+    let runtime = tokio::runtime::Runtime::new().unwrap();
+
+    c.bench_function("connection_info_queries", |b| {
+        b.to_async(&runtime).iter(|| async {
+            let config = ServerConfig::default();
+            let metrics = Arc::new(ServerMetrics::new());
+            let worker_config = WorkerConfig {
+                read_timeout: config.read_timeout,
+                idle_timeout: config.idle_timeout,
+                write_timeout: config.write_timeout,
+                control_buffer_size: 100,
+            };
+            let manager = ConnectionManager::new(metrics, worker_config);
+
+            // Add connections
+            let mut clients = Vec::new();
+            for i in 0..10 {
+                let (server, client) = create_test_connection().await;
+                let id = ConnectionId::new(i);
+                let connection = TelnetConnection::wrap(server, id).unwrap();
+                manager
+                    .add_connection(connection, Arc::new(BenchHandler))
+                    .unwrap();
+                clients.push(client);
+            }
+
+            // Query all connection info
+            let _infos = manager.get_all_connection_infos();
+            let _ids = manager.get_connection_ids();
+            let _count = manager.connection_count();
+
+            manager.shutdown().await;
+            drop(clients);
+        });
+    });
+}
+
+// Benchmark filtered broadcast
+fn bench_filtered_broadcast(c: &mut Criterion) {
+    let runtime = tokio::runtime::Runtime::new().unwrap();
+
+    c.bench_function("broadcast_filtered", |b| {
+        b.to_async(&runtime).iter(|| async {
+            let config = ServerConfig::default();
+            let metrics = Arc::new(ServerMetrics::new());
+            let worker_config = WorkerConfig {
+                read_timeout: config.read_timeout,
+                idle_timeout: config.idle_timeout,
+                write_timeout: config.write_timeout,
+                control_buffer_size: 100,
+            };
+            let manager = ConnectionManager::new(metrics, worker_config);
+
+            // Add connections
+            let mut clients = Vec::new();
+            for i in 0..50 {
+                let (server, client) = create_test_connection().await;
+                let id = ConnectionId::new(i);
+                let connection = TelnetConnection::wrap(server, id).unwrap();
+                manager
+                    .add_connection(connection, Arc::new(BenchHandler))
+                    .unwrap();
+                clients.push(client);
+            }
+
+            tokio::time::sleep(Duration::from_millis(50)).await;
+
+            // Broadcast with filter (only even IDs)
+            let result = manager
+                .broadcast_filtered(TerminalCommand::SendEraseLine, |info| {
+                    info.id.as_u64() % 2 == 0
+                })
+                .await;
+            black_box(result);
+
+            manager.shutdown().await;
+            drop(clients);
+        });
+    });
+}
+
+// Benchmark broadcast except
+fn bench_broadcast_except(c: &mut Criterion) {
+    let runtime = tokio::runtime::Runtime::new().unwrap();
+
+    c.bench_function("broadcast_except", |b| {
+        b.to_async(&runtime).iter(|| async {
+            let config = ServerConfig::default();
+            let metrics = Arc::new(ServerMetrics::new());
+            let worker_config = WorkerConfig {
+                read_timeout: config.read_timeout,
+                idle_timeout: config.idle_timeout,
+                write_timeout: config.write_timeout,
+                control_buffer_size: 100,
+            };
+            let manager = ConnectionManager::new(metrics, worker_config);
+
+            // Add connections
+            let mut clients = Vec::new();
+            let mut exclude_ids = Vec::new();
+            for i in 0..50 {
+                let (server, client) = create_test_connection().await;
+                let id = ConnectionId::new(i);
+                let connection = TelnetConnection::wrap(server, id).unwrap();
+                manager
+                    .add_connection(connection, Arc::new(BenchHandler))
+                    .unwrap();
+                clients.push(client);
+
+                // Exclude first 5 connections
+                if i < 5 {
+                    exclude_ids.push(id);
+                }
+            }
+
+            tokio::time::sleep(Duration::from_millis(50)).await;
+
+            // Broadcast except excluded IDs
+            let result = manager
+                .broadcast_except(TerminalCommand::SendEraseLine, &exclude_ids)
+                .await;
+            black_box(result);
+
+            manager.shutdown().await;
+            drop(clients);
+        });
+    });
+}
+
+// Benchmark memory usage patterns
+fn bench_memory_patterns(c: &mut Criterion) {
+    let runtime = tokio::runtime::Runtime::new().unwrap();
+
+    c.bench_function("connection_churn", |b| {
+        b.to_async(&runtime).iter(|| async {
+            let config = ServerConfig::default();
+            let metrics = Arc::new(ServerMetrics::new());
+            let worker_config = WorkerConfig {
+                read_timeout: config.read_timeout,
+                idle_timeout: config.idle_timeout,
+                write_timeout: config.write_timeout,
+                control_buffer_size: 100,
+            };
+            let manager = ConnectionManager::new(metrics, worker_config);
+
+            // Simulate connection churn
+            for i in 0..20 {
+                let (server, _client) = create_test_connection().await;
+                let id = ConnectionId::new(i);
+                let connection = TelnetConnection::wrap(server, id).unwrap();
+                let conn_id = manager
+                    .add_connection(connection, Arc::new(BenchHandler))
+                    .unwrap();
+
+                // Immediately remove
+                let _ = manager.remove_connection(conn_id).await;
+            }
+
+            manager.shutdown().await;
+        });
+    });
+}
+
+// Benchmark metrics snapshot performance
+fn bench_metrics_snapshot(c: &mut Criterion) {
+    let metrics = Arc::new(ServerMetrics::new());
+
+    // Populate with some data
+    for _ in 0..100 {
+        metrics.connection_opened();
+        metrics.bytes_sent(1024);
+        metrics.message_sent();
+    }
+
+    c.bench_function("metrics_snapshot_with_calculations", |b| {
+        b.iter(|| {
+            let snapshot = metrics.snapshot();
+            black_box(snapshot.messages_sent_per_sec());
+            black_box(snapshot.bytes_sent_per_sec());
+            black_box(snapshot.error_rate());
+        });
+    });
+}
+
+// Benchmark concurrent manager access
+fn bench_concurrent_manager_access(c: &mut Criterion) {
+    let runtime = tokio::runtime::Runtime::new().unwrap();
+
+    c.bench_function("high_concurrency_queries", |b| {
+        b.to_async(&runtime).iter(|| async {
+            let config = ServerConfig::default();
+            let metrics = Arc::new(ServerMetrics::new());
+            let worker_config = WorkerConfig {
+                read_timeout: config.read_timeout,
+                idle_timeout: config.idle_timeout,
+                write_timeout: config.write_timeout,
+                control_buffer_size: 100,
+            };
+            let manager = Arc::new(ConnectionManager::new(metrics, worker_config));
+
+            // Add some connections
+            let mut clients = Vec::new();
+            for i in 0..20 {
+                let (server, client) = create_test_connection().await;
+                let id = ConnectionId::new(i);
+                let connection = TelnetConnection::wrap(server, id).unwrap();
+                manager
+                    .add_connection(connection, Arc::new(BenchHandler))
+                    .unwrap();
+                clients.push(client);
+            }
+
+            // Spawn many concurrent queries
+            let mut handles = Vec::new();
+            for _ in 0..50 {
+                let mgr = manager.clone();
+                handles.push(tokio::spawn(async move {
+                    let _count = mgr.connection_count();
+                    let _ids = mgr.get_connection_ids();
+                    let _infos = mgr.get_all_connection_infos();
+                }));
+            }
+
+            for handle in handles {
+                handle.await.unwrap();
+            }
+
+            manager.shutdown().await;
+            drop(clients);
+        });
+    });
+}
+
+criterion_group!(
+    enhanced_benches,
+    bench_message_throughput,
+    bench_connection_lifecycle,
+    bench_metadata_operations,
+    bench_filtered_broadcast,
+    bench_broadcast_except,
+    bench_memory_patterns,
+    bench_metrics_snapshot,
+    bench_concurrent_manager_access,
+);
+
+criterion_main!(benches, enhanced_benches);

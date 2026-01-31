@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,9 +14,13 @@
 // limitations under the License.
 //
 
+use crate::ansi::{
+    AnsiApplicationProgramCommand, AnsiControlCode, AnsiControlSequenceIntroducer,
+    AnsiDeviceControlString, AnsiOperatingSystemCommand, AnsiPrivacyMessage, AnsiStartOfString,
+    EraseInDisplayMode, EraseInLineMode,
+};
+use crate::string::{Segment, SegmentedString};
 use std::ops::{Index, Range};
-use crate::ansi::{AnsiApplicationProgramCommand, AnsiControlCode, AnsiControlSequenceIntroducer, AnsiDeviceControlString, AnsiOperatingSystemCommand, AnsiPrivacyMessage, AnsiStartOfString, EraseInDisplayMode, EraseInLineMode};
-use crate::string::{SegmentedString, Segment};
 
 /// A collection of [`Span`] objects representing parsed segments of an ANSI-formatted string.
 ///
@@ -594,7 +598,9 @@ impl SpannedString {
                         // Greedy: consume all consecutive Unicode characters
                         while pos < bytes.len() && bytes[pos] >= 0x80 {
                             // Check if it's a C1 control code
-                            if bytes[pos] <= 0x9F && AnsiControlCode::from_byte(bytes[pos]).is_some() {
+                            if bytes[pos] <= 0x9F
+                                && AnsiControlCode::from_byte(bytes[pos]).is_some()
+                            {
                                 break;
                             }
                             let char_len = utf8_char_len(bytes[pos]);
@@ -781,43 +787,47 @@ impl SpannedString {
                 Span::OSC { range } => {
                     // Extract OSC data
                     if let Some(data) = source.get(range.clone()) {
-                        segmented
-                            .push_segment(Segment::OSC(AnsiOperatingSystemCommand::Unknown(data.as_bytes().to_vec())));
+                        segmented.push_segment(Segment::OSC(AnsiOperatingSystemCommand::Unknown(
+                            data.as_bytes().to_vec(),
+                        )));
                     }
                 }
                 Span::DCS { range } => {
                     // Extract DCS data
                     if let Some(data) = source.get(range.clone()) {
-                        segmented
-                            .push_segment(Segment::DCS(AnsiDeviceControlString::Unknown(data.as_bytes().to_vec())));
+                        segmented.push_segment(Segment::DCS(AnsiDeviceControlString::Unknown(
+                            data.as_bytes().to_vec(),
+                        )));
                     }
                 }
                 Span::SOS { range } => {
                     // Extract SOS data
                     if let Some(data) = source.get(range.clone()) {
-                        segmented
-                            .push_segment(Segment::SOS(AnsiStartOfString::Unknown(data.as_bytes().to_vec())));
+                        segmented.push_segment(Segment::SOS(AnsiStartOfString::Unknown(
+                            data.as_bytes().to_vec(),
+                        )));
                     }
                 }
                 Span::ST { range } => {
                     // Extract ST data
                     if let Some(_data) = source.get(range.clone()) {
-                        segmented
-                            .push_segment(Segment::ST);
+                        segmented.push_segment(Segment::ST);
                     }
                 }
                 Span::PM { range } => {
                     // Extract PM data
                     if let Some(data) = source.get(range.clone()) {
-                        segmented
-                            .push_segment(Segment::PM(AnsiPrivacyMessage::Unknown(data.as_bytes().to_vec())));
+                        segmented.push_segment(Segment::PM(AnsiPrivacyMessage::Unknown(
+                            data.as_bytes().to_vec(),
+                        )));
                     }
                 }
                 Span::APC { range } => {
                     // Extract APC data
                     if let Some(data) = source.get(range.clone()) {
-                        segmented
-                            .push_segment(Segment::APC(AnsiApplicationProgramCommand::Unknown(data.as_bytes().to_vec())));
+                        segmented.push_segment(Segment::APC(
+                            AnsiApplicationProgramCommand::Unknown(data.as_bytes().to_vec()),
+                        ));
                     }
                 }
             }
@@ -2362,8 +2372,12 @@ fn parse_csi_command(param_bytes: &[u8], final_byte: Option<u8>) -> AnsiControlS
         b'C' => AnsiControlSequenceIntroducer::CursorForward(params.get(0).copied().unwrap_or(1)),
         b'D' => AnsiControlSequenceIntroducer::CursorBack(params.get(0).copied().unwrap_or(1)),
         b'E' => AnsiControlSequenceIntroducer::CursorNextLine(params.get(0).copied().unwrap_or(1)),
-        b'F' => AnsiControlSequenceIntroducer::CursorPreviousLine(params.get(0).copied().unwrap_or(1)),
-        b'G' => AnsiControlSequenceIntroducer::CursorHorizontalAbsolute(params.get(0).copied().unwrap_or(1)),
+        b'F' => {
+            AnsiControlSequenceIntroducer::CursorPreviousLine(params.get(0).copied().unwrap_or(1))
+        }
+        b'G' => AnsiControlSequenceIntroducer::CursorHorizontalAbsolute(
+            params.get(0).copied().unwrap_or(1),
+        ),
         b'H' | b'f' => AnsiControlSequenceIntroducer::CursorPosition {
             row: params.get(0).copied().unwrap_or(1),
             col: params.get(1).copied().unwrap_or(1),

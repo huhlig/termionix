@@ -18,3 +18,13 @@ categories.workspace = true
 async-compression.workspace = true
 pin-project-lite.workspace = true
 tokio.workspace = true
+
+[dev-dependencies]
+criterion.workspace = true
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "io-util", "test-util"] }
+bytes.workspace = true
+futures.workspace = true
+
+[[bench]]
+name = "compress_benchmarks"
+harness = false

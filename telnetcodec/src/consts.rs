@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -322,7 +322,7 @@ pub mod option {
         (false, false), //  22 - SUPDUP_OUTPUT
         (false, false), //  23 - SNDLOC
         (false, false), //  24 - TTYPE
-        (false, false), //  25 - EOR
+        ( true,  true), //  25 - EOR
         (false, false), //  26 - TUID
         (false, false), //  27 - OUTMRK
         (false, false), //  28 - TTYLOC

@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -211,18 +211,21 @@ impl<I> TerminalCodec<I> {
                 Ok(Some(TerminalEvent::EraseLine { cursor }))
             }
             TelnetCommand::GoAhead => Ok(None),
-            TelnetCommand::OptionStatus(option, side, enabled) => Ok(Some(
-                TerminalEvent::TelnetOptionStatus(termionix_codec::status::TelnetOptionStatus {
-                    command: termionix_codec::status::StatusCommand::Is,
-                    options: std::collections::HashMap::from([(
-                        option,
-                        (side == termionix_codec::TelnetSide::Remote, enabled),
-                    )]),
-                }),
-            )),
+            TelnetCommand::EndOfRecord => Ok(None),
+            TelnetCommand::OptionStatus(option, side, enabled) => {
+                Ok(Some(TerminalEvent::TelnetOptionStatus(
+                    termionix_telnetcodec::status::TelnetOptionStatus {
+                        command: termionix_telnetcodec::status::StatusCommand::Is,
+                        options: std::collections::HashMap::from([(
+                            option,
+                            (side == termionix_telnetcodec::TelnetSide::Remote, enabled),
+                        )]),
+                    },
+                )))
+            }
             TelnetCommand::Subnegotiation(arg) => {
                 // Handle subnegotiation based on the argument type
-                use termionix_codec::TelnetArgument;
+                use termionix_telnetcodec::TelnetArgument;
                 match arg {
                     TelnetArgument::NAWSWindowSize(window_size) => {
                         let old = self.buffer.size();
@@ -259,6 +262,18 @@ where
 
     fn encode(&mut self, item: &'a str, dst: &mut BytesMut) -> Result<(), Self::Error> {
         self.codec.encode(item, dst).map_err(From::from)
+    }
+}
+
+impl<'a, I> Encoder<&'a String> for TerminalCodec<I>
+where
+    I: Encoder<&'a str>,
+    TerminalError: From<I::Error>,
+{
+    type Error = TerminalError;
+
+    fn encode(&mut self, item: &'a String, dst: &mut BytesMut) -> Result<(), Self::Error> {
+        self.codec.encode(item.as_str(), dst).map_err(From::from)
     }
 }
 
@@ -338,7 +353,7 @@ where
 mod tests {
     use super::*;
     use termionix_ansicodec::{AnsiCodec, AnsiConfig};
-    use termionix_codec::TelnetCodec;
+    use termionix_telnetcodec::TelnetCodec;
 
     fn create_test_codec() -> TerminalCodec<AnsiCodec<TelnetCodec>> {
         let telnet_codec = TelnetCodec::new();

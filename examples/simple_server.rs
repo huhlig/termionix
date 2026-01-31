@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,26 +37,24 @@ use termionix_service::{CallbackHandler, ServerConfig, TelnetServer};
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Configure server to listen on port 2323
     let config = ServerConfig::new("127.0.0.1:2323".parse()?);
-    
+
     // Create server
     let server = TelnetServer::new(config).await?;
-    
+
     // Create a simple handler that just logs events
     let handler = Arc::new(CallbackHandler::default());
-    
+
     println!("Simple Telnet Server running on 127.0.0.1:2323");
     println!("Press Ctrl+C to stop");
-    
+
     // Start server
     server.start(handler).await?;
-    
+
     // Wait for Ctrl+C
     tokio::signal::ctrl_c().await?;
-    
+
     // Shutdown
     server.shutdown().await?;
-    
+
     Ok(())
 }
-
-// Made with Bob

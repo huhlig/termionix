@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ pub enum TelnetError {
 
     /// Protocol error from the codec layer
     #[error("Protocol error: {0}")]
-    Protocol(#[from] termionix_codec::CodecError),
+    Protocol(#[from] termionix_telnetcodec::CodecError),
 
     /// Terminal error from the terminal layer
     #[error("Terminal error: {0}")]
@@ -86,9 +86,7 @@ impl TelnetError {
     pub fn is_connection_error(&self) -> bool {
         matches!(
             self,
-            TelnetError::ConnectionNotFound(_)
-                | TelnetError::ConnectionClosed
-                | TelnetError::Io(_)
+            TelnetError::ConnectionNotFound(_) | TelnetError::ConnectionClosed | TelnetError::Io(_)
         )
     }
 
@@ -126,5 +124,3 @@ mod tests {
         assert_eq!(err.to_string(), "Maximum connections (1000) reached");
     }
 }
-
-

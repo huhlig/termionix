@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -148,8 +148,7 @@ pub struct CallbackHandler {
     pub on_idle_timeout:
         Option<Box<dyn Fn(ConnectionId, &TelnetConnection) + Send + Sync + 'static>>,
     /// Called on disconnection
-    pub on_disconnect:
-        Option<Box<dyn Fn(ConnectionId, &TelnetConnection) + Send + Sync + 'static>>,
+    pub on_disconnect: Option<Box<dyn Fn(ConnectionId, &TelnetConnection) + Send + Sync + 'static>>,
 }
 
 impl Default for CallbackHandler {
@@ -182,21 +181,19 @@ impl ServerHandler for CallbackHandler {
             EventHandler::Multiple {
                 on_character,
                 on_line,
-            } => {
-                match event {
-                    TerminalEvent::CharacterData { character, .. } => {
-                        if let Some(f) = on_character {
-                            f(id, character);
-                        }
+            } => match event {
+                TerminalEvent::CharacterData { character, .. } => {
+                    if let Some(f) = on_character {
+                        f(id, character);
                     }
-                    TerminalEvent::LineCompleted { line, .. } => {
-                        if let Some(f) = on_line {
-                            f(id, line.to_string());
-                        }
-                    }
-                    _ => {}
                 }
-            }
+                TerminalEvent::LineCompleted { line, .. } => {
+                    if let Some(f) = on_line {
+                        f(id, line.to_string());
+                    }
+                }
+                _ => {}
+            },
         }
     }
 
@@ -224,5 +221,3 @@ impl ServerHandler for CallbackHandler {
         }
     }
 }
-
-

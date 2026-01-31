@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ use crate::{
     ServerMetrics, TelnetConnection, TelnetError, WorkerConfig,
 };
 use dashmap::DashMap;
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Instant;
 use termionix_terminal::TerminalCommand;
 use tokio::sync::mpsc;
@@ -153,8 +153,12 @@ impl ConnectionManager {
 
         // Create worker
         let worker_connection = connection.clone();
-        let (worker, control_tx) =
-            crate::ConnectionWorker::new(id, worker_connection, handler, self.worker_config.clone());
+        let (worker, control_tx) = crate::ConnectionWorker::new(
+            id,
+            worker_connection,
+            handler,
+            self.worker_config.clone(),
+        );
 
         // Get state reference before moving worker
         let state = Arc::new(std::sync::atomic::AtomicU8::new(
@@ -199,11 +203,8 @@ impl ConnectionManager {
             let _ = managed.control_tx.send(ControlMessage::Close).await;
 
             // Wait for worker to finish (with timeout)
-            let _ = tokio::time::timeout(
-                std::time::Duration::from_secs(5),
-                managed.worker_handle,
-            )
-            .await;
+            let _ = tokio::time::timeout(std::time::Duration::from_secs(5), managed.worker_handle)
+                .await;
 
             Ok(())
         } else {
@@ -346,6 +347,80 @@ impl ConnectionManager {
         result
     }
 
+    /// Broadcast to all connections except specified ones
+    ///
+    /// This is useful for broadcasting messages to all connections except
+    /// the sender or a specific set of connections.
+    ///
+    /// # Parameters
+    ///
+    /// * `command` - The terminal command to broadcast
+    /// * `exclude` - Slice of connection IDs to exclude from the broadcast
+    ///
+    /// # Returns
+    ///
+    /// A `BroadcastResult` containing statistics about the broadcast operation.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use termionix_service::ConnectionManager;
+    /// # use termionix_terminal::TerminalCommand;
+    /// # async fn example(manager: &ConnectionManager, sender_id: termionix_service::ConnectionId) {
+    /// // Broadcast to all except the sender
+    /// let result = manager.broadcast_except(
+    ///     TerminalCommand::SendEraseLine,
+    ///     &[sender_id]
+    /// ).await;
+    /// println!("Broadcast to {} connections", result.succeeded);
+    /// # }
+    /// ```
+    pub async fn broadcast_except(
+        &self,
+        command: TerminalCommand,
+        exclude: &[ConnectionId],
+    ) -> BroadcastResult {
+        let mut result = BroadcastResult::new();
+
+        // Collect non-excluded connections
+        let mut sends = Vec::new();
+        for entry in self.connections.iter() {
+            let id = *entry.key();
+
+            // Skip excluded connections
+            if exclude.contains(&id) {
+                continue;
+            }
+
+            result.total += 1;
+            let tx = entry.control_tx.clone();
+            let cmd = command;
+
+            sends.push(async move {
+                match tx.send(ControlMessage::Broadcast(cmd)).await {
+                    Ok(_) => (id, Ok(())),
+                    Err(e) => (id, Err(e.to_string())),
+                }
+            });
+        }
+
+        // Execute all sends concurrently
+        let results = futures_util::future::join_all(sends).await;
+
+        // Collect results
+        for (id, res) in results {
+            match res {
+                Ok(_) => result.succeeded += 1,
+                Err(e) => {
+                    result.failed += 1;
+                    result.errors.push((id, e));
+                }
+            }
+        }
+
+        result
+    }
+
     /// Shutdown all connections gracefully
     pub async fn shutdown(&self) {
         // Send close to all connections
@@ -465,5 +540,3 @@ mod tests {
         drop(clients);
     }
 }
-
-

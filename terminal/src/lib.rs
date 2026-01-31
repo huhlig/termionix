@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ mod command;
 mod event;
 mod result;
 mod types;
+mod utility;
 
 pub use self::buffer::TerminalBuffer;
 pub use self::codec::TerminalCodec;
@@ -27,6 +28,7 @@ pub use self::command::TerminalCommand;
 pub use self::event::TerminalEvent;
 pub use self::result::{TerminalError, TerminalResult};
 pub use self::types::{CursorPosition, TerminalSize};
+pub use self::utility::{terminal_word_unwrap, terminal_word_wrap};
 
 #[cfg(test)]
 mod tests {
@@ -37,7 +39,9 @@ mod tests {
     fn test_module_exports_exist() {
         // Verify all public exports are accessible
         let _ = std::any::type_name::<TerminalBuffer>();
-        let _ = std::any::type_name::<TerminalCodec<termionix_ansicodec::AnsiCodec<termionix_codec::TelnetCodec>>>();
+        let _ = std::any::type_name::<
+            TerminalCodec<termionix_ansicodec::AnsiCodec<termionix_telnetcodec::TelnetCodec>>,
+        >();
         let _ = std::any::type_name::<TerminalCommand>();
         let _ = std::any::type_name::<TerminalEvent>();
         let _ = std::any::type_name::<TerminalError>();
@@ -60,8 +64,9 @@ mod tests {
         assert_eq!(buffer.height(), 40);
     }
 
-    fn create_test_codec() -> TerminalCodec<termionix_ansicodec::AnsiCodec<termionix_codec::TelnetCodec>> {
-        let telnet_codec = termionix_codec::TelnetCodec::new();
+    fn create_test_codec()
+    -> TerminalCodec<termionix_ansicodec::AnsiCodec<termionix_telnetcodec::TelnetCodec>> {
+        let telnet_codec = termionix_telnetcodec::TelnetCodec::new();
         let ansi_codec = termionix_ansicodec::AnsiCodec::new(
             termionix_ansicodec::AnsiConfig::default(),
             telnet_codec,

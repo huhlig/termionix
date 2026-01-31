@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -171,12 +171,11 @@ impl From<std::io::Error> for AnsiError {
     }
 }
 
-impl From<termionix_codec::CodecError> for AnsiError {
-    fn from(error: termionix_codec::CodecError) -> Self {
+impl From<termionix_telnetcodec::CodecError> for AnsiError {
+    fn from(error: termionix_telnetcodec::CodecError) -> Self {
         AnsiError::IoError(std::io::Error::new(
             std::io::ErrorKind::Other,
             format!("Codec error: {:?}", error),
         ))
     }
 }
-

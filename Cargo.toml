@@ -24,18 +24,21 @@ categories = ["network-programming"]
 
 
 [workspace.dependencies]
+async-trait = { version = "0.1" }
 async-compression = { version = "0.4", features = ["tokio", "all-algorithms"] }
 async-debug = { version = "0.1" }
 bytes = { version = "1", features = ["default"] }
 byteorder = { version = "1", features = ["default"] }
 criterion = { version = "0.8", features = ["default", "async_tokio", "html_reports"] }
+dashmap = { version = "3" }
 enum-kinds = { version = "0.5", features = ["default"] }
 futures = { version = "0.3", features = ["default"] }
 futures-util = { version = "0.3", features = ["default"] }
+metrics = { version = "0.24" }
 pin-project-lite = { version = "0.2" }
+proptest = { version = "1.9" }
 termionix-ansicodec = { path = "ansicodec" }
-# termionix-oldansi = { path = "oldansi" }
-termionix-codec = { path = "telnetcodec", package = "termionix-telnetcodec" }
+termionix-telnetcodec = { path = "telnetcodec" }
 termionix-compress = { path = "compress" }
 termionix-service = { path = "service" }
 termionix-terminal = { path = "terminal" }
@@ -43,5 +46,6 @@ thiserror = { version = "2", features = ["default"] }
 tokio = { version = "1", features = ["rt-multi-thread", "tracing", "net", "test-util", "macros", "io-util", "signal"] }
 tokio-util = { version = "0.7", features = ["codec"] }
 tracing = { version = "0.1", features = ["default"] }
+tracing-subscriber = { version = "0.3", features = ["default"] }
 tracing-test = { version = "0.2" }
 tracing-timing = { version = "0.7" }

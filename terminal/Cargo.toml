@@ -16,6 +16,15 @@ categories.workspace = true
 [dependencies]
 enum-kinds.workspace = true
 termionix-ansicodec.workspace = true
-termionix-codec.workspace = true
+termionix-telnetcodec.workspace = true
 tokio.workspace = true
 tokio-util.workspace = true
+
+[dev-dependencies]
+criterion.workspace = true
+proptest.workspace = true
+tokio = { workspace = true, features = ["full", "test-util"] }
+
+[[bench]]
+name = "terminal_benchmarks"
+harness = false

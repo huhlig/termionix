@@ -15,6 +15,14 @@ categories.workspace = true
 
 [dependencies]
 bytes.workspace = true
-termionix-codec.workspace = true
+termionix-telnetcodec.workspace = true
 thiserror.workspace = true
 tokio-util.workspace = true
+
+[dev-dependencies]
+criterion.workspace = true
+tokio.workspace = true
+
+[[bench]]
+name = "ansi_benchmarks"
+harness = false

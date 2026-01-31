@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,11 +24,9 @@
 //! - Broadcast message handling
 //! - Resource cleanup
 
-use crate::{
-    ConnectionId, ConnectionState, Result, ServerHandler, TelnetConnection, TelnetError,
-};
-use std::sync::atomic::{AtomicU8, Ordering};
+use crate::{ConnectionId, ConnectionState, Result, ServerHandler, TelnetConnection, TelnetError};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU8, Ordering};
 use std::time::{Duration, Instant};
 use termionix_terminal::TerminalCommand;
 use tokio::select;
@@ -148,9 +146,7 @@ impl ConnectionWorker {
 
         // Handle any errors
         if let Err(e) = result {
-            self.handler
-                .on_error(self.id, &self.connection, e)
-                .await;
+            self.handler.on_error(self.id, &self.connection, e).await;
         }
 
         // Cleanup
@@ -242,9 +238,7 @@ impl ConnectionWorker {
         self.set_state(ConnectionState::Closing);
 
         // Notify handler of disconnection
-        self.handler
-            .on_disconnect(self.id, &self.connection)
-            .await;
+        self.handler.on_disconnect(self.id, &self.connection).await;
 
         // Drain any remaining control messages
         while self.control_rx.try_recv().is_ok() {}
@@ -398,5 +392,3 @@ mod tests {
         drop(client);
     }
 }
-
-

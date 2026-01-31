@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ pub use crate::style::{
     AnsiSelectGraphicRendition, Blink, Color, Font, Ideogram, Intensity, SGRParameter, Script,
     Underline,
 };
-use termionix_codec::{TelnetArgument, TelnetOption, TelnetSide};
+use termionix_telnetcodec::{TelnetArgument, TelnetOption, TelnetSide};
 use tokio_util::bytes::BufMut;
 
 /// Ansi Sequence represents a series of bytes read from a [TelnetCodec] which translates to a valid
@@ -552,6 +552,15 @@ pub enum TelnetCommand {
     /// and the receiver may now send data. Rarely used in modern systems.
     GoAhead,
 
+    /// End of Record - Marks the end of a prompt.
+    ///
+    /// Format: `IAC EOR` (0xFF 0xEF)
+    ///
+    /// Used by MUD servers to mark the end of a prompt. A prompt is considered
+    /// any line that does not end with \r\n. This allows clients to distinguish
+    /// between regular output and prompts that require user input.
+    EndOfRecord,
+
     /// Telnet Negotiation Result.
     ///
     /// # Arguments
@@ -622,6 +631,7 @@ impl TelnetCommand {
             TelnetCommand::EraseCharacter => 3,
             TelnetCommand::EraseLine => 3,
             TelnetCommand::GoAhead => 3,
+            TelnetCommand::EndOfRecord => 3,
             TelnetCommand::OptionStatus(_, _, _) => 0,
             TelnetCommand::Subnegotiation(arg) => 2 + arg.len(),
         }
@@ -751,6 +761,10 @@ impl TelnetCommand {
                 writer.write_all(&[0xFF, 0xF9])?;
                 Ok(3)
             }
+            TelnetCommand::EndOfRecord => {
+                writer.write_all(&[0xFF, 0xEF])?;
+                Ok(3)
+            }
             TelnetCommand::OptionStatus(_option, _side, _enabled) => Ok(3),
             TelnetCommand::Subnegotiation(arg) => {
                 writer.write_all(&[0xFF, 0xFA])?;
@@ -775,6 +789,7 @@ impl std::fmt::Display for TelnetCommand {
             TelnetCommand::EraseCharacter => write!(f, "$EC$"),
             TelnetCommand::EraseLine => write!(f, "$EL$"),
             TelnetCommand::GoAhead => write!(f, "$GA$"),
+            TelnetCommand::EndOfRecord => write!(f, "$EOR$"),
             TelnetCommand::OptionStatus(option, side, enabled) => {
                 write!(f, "$TELNEG({},{}, {})$", option, side, enabled)
             }

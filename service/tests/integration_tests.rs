@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
 use termionix_service::{
-    ConnectionId, ServerConfig, ServerHandler, TelnetConnection, TelnetServer,
+    ConnectionId, ConnectionState, ServerConfig, ServerHandler, TelnetConnection, TelnetServer,
 };
 use termionix_terminal::TerminalEvent;
 use tokio::io::AsyncWriteExt;
@@ -791,5 +791,403 @@ async fn test_connection_state_tracking() {
     assert_eq!(handler.disconnect_count(), 2);
 
     // Cleanup
+    server.shutdown().await.unwrap();
+}
+
+// ============================================================================
+// ENHANCED TESTS - Stress Testing & Edge Cases
+// ============================================================================
+
+#[tokio::test]
+async fn test_rapid_connection_cycling() {
+    let config = ServerConfig::new("127.0.0.1:0".parse().unwrap()).with_max_connections(100);
+    let server = TelnetServer::new(config).await.unwrap();
+    let addr = server.bind_address();
+
+    let handler = Arc::new(TestHandler::new());
+    server.start(handler.clone()).await.unwrap();
+
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    // Rapidly connect and disconnect
+    for _ in 0..20 {
+        let client = TcpStream::connect(addr).await.unwrap();
+        tokio::time::sleep(Duration::from_millis(10)).await;
+        drop(client);
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+
+    tokio::time::sleep(Duration::from_millis(200)).await;
+
+    // Verify all connections were handled
+    assert!(handler.connect_count() >= 20);
+    assert!(handler.disconnect_count() >= 15); // Allow some to still be closing
+
+    server.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn test_connection_limit_enforcement() {
+    let config = ServerConfig::new("127.0.0.1:0".parse().unwrap()).with_max_connections(5);
+    let server = TelnetServer::new(config).await.unwrap();
+    let addr = server.bind_address();
+
+    let handler = Arc::new(TestHandler::new());
+    server.start(handler.clone()).await.unwrap();
+
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    // Try to create more connections than the limit
+    let mut clients = Vec::new();
+    for _ in 0..10 {
+        if let Ok(client) = TcpStream::connect(addr).await {
+            clients.push(client);
+            tokio::time::sleep(Duration::from_millis(50)).await;
+        }
+    }
+
+    // Should not exceed the limit
+    assert!(server.connection_count() <= 5);
+    assert!(clients.len() >= 5); // At least 5 should connect
+
+    drop(clients);
+    tokio::time::sleep(Duration::from_millis(200)).await;
+    server.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn test_large_message_handling() {
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+    let config = ServerConfig::new("127.0.0.1:0".parse().unwrap());
+    let server = TelnetServer::new(config).await.unwrap();
+    let addr = server.bind_address();
+
+    let handler = Arc::new(ConversationHandler::new());
+    server.start(handler.clone()).await.unwrap();
+
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    let mut client = TcpStream::connect(addr).await.unwrap();
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    // Read welcome message
+    let mut buf = vec![0u8; 1024];
+    let _ = tokio::time::timeout(Duration::from_secs(1), client.read(&mut buf))
+        .await
+        .unwrap()
+        .unwrap();
+
+    // Send a large message (1000 characters)
+    let large_msg = "A".repeat(1000) + "\n";
+    client.write_all(large_msg.as_bytes()).await.unwrap();
+    client.flush().await.unwrap();
+    tokio::time::sleep(Duration::from_millis(300)).await;
+
+    // Verify message was received
+    let messages = handler.get_messages().await;
+    assert_eq!(messages.len(), 1);
+    assert_eq!(messages[0].1.trim().len(), 1000);
+
+    drop(client);
+    tokio::time::sleep(Duration::from_millis(100)).await;
+    server.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn test_burst_messages() {
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+    let config = ServerConfig::new("127.0.0.1:0".parse().unwrap());
+    let server = TelnetServer::new(config).await.unwrap();
+    let addr = server.bind_address();
+
+    let handler = Arc::new(ConversationHandler::new());
+    server.start(handler.clone()).await.unwrap();
+
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    let mut client = TcpStream::connect(addr).await.unwrap();
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    // Read welcome message
+    let mut buf = vec![0u8; 1024];
+    let _ = tokio::time::timeout(Duration::from_secs(1), client.read(&mut buf))
+        .await
+        .unwrap()
+        .unwrap();
+
+    // Send burst of messages
+    for i in 0..10 {
+        let msg = format!("message{}\n", i);
+        client.write_all(msg.as_bytes()).await.unwrap();
+    }
+    client.flush().await.unwrap();
+    tokio::time::sleep(Duration::from_millis(500)).await;
+
+    // Verify all messages were received
+    let messages = handler.get_messages().await;
+    assert_eq!(messages.len(), 10);
+
+    drop(client);
+    tokio::time::sleep(Duration::from_millis(100)).await;
+    server.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn test_connection_metadata() {
+    let config = ServerConfig::new("127.0.0.1:0".parse().unwrap());
+    let server = TelnetServer::new(config).await.unwrap();
+    let addr = server.bind_address();
+
+    let handler = Arc::new(TestHandler::new());
+    server.start(handler.clone()).await.unwrap();
+
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    let _client = TcpStream::connect(addr).await.unwrap();
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    // Get connection info
+    let manager = server.manager();
+    let ids = manager.get_connection_ids();
+    assert_eq!(ids.len(), 1);
+
+    let info = manager.get_connection_info(ids[0]).unwrap();
+    assert_eq!(info.id, ids[0]);
+    assert!(info.peer_addr.port() > 0);
+    assert_eq!(info.state, ConnectionState::Active);
+
+    server.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn test_broadcast_filtered() {
+    let config = ServerConfig::new("127.0.0.1:0".parse().unwrap());
+    let server = TelnetServer::new(config).await.unwrap();
+    let addr = server.bind_address();
+
+    let handler = Arc::new(TestHandler::new());
+    server.start(handler.clone()).await.unwrap();
+
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    // Connect multiple clients
+    let mut clients = Vec::new();
+    for _ in 0..5 {
+        let client = TcpStream::connect(addr).await.unwrap();
+        clients.push(client);
+        tokio::time::sleep(Duration::from_millis(50)).await;
+    }
+
+    let manager = server.manager();
+    let ids = manager.get_connection_ids();
+    let first_id = ids[0];
+
+    // Broadcast to all except first connection
+    let result = manager
+        .broadcast_except(
+            termionix_terminal::TerminalCommand::SendEraseLine,
+            &[first_id],
+        )
+        .await;
+
+    assert_eq!(result.total, 4);
+    assert!(result.all_succeeded());
+
+    drop(clients);
+    tokio::time::sleep(Duration::from_millis(100)).await;
+    server.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn test_metrics_accuracy() {
+    let config = ServerConfig::new("127.0.0.1:0".parse().unwrap());
+    let server = TelnetServer::new(config).await.unwrap();
+    let addr = server.bind_address();
+
+    let handler = Arc::new(TestHandler::new());
+    server.start(handler.clone()).await.unwrap();
+
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    let metrics = server.metrics();
+    let initial_total = metrics.total_connections();
+
+    // Connect 3 clients
+    let mut clients = Vec::new();
+    for _ in 0..3 {
+        let client = TcpStream::connect(addr).await.unwrap();
+        clients.push(client);
+        tokio::time::sleep(Duration::from_millis(50)).await;
+    }
+
+    // Verify metrics
+    assert_eq!(metrics.total_connections(), initial_total + 3);
+    assert_eq!(metrics.active_connections(), 3);
+
+    // Disconnect 1 client
+    drop(clients.pop());
+    tokio::time::sleep(Duration::from_millis(200)).await;
+
+    assert_eq!(metrics.active_connections(), 2);
+    assert_eq!(metrics.total_connections(), initial_total + 3);
+
+    drop(clients);
+    tokio::time::sleep(Duration::from_millis(200)).await;
+    server.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn test_server_restart() {
+    let bind_addr = "127.0.0.1:0".parse().unwrap();
+    let config = ServerConfig::new(bind_addr);
+    let server = TelnetServer::new(config).await.unwrap();
+    let addr = server.bind_address();
+
+    let handler = Arc::new(TestHandler::new());
+    server.start(handler.clone()).await.unwrap();
+
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    // Connect a client
+    let client = TcpStream::connect(addr).await.unwrap();
+    tokio::time::sleep(Duration::from_millis(100)).await;
+    assert_eq!(server.connection_count(), 1);
+
+    // Shutdown server
+    server.shutdown().await.unwrap();
+    drop(client);
+
+    // Create new server on same address (OS will assign new port)
+    let config2 = ServerConfig::new(bind_addr);
+    let server2 = TelnetServer::new(config2).await.unwrap();
+    let addr2 = server2.bind_address();
+
+    let handler2 = Arc::new(TestHandler::new());
+    server2.start(handler2.clone()).await.unwrap();
+
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    // Connect to new server
+    let client2 = TcpStream::connect(addr2).await.unwrap();
+    tokio::time::sleep(Duration::from_millis(100)).await;
+    assert_eq!(server2.connection_count(), 1);
+
+    drop(client2);
+    server2.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn test_connection_user_data() {
+    let config = ServerConfig::new("127.0.0.1:0".parse().unwrap());
+    let server = TelnetServer::new(config).await.unwrap();
+    let addr = server.bind_address();
+
+    let handler = Arc::new(TestHandler::new());
+    server.start(handler.clone()).await.unwrap();
+
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    let _client = TcpStream::connect(addr).await.unwrap();
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    let manager = server.manager();
+    let ids = manager.get_connection_ids();
+    let conn = manager.get_connection(ids[0]).unwrap();
+
+    // Set user data
+    conn.set_data("username", "testuser".to_string());
+    conn.set_data("score", 100u32);
+
+    // Retrieve user data
+    assert_eq!(
+        conn.get_data::<String>("username"),
+        Some("testuser".to_string())
+    );
+    assert_eq!(conn.get_data::<u32>("score"), Some(100));
+    assert!(conn.has_data("username"));
+
+    // Remove user data
+    assert!(conn.remove_data("score"));
+    assert!(!conn.has_data("score"));
+
+    server.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn test_empty_message_handling() {
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+    let config = ServerConfig::new("127.0.0.1:0".parse().unwrap());
+    let server = TelnetServer::new(config).await.unwrap();
+    let addr = server.bind_address();
+
+    let handler = Arc::new(ConversationHandler::new());
+    server.start(handler.clone()).await.unwrap();
+
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    let mut client = TcpStream::connect(addr).await.unwrap();
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    // Read welcome message
+    let mut buf = vec![0u8; 1024];
+    let _ = tokio::time::timeout(Duration::from_secs(1), client.read(&mut buf))
+        .await
+        .unwrap()
+        .unwrap();
+
+    // Send empty line
+    client.write_all(b"\n").await.unwrap();
+    client.flush().await.unwrap();
+    tokio::time::sleep(Duration::from_millis(200)).await;
+
+    // Verify empty message was received
+    let messages = handler.get_messages().await;
+    assert_eq!(messages.len(), 1);
+    assert_eq!(messages[0].1.trim(), "");
+
+    drop(client);
+    tokio::time::sleep(Duration::from_millis(100)).await;
+    server.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn test_special_characters() {
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+    let config = ServerConfig::new("127.0.0.1:0".parse().unwrap());
+    let server = TelnetServer::new(config).await.unwrap();
+    let addr = server.bind_address();
+
+    let handler = Arc::new(ConversationHandler::new());
+    server.start(handler.clone()).await.unwrap();
+
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    let mut client = TcpStream::connect(addr).await.unwrap();
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    // Read welcome message
+    let mut buf = vec![0u8; 1024];
+    let _ = tokio::time::timeout(Duration::from_secs(1), client.read(&mut buf))
+        .await
+        .unwrap()
+        .unwrap();
+
+    // Send message with special characters
+    let special_msg = "test!@#$%^&*()_+-=[]{}|;':\",./<>?\n";
+    client.write_all(special_msg.as_bytes()).await.unwrap();
+    client.flush().await.unwrap();
+    tokio::time::sleep(Duration::from_millis(200)).await;
+
+    // Verify message was received correctly
+    let messages = handler.get_messages().await;
+    assert_eq!(messages.len(), 1);
+    assert!(messages[0].1.contains("!@#$%"));
+
+    drop(client);
+    tokio::time::sleep(Duration::from_millis(100)).await;
     server.shutdown().await.unwrap();
 }

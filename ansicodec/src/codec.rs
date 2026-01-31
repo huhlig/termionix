@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,9 +14,13 @@
 // limitations under the License.
 //
 
-use crate::ansi::{AnsiApplicationProgramCommand, AnsiControlCode, AnsiControlSequenceIntroducer, AnsiDeviceControlString, AnsiOperatingSystemCommand, AnsiPrivacyMessage, AnsiSelectGraphicRendition, AnsiSequence, AnsiStartOfString, TelnetCommand};
+use crate::ansi::{
+    AnsiApplicationProgramCommand, AnsiControlCode, AnsiControlSequenceIntroducer,
+    AnsiDeviceControlString, AnsiOperatingSystemCommand, AnsiPrivacyMessage,
+    AnsiSelectGraphicRendition, AnsiSequence, AnsiStartOfString, TelnetCommand,
+};
 use crate::{AnsiConfig, AnsiError, AnsiParser, AnsiResult};
-use termionix_codec::TelnetEvent;
+use termionix_telnetcodec::TelnetEvent;
 use tokio_util::bytes::BytesMut;
 use tokio_util::codec::{Decoder, Encoder};
 
@@ -85,6 +89,9 @@ where
                 }
                 TelnetEvent::GoAhead => {
                     Ok(Some(AnsiSequence::TelnetCommand(TelnetCommand::GoAhead)))
+                }
+                TelnetEvent::EndOfRecord => {
+                    Ok(Some(AnsiSequence::TelnetCommand(TelnetCommand::EndOfRecord)))
                 }
                 TelnetEvent::OptionStatus(option, side, enabled) => Ok(Some(
                     AnsiSequence::TelnetCommand(TelnetCommand::OptionStatus(option, side, enabled)),

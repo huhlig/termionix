@@ -15,23 +15,24 @@ categories.workspace = true
 
 [dependencies]
 async-debug.workspace = true
-async-trait = "0.1"
-dashmap = "5.5"
+async-trait.workspace = true
+dashmap.workspace = true
 futures.workspace = true
 futures-util.workspace = true
+metrics.workspace = true
 termionix-ansicodec.workspace = true
-termionix-codec.workspace = true
+termionix-telnetcodec.workspace = true
 termionix-compress.workspace = true
 termionix-terminal.workspace = true
-thiserror = "1.0"
+thiserror.workspace = true
 tokio.workspace = true
 tokio-util.workspace = true
 tracing.workspace = true
 tracing-timing.workspace = true
 
 [dev-dependencies]
-criterion = { version = "0.5", features = ["async_tokio", "html_reports"] }
-tracing-subscriber = "0.3"
+criterion = { workspace = true, features = ["async_tokio", "html_reports"] }
+tracing-subscriber.workspace = true
 tracing-test.workspace = true
 
 [[bench]]

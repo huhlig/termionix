@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -356,6 +356,10 @@ impl Decoder for TelnetCodec {
                     self.decoder_state = DecoderState::NormalData;
                     return Ok(Some(TelnetEvent::GoAhead));
                 }
+                (DecoderState::InterpretAsCommand, consts::EOR) => {
+                    self.decoder_state = DecoderState::NormalData;
+                    return Ok(Some(TelnetEvent::EndOfRecord));
+                }
                 (DecoderState::InterpretAsCommand, consts::IAC) => {
                     self.decoder_state = DecoderState::NormalData;
                     return Ok(Some(TelnetEvent::Data(consts::IAC)));
@@ -675,6 +679,11 @@ impl Encoder<TelnetFrame> for TelnetCodec {
                 dst.put_u8(consts::IAC);
                 dst.put_u8(consts::GA);
             }
+            TelnetFrame::EndOfRecord => {
+                dst.reserve(2);
+                dst.put_u8(consts::IAC);
+                dst.put_u8(consts::EOR);
+            }
             TelnetFrame::Do(option) => {
                 dst.reserve(3);
                 dst.put_u8(consts::IAC);
@@ -732,6 +741,7 @@ impl Encoder<TelnetEvent> for TelnetCodec {
             TelnetEvent::EraseCharacter => self.encode(TelnetFrame::EraseCharacter, dst),
             TelnetEvent::EraseLine => self.encode(TelnetFrame::EraseLine, dst),
             TelnetEvent::GoAhead => self.encode(TelnetFrame::GoAhead, dst),
+            TelnetEvent::EndOfRecord => self.encode(TelnetFrame::EndOfRecord, dst),
             TelnetEvent::Subnegotiate(arg) => self.encode(TelnetFrame::Subnegotiate(arg), dst),
             TelnetEvent::OptionStatus(_option, _side, _enabled) => {
                 // OptionStatus events are informational only and cannot be encoded

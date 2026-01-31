@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 Hans W. Uhlig. All Rights Reserved.
+// Copyright 2017-2026 Hans W. Uhlig. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ pub enum TelnetFrame {
     EraseLine,
     /// End of input for half-duplex connections.
     GoAhead,
+    /// End of Record - marks the end of a prompt
+    EndOfRecord,
     /// Telnet Do Option
     Do(TelnetOption),
     /// Telnet Dont Option
