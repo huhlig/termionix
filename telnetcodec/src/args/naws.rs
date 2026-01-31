@@ -119,7 +119,7 @@ impl WindowSize {
     /// ```
     pub fn write<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<usize> {
         writer.write_u16::<BigEndian>(self.cols)?;
-        writer.write_u16::<BigEndian>(self.cols)?;
+        writer.write_u16::<BigEndian>(self.rows)?;
         Ok(4)
     }
 

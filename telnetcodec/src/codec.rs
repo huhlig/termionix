@@ -526,7 +526,7 @@ impl Decoder for TelnetCodec {
                 (DecoderState::SubnegotiateArgumentIAC(option), consts::SE) => {
                     self.decoder_state = DecoderState::NormalData;
                     let option = TelnetOption::from_u8(option);
-                    let buffer = BytesMut::from(self.decoder_buffer.as_ref());
+                    let mut buffer = BytesMut::from(self.decoder_buffer.as_ref());
                     let argument = match option {
                         TelnetOption::GMCP => {
                             // Parse GMCP message from buffer
@@ -536,6 +536,16 @@ impl Decoder for TelnetCodec {
                                 // If parsing fails, treat as unknown
                                 warn!("Failed to parse GMCP message, treating as unknown");
                                 TelnetArgument::Unknown(option, buffer)
+                            }
+                        }
+                        TelnetOption::NAWS => {
+                            // Parse NAWS window size from buffer
+                            match crate::args::naws::WindowSize::decode(&mut buffer) {
+                                Ok(window_size) => TelnetArgument::NAWSWindowSize(window_size),
+                                Err(e) => {
+                                    warn!("Failed to parse NAWS window size: {}, treating as unknown", e);
+                                    TelnetArgument::Unknown(option, buffer)
+                                }
                             }
                         }
                         _ => TelnetArgument::Unknown(option, buffer),
@@ -599,8 +609,6 @@ impl Encoder<&str> for TelnetCodec {
         for byte in item.as_bytes() {
             self.encode(TelnetFrame::Data(*byte), dst)?;
         }
-        self.encode(TelnetFrame::Data(b'\r'), dst)?;
-        self.encode(TelnetFrame::Data(b'\n'), dst)?;
         Ok(())
     }
 }
@@ -1142,7 +1150,7 @@ mod tests {
         let mut codec = TelnetCodec::new();
         let mut dst = BytesMut::new();
         codec.encode("Hello", &mut dst).expect("encode ok");
-        assert_eq!(&dst[..], b"Hello\r\n");
+        assert_eq!(&dst[..], b"Hello");
     }
 
     #[test]
@@ -1150,7 +1158,7 @@ mod tests {
         let mut codec = TelnetCodec::new();
         let mut dst = BytesMut::new();
         codec.encode("", &mut dst).expect("encode ok");
-        assert_eq!(&dst[..], b"\r\n");
+        assert_eq!(&dst[..], b"");
     }
 
     // ============================================================================
