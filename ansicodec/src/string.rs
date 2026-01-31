@@ -88,7 +88,7 @@ use bytes::BufMut;
 /// segmented.push_str("File not found");
 ///
 /// // Add a control character
-/// segmented.push_control(ControlCode::LF);
+/// segmented.push_ansi_control(ControlCode::LF);
 /// ```
 ///
 /// Building terminal output character by character:
@@ -257,7 +257,7 @@ impl SegmentedString {
     /// use termionix_ansicodec::{SegmentedString, ControlCode};
     ///
     /// let mut segmented = SegmentedString::empty();
-    /// segmented.push_control(ControlCode::LF);
+    /// segmented.push_ansi_control(ControlCode::LF);
     /// segmented.push("New");
     /// assert_eq!(segmented.segment_count(), 2); // New segment created
     /// ```
@@ -525,7 +525,7 @@ impl SegmentedString {
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Line 1");
-    /// segmented.push_control(ControlCode::LF);
+    /// segmented.push_ansi_control(ControlCode::LF);
     /// segmented.push_str("Line 2");
     /// assert_eq!(segmented.segment_count(), 3); // Text, Control, Text
     /// ```
@@ -536,8 +536,8 @@ impl SegmentedString {
     /// use termionix_ansicodec::{SegmentedString, ControlCode};
     ///
     /// let mut segmented = SegmentedString::empty();
-    /// segmented.push_control(ControlCode::CR);
-    /// segmented.push_control(ControlCode::LF);
+    /// segmented.push_ansi_control(ControlCode::CR);
+    /// segmented.push_ansi_control(ControlCode::LF);
     /// assert_eq!(segmented.segment_count(), 2); // Each control is a separate segment
     /// ```
     pub fn push_ansi_control(&mut self, control: AnsiControlCode) {
@@ -752,7 +752,7 @@ impl SegmentedString {
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Line 1");
-    /// segmented.push_control(ControlCode::LF);
+    /// segmented.push_ansi_control(ControlCode::LF);
     /// segmented.push_str("Line 2");
     ///
     /// let control_count = segmented.segments()
@@ -822,7 +822,7 @@ impl SegmentedString {
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Line 1");
-    /// segmented.push_control(ControlCode::LF);
+    /// segmented.push_ansi_control(ControlCode::LF);
     /// segmented.push_str("Line 2");
     ///
     /// // Control codes are removed, only text remains
@@ -853,7 +853,7 @@ impl SegmentedString {
     ///     ..Default::default()
     /// });
     /// segmented.push_str("OK");
-    /// segmented.push_control(ControlCode::LF);
+    /// segmented.push_ansi_control(ControlCode::LF);
     /// segmented.push_str("Progress: 100%");
     ///
     /// // All styling and control codes removed
@@ -958,13 +958,13 @@ impl SegmentedString {
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Line 1");
-    /// segmented.push_control(ControlCode::LF);
+    /// segmented.push_ansi_control(ControlCode::LF);
     /// segmented.push_style(Style {
     ///     foreground: Some(Color::Green),
     ///     ..Default::default()
     /// });
     /// segmented.push_str("Line 2");
-    /// segmented.push_control(ControlCode::LF);
+    /// segmented.push_ansi_control(ControlCode::LF);
     ///
     /// assert_eq!(segmented.segment_count(), 5);
     ///
@@ -1011,7 +1011,7 @@ impl SegmentedString {
     /// Clearing complex terminal output:
     ///
     /// ```rust
-    /// use termionix_ansicodec::{SegmentedString, Style, Color, ControlCode, CSICommand, Intensity};
+    /// use termionix_ansicodec::{SegmentedString, Style, Color, ControlCode, Intensity};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Status: ");
@@ -1022,7 +1022,7 @@ impl SegmentedString {
     /// });
     /// segmented.push_str("OK");
     /// segmented.push_style(Style::default());
-    /// segmented.push_control(ControlCode::LF);
+    /// segmented.push_ansi_control(ControlCode::LF);
     /// segmented.push_str("Progress: 100%");
     ///
     /// // All segments removed, including text, styles, and control codes
@@ -1118,7 +1118,7 @@ impl SegmentedString {
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Hello");
-    /// segmented.push_control(ControlCode::LF);
+    /// segmented.push_ansi_control(ControlCode::LF);
     ///
     /// // Control code is removed as a whole, returns None
     /// assert_eq!(segmented.pop(), None);
@@ -1211,7 +1211,7 @@ impl SegmentedString {
     /// segmented.push_str("Hello");
     ///
     /// let config = AnsiConfig::default();
-    /// assert_eq!(segmented.styled_len(Some(&config)), 5);
+    /// assert_eq!(segmented.len(Some(&config)).unwrap(), 5);
     /// ```
     ///
     /// With control codes (which don't contribute to display length):
@@ -1221,11 +1221,11 @@ impl SegmentedString {
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Hello");
-    /// segmented.push_control(ControlCode::LF);
+    /// segmented.push_ansi_control(ControlCode::LF);
     /// segmented.push_str("World");
     ///
     /// let config = AnsiConfig::strip_all();
-    /// assert_eq!(segmented.styled_len(Some(&config)), 10); // Only counts "HelloWorld"
+    /// assert_eq!(segmented.len(Some(&config)).unwrap(), 10); // Only counts "HelloWorld"
     /// ```
     pub fn len(&self, config: Option<&AnsiConfig>) -> AnsiResult<usize> {
         let mut total_len = 0;
@@ -1429,7 +1429,7 @@ impl SegmentedString {
     /// let config = AnsiConfig::default();
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Line 1");
-    /// segmented.push_control(ControlCode::LF);
+    /// segmented.push_ansi_control(ControlCode::LF);
     /// segmented.push_str("Line 2");
     ///
     /// let mut output = String::new();
@@ -1719,7 +1719,7 @@ impl SegmentedString {
     /// ## Plain Text
     ///
     /// ```rust
-    /// use termionix_ansicodes::SegmentedString;
+    /// use termionix_ansicodec::SegmentedString;
     ///
     /// let segmented = SegmentedString::parse("Hello World");
     /// assert_eq!(segmented.segment_count(), 1);
@@ -1729,7 +1729,7 @@ impl SegmentedString {
     /// ## ANSI Colors
     ///
     /// ```rust
-    /// use termionix_ansicodes::SegmentedString;
+    /// use termionix_ansicodec::SegmentedString;
     ///
     /// let input = "\x1b[31mRed Text\x1b[0m";
     /// let segmented = SegmentedString::parse(input);
@@ -1742,7 +1742,7 @@ impl SegmentedString {
     /// ## Mixed Content with Control Codes
     ///
     /// ```rust
-    /// use termionix_ansicodes::SegmentedString;
+    /// use termionix_ansicodec::SegmentedString;
     ///
     /// let input = "Line 1\nLine 2\tTabbed";
     /// let segmented = SegmentedString::parse(input);
@@ -1754,7 +1754,7 @@ impl SegmentedString {
     /// ## Unicode Content
     ///
     /// ```rust
-    /// use termionix_ansicodes::SegmentedString;
+    /// use termionix_ansicodec::SegmentedString;
     ///
     /// let input = "Hello 世界";
     /// let segmented = SegmentedString::parse(input);
@@ -1767,7 +1767,7 @@ impl SegmentedString {
     /// ## Complex ANSI Sequences
     ///
     /// ```rust
-    /// use termionix_ansicodes::SegmentedString;
+    /// use termionix_ansicodec::SegmentedString;
     ///
     /// let input = "\x1b[1;32mBold Green\x1b[0m Normal\n";
     /// let segmented = SegmentedString::parse(input);
@@ -1779,11 +1779,11 @@ impl SegmentedString {
     /// ## Building from Parse
     ///
     /// ```rust
-    /// use termionix_ansicodes::SegmentedString;
+    /// use termionix_ansicodec::{SegmentedString, ControlCode};
     ///
     /// let mut segmented = SegmentedString::parse("\x1b[31mError:\x1b[0m ");
     /// segmented.push_str("File not found");
-    /// segmented.push_control(termionix_ansicodes::ControlCode::LF);
+    /// segmented.push_ansi_control(ControlCode::LF);
     /// ```
     ///
     /// ## Generic String Types
@@ -1791,7 +1791,7 @@ impl SegmentedString {
     /// The method accepts any type implementing `AsRef<str>`:
     ///
     /// ```rust
-    /// use termionix_ansicodes::SegmentedString;
+    /// use termionix_ansicodec::SegmentedString;
     ///
     /// // From &str
     /// let s1 = SegmentedString::parse("text");
@@ -1904,7 +1904,7 @@ impl std::ops::Index<usize> for SegmentedString {
 /// Text segments store their content directly:
 ///
 /// ```rust
-/// use termionix_ansicodes::Segment;
+/// use termionix_ansicodec::Segment;
 ///
 /// let ascii_segment = Segment::ASCII("Hello".to_string());
 /// let unicode_segment = Segment::Unicode("世界".to_string());
@@ -1913,7 +1913,7 @@ impl std::ops::Index<usize> for SegmentedString {
 /// Control and styling segments carry semantic meaning:
 ///
 /// ```rust
-/// use termionix_ansicodes::{Segment, ControlCode, Style, Color};
+/// use termionix_ansicodec::{Segment, ControlCode, Style, Color};
 ///
 /// let newline = Segment::Control(ControlCode::LF);
 /// let red_text = Segment::SGR(Style {

@@ -129,7 +129,7 @@ jobs:
         run: cargo doc --no-deps --all-features --workspace
       
       - name: Add index redirect
-        run: echo '<meta http-equiv="refresh" content="0; url=termionix">' > target/doc/index.html
+        run: echo '<meta http-equiv="refresh" content="0; url=termionix_service/index.html">' > target/doc/index.html
       
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

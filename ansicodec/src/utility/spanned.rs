@@ -2047,7 +2047,7 @@ impl Span {
     /// Verify that spans are contiguous (no gaps):
     ///
     /// ```rust
-    /// use termionix_ansicodes::SpannedString;
+    /// use termionix_ansicodec::SpannedString;
     ///
     /// let input = "Hello World";
     /// let spans = SpannedString::parse(input);
@@ -2063,7 +2063,7 @@ impl Span {
     /// Calculate positions relative to other spans:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "ABCDEF";
     /// let spans = SpannedString::parse(input);
@@ -2081,7 +2081,7 @@ impl Span {
     /// Check if a span overlaps with a given byte position:
     ///
     /// ```rust
-    /// use termionix_ansicodes::SpannedString;
+    /// use termionix_ansicodec::SpannedString;
     ///
     /// let input = "Hello World";
     /// let spans = SpannedString::parse(input);
@@ -2154,7 +2154,7 @@ impl Span {
     /// ## Basic Usage
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "Hello";
     /// let spans = SpannedString::parse(input);
@@ -2172,7 +2172,7 @@ impl Span {
     /// The end position is exclusive, so it's one past the last byte:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "ABC";
     /// let spans = SpannedString::parse(input);
@@ -2188,7 +2188,7 @@ impl Span {
     /// For adjacent spans, one's end equals the next's start:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "AB";
     /// let spans = SpannedString::parse(input);
@@ -2201,7 +2201,7 @@ impl Span {
     /// With multiple spans:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "A\nB";
     /// let spans = SpannedString::parse(input);
@@ -2220,7 +2220,7 @@ impl Span {
     /// Use start and end directly with slice indexing:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "Hello World";
     /// let spans = SpannedString::parse(input);
@@ -2236,7 +2236,7 @@ impl Span {
     /// The last byte of a span is at position `end - 1`:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "Hello";
     /// let spans = SpannedString::parse(input);
@@ -2251,7 +2251,7 @@ impl Span {
     /// Find the total byte range covered by all spans:
     ///
     /// ```rust
-    /// use termionix_ansicodes::SpannedString;
+    /// use termionix_ansicodec::SpannedString;
     ///
     /// let input = "Hello World";
     /// let spans = SpannedString::parse(input);
@@ -2268,7 +2268,7 @@ impl Span {
     /// Verify that spans cover the entire input with no gaps:
     ///
     /// ```rust
-    /// use termionix_ansicodes::SpannedString;
+    /// use termionix_ansicodec::SpannedString;
     ///
     /// let input = "Hello World";
     /// let spans = SpannedString::parse(input);
@@ -2291,7 +2291,7 @@ impl Span {
     /// Calculate how far into the string each span ends:
     ///
     /// ```rust
-    /// use termionix_ansicodes::SpannedString;
+    /// use termionix_ansicodec::SpannedString;
     ///
     /// let input = "One\nTwo\nThree";
     /// let spans = SpannedString::parse(input);

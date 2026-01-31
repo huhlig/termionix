@@ -1881,7 +1881,7 @@ impl Color {
     /// RGB colors are preserved:
     ///
     /// ```
-    /// use termionix_ansicodes::Color;
+    /// use termionix_ansicodec::Color;
     ///
     /// let custom = Color::RGB(123, 45, 67);
     /// assert_eq!(custom.to_truecolor(), custom);
@@ -1890,7 +1890,7 @@ impl Color {
     /// Using for true color output:
     ///
     /// ```
-    /// use termionix_ansicodes::{Color, Style, ColorMode};
+    /// use termionix_ansicodec::{Color, Style, ColorMode};
     ///
     /// // Ensure all colors are in RGB format for true color terminals
     /// let style = Style {
@@ -1905,7 +1905,7 @@ impl Color {
     /// Normalizing colors to RGB:
     ///
     /// ```
-    /// use termionix_ansicodes::Color;
+    /// use termionix_ansicodec::Color;
     ///
     /// fn get_rgb_values(color: Color) -> (u8, u8, u8) {
     ///     match color.to_truecolor() {
@@ -1918,7 +1918,7 @@ impl Color {
     /// Color manipulation:
     ///
     /// ```
-    /// use termionix_ansicodes::Color;
+    /// use termionix_ansicodec::Color;
     ///
     /// fn lighten(color: Color, amount: u8) -> Color {
     ///     match color.to_truecolor() {
@@ -2295,7 +2295,7 @@ impl Color {
 /// Basic usage:
 ///
 /// ```
-/// use termionix_ansicodes::{Style, Font, ColorMode, AnsiConfig};
+/// use termionix_ansicodec::{Style, Font, ColorMode, AnsiConfig};
 ///
 /// let config = AnsiConfig::enabled();
 /// let style = Style {
@@ -2311,7 +2311,7 @@ impl Color {
 /// Using Fraktur font:
 ///
 /// ```
-/// use termionix_ansicodes::{Style, Font, ColorMode, AnsiConfig};
+/// use termionix_ansicodec::{Style, Font, ColorMode, AnsiConfig};
 ///
 /// let config = AnsiConfig::enabled();
 /// let fraktur_style = Style {
@@ -2327,7 +2327,7 @@ impl Color {
 /// Resetting to primary font:
 ///
 /// ```
-/// use termionix_ansicodes::{Style, Font, ColorMode, AnsiConfig};
+/// use termionix_ansicodec::{Style, Font, ColorMode, AnsiConfig};
 ///
 /// let config = AnsiConfig::enabled();
 /// let reset_style = Style {
@@ -2346,7 +2346,7 @@ impl Color {
 /// terminal's standard font and is used to reset any alternate font selection.
 ///
 /// ```
-/// use termionix_ansicodes::Font;
+/// use termionix_ansicodec::Font;
 ///
 /// assert_eq!(Font::default(), Font::PrimaryFont);
 /// ```
@@ -2356,7 +2356,7 @@ impl Color {
 /// The `Font` enum can be converted to SGR codes:
 ///
 /// ```
-/// use termionix_ansicodes::Font;
+/// use termionix_ansicodec::Font;
 ///
 /// assert_eq!(Font::PrimaryFont.to_u8(), 10);
 /// assert_eq!(Font::AlternateFont1.to_u8(), 11);
@@ -2391,7 +2391,7 @@ pub enum Font {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     /// assert_eq!(Font::PrimaryFont.to_u8(), 10);
     /// ```
     #[default]
@@ -2405,7 +2405,7 @@ pub enum Font {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     /// assert_eq!(Font::AlternateFont1.to_u8(), 11);
     /// ```
     AlternateFont1,
@@ -2417,7 +2417,7 @@ pub enum Font {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     /// assert_eq!(Font::AlternateFont2.to_u8(), 12);
     /// ```
     AlternateFont2,
@@ -2429,7 +2429,7 @@ pub enum Font {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     /// assert_eq!(Font::AlternateFont3.to_u8(), 13);
     /// ```
     AlternateFont3,
@@ -2441,7 +2441,7 @@ pub enum Font {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     /// assert_eq!(Font::AlternateFont4.to_u8(), 14);
     /// ```
     AlternateFont4,
@@ -2453,7 +2453,7 @@ pub enum Font {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     /// assert_eq!(Font::AlternateFont5.to_u8(), 15);
     /// ```
     AlternateFont5,
@@ -2465,7 +2465,7 @@ pub enum Font {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     /// assert_eq!(Font::AlternateFont6.to_u8(), 16);
     /// ```
     AlternateFont6,
@@ -2477,7 +2477,7 @@ pub enum Font {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     /// assert_eq!(Font::AlternateFont7.to_u8(), 17);
     /// ```
     AlternateFont7,
@@ -2489,7 +2489,7 @@ pub enum Font {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     /// assert_eq!(Font::AlternateFont8.to_u8(), 18);
     /// ```
     AlternateFont8,
@@ -2501,7 +2501,7 @@ pub enum Font {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     /// assert_eq!(Font::AlternateFont9.to_u8(), 19);
     /// ```
     AlternateFont9,
@@ -2515,7 +2515,7 @@ pub enum Font {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     /// assert_eq!(Font::Fraktur.to_u8(), 20);
     /// ```
     Fraktur,
@@ -2548,7 +2548,7 @@ impl Font {
     /// Basic conversion:
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     ///
     /// assert_eq!(Font::PrimaryFont.to_u8(), 10);
     /// assert_eq!(Font::AlternateFont1.to_u8(), 11);
@@ -2559,7 +2559,7 @@ impl Font {
     /// Building ANSI sequences:
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     ///
     /// let font = Font::AlternateFont3;
     /// let code = font.to_u8();
@@ -2570,7 +2570,7 @@ impl Font {
     /// Iterating through all fonts:
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     ///
     /// let fonts = vec![
     ///     Font::PrimaryFont,
@@ -2657,7 +2657,7 @@ impl Font {
     /// Basic usage:
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     ///
     /// assert_eq!(Font::from_u8(10), Some(Font::PrimaryFont));
     /// assert_eq!(Font::from_u8(11), Some(Font::AlternateFont1));
@@ -2668,7 +2668,7 @@ impl Font {
     /// Handling invalid codes:
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     ///
     /// assert_eq!(Font::from_u8(0), None);
     /// assert_eq!(Font::from_u8(9), None);
@@ -2679,7 +2679,7 @@ impl Font {
     /// Parsing ANSI sequences:
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     ///
     /// // Parse a code from an ANSI sequence parameter
     /// let sgr_params: Vec<u8> = vec![1, 11, 31]; // Bold, AlternateFont1, Red
@@ -2694,7 +2694,7 @@ impl Font {
     /// Round-trip conversion:
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     ///
     /// let original = Font::AlternateFont3;
     /// let code = original.to_u8();
@@ -2706,7 +2706,7 @@ impl Font {
     /// Using in a parser:
     ///
     /// ```
-    /// use termionix_ansicodes::Font;
+    /// use termionix_ansicodec::Font;
     ///
     /// fn parse_sgr_code(code: u8) -> Option<String> {
     ///     Font::from_u8(code).map(|font| {
@@ -2793,7 +2793,7 @@ impl Font {
 /// Basic usage:
 ///
 /// ```rust
-/// use termionix_ansicodes::{Style, Blink, ColorMode, AnsiConfig};
+/// use termionix_ansicodec::{Style, Blink, ColorMode, AnsiConfig};
 ///
 /// let config = AnsiConfig::enabled();
 /// let style = Style {
@@ -2808,7 +2808,7 @@ impl Font {
 /// Different blink rates:
 ///
 /// ```rust
-/// use termionix_ansicodes::{Style, Blink, ColorMode, AnsiConfig};
+/// use termionix_ansicodec::{Style, Blink, ColorMode, AnsiConfig};
 ///
 /// let config = AnsiConfig::enabled();
 /// let slow = Style {
@@ -2834,7 +2834,7 @@ impl Font {
 /// No blinking (default):
 ///
 /// ```rust
-/// use termionix_ansicodes::{Style, Blink, ColorMode, AnsiConfig};
+/// use termionix_ansicodec::{Style, Blink, ColorMode, AnsiConfig};
 ///
 /// let config = AnsiConfig::enabled();
 /// let style = Style {
@@ -2851,7 +2851,7 @@ impl Font {
 /// Convert between `Blink` and its numeric representation:
 ///
 /// ```rust
-/// use termionix_ansicodes::Blink;
+/// use termionix_ansicodec::Blink;
 ///
 /// // To numeric codes
 /// assert_eq!(Blink::Off.to_u8(), 25);
@@ -2894,7 +2894,7 @@ pub enum Blink {
     /// # Examples
     ///
     /// ```rust
-    /// use termionix_ansicodes::{Style, Blink, ColorMode, AnsiConfig};
+    /// use termionix_ansicodec::{Style, Blink, ColorMode, AnsiConfig};
     ///
     /// let config = AnsiConfig::enabled();
     /// let style = Style {
@@ -2924,7 +2924,7 @@ pub enum Blink {
     /// # Examples
     ///
     /// ```rust
-    /// use termionix_ansicodes::{Style, Blink, ColorMode, AnsiConfig};
+    /// use termionix_ansicodec::{Style, Blink, ColorMode, AnsiConfig};
     ///
     /// let config = AnsiConfig::enabled();
     /// let style = Style {
@@ -2953,7 +2953,7 @@ pub enum Blink {
     /// # Examples
     ///
     /// ```rust
-    /// use termionix_ansicodes::{Style, Blink, ColorMode, AnsiConfig};
+    /// use termionix_ansicodec::{Style, Blink, ColorMode, AnsiConfig};
     ///
     /// let config = AnsiConfig::enabled();
     /// let style = Style {
@@ -2988,7 +2988,7 @@ impl Blink {
     /// # Examples
     ///
     /// ```rust
-    /// use termionix_ansicodes::Blink;
+    /// use termionix_ansicodec::Blink;
     ///
     /// assert_eq!(Blink::Off.to_u8(), 25);
     /// assert_eq!(Blink::Slow.to_u8(), 5);
@@ -2998,7 +2998,7 @@ impl Blink {
     /// Building ANSI sequences manually:
     ///
     /// ```rust
-    /// use termionix_ansicodes::Blink;
+    /// use termionix_ansicodec::Blink;
     ///
     /// let blink = Blink::Slow;
     /// if blink.to_u8() != 0 {
@@ -3043,7 +3043,7 @@ impl Blink {
     /// Valid blink codes:
     ///
     /// ```rust
-    /// use termionix_ansicodes::Blink;
+    /// use termionix_ansicodec::Blink;
     ///
     /// assert_eq!(Blink::from_u8(25), Some(Blink::Off));
     /// assert_eq!(Blink::from_u8(5), Some(Blink::Slow));
@@ -3053,7 +3053,7 @@ impl Blink {
     /// Invalid blink codes:
     ///
     /// ```rust
-    /// use termionix_ansicodes::Blink;
+    /// use termionix_ansicodec::Blink;
     ///
     /// assert_eq!(Blink::from_u8(1), None);
     /// assert_eq!(Blink::from_u8(7), None);
@@ -3063,7 +3063,7 @@ impl Blink {
     /// Parsing ANSI sequences:
     ///
     /// ```rust
-    /// use termionix_ansicodes::Blink;
+    /// use termionix_ansicodec::Blink;
     ///
     /// let ansi_params = vec![5, 31]; // Slow blink + red foreground
     ///
@@ -3077,7 +3077,7 @@ impl Blink {
     /// Safe parsing with fallback:
     ///
     /// ```rust
-    /// use termionix_ansicodes::Blink;
+    /// use termionix_ansicodec::Blink;
     ///
     /// let code = 5;
     /// let blink = Blink::from_u8(code).unwrap_or(Blink::Off);
@@ -3152,7 +3152,7 @@ impl Blink {
 /// Basic usage:
 ///
 /// ```
-/// use termionix_ansicodes::{Style, Script, ColorMode, AnsiConfig};
+/// use termionix_ansicodec::{Style, Script, ColorMode, AnsiConfig};
 ///
 /// let config = AnsiConfig::enabled();
 /// let superscript_style = Style {
@@ -3168,7 +3168,7 @@ impl Blink {
 /// Subscript usage:
 ///
 /// ```
-/// use termionix_ansicodes::{Style, Script, ColorMode, AnsiConfig};
+/// use termionix_ansicodec::{Style, Script, ColorMode, AnsiConfig};
 ///
 /// let config = AnsiConfig::enabled();
 /// let subscript_style = Style {
@@ -3184,7 +3184,7 @@ impl Blink {
 /// Resetting to normal position:
 ///
 /// ```
-/// use termionix_ansicodes::{Style, Script, ColorMode, AnsiConfig};
+/// use termionix_ansicodec::{Style, Script, ColorMode, AnsiConfig};
 ///
 /// let config = AnsiConfig::enabled();
 /// let normal_style = Style {
@@ -3200,7 +3200,7 @@ impl Blink {
 /// Mathematical expression example (conceptual):
 ///
 /// ```
-/// use termionix_ansicodes::{StyledString, Style, Script};
+/// use termionix_ansicodec::{StyledString, Style, Script};
 ///
 /// // Creating "x²" with superscript (if terminal supports it)
 /// let mut expr = StyledString::empty();
@@ -3217,7 +3217,7 @@ impl Blink {
 /// at the standard baseline position.
 ///
 /// ```
-/// use termionix_ansicodes::Script;
+/// use termionix_ansicodec::Script;
 ///
 /// assert_eq!(Script::default(), Script::Normal);
 /// ```
@@ -3227,7 +3227,7 @@ impl Blink {
 /// The `Script` enum can be converted to and from SGR codes:
 ///
 /// ```
-/// use termionix_ansicodes::Script;
+/// use termionix_ansicodec::Script;
 ///
 /// // To SGR codes
 /// assert_eq!(Script::Superscript.to_u8(), 73);
@@ -3279,7 +3279,7 @@ pub enum Script {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Script;
+    /// use termionix_ansicodec::Script;
     /// assert_eq!(Script::Normal.to_u8(), 75);
     /// ```
     #[default]
@@ -3294,7 +3294,7 @@ pub enum Script {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Script;
+    /// use termionix_ansicodec::Script;
     /// assert_eq!(Script::Superscript.to_u8(), 73);
     /// ```
     ///
@@ -3315,7 +3315,7 @@ pub enum Script {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Script;
+    /// use termionix_ansicodec::Script;
     /// assert_eq!(Script::Subscript.to_u8(), 74);
     /// ```
     ///
@@ -3346,7 +3346,7 @@ impl Script {
     /// Basic conversion:
     ///
     /// ```
-    /// use termionix_ansicodes::Script;
+    /// use termionix_ansicodec::Script;
     ///
     /// assert_eq!(Script::Superscript.to_u8(), 73);
     /// assert_eq!(Script::Subscript.to_u8(), 74);
@@ -3356,7 +3356,7 @@ impl Script {
     /// Building ANSI sequences:
     ///
     /// ```
-    /// use termionix_ansicodes::Script;
+    /// use termionix_ansicodec::Script;
     ///
     /// let script = Script::Superscript;
     /// let code = script.to_u8();
@@ -3367,7 +3367,7 @@ impl Script {
     /// Iterating through all script modes:
     ///
     /// ```
-    /// use termionix_ansicodes::Script;
+    /// use termionix_ansicodec::Script;
     ///
     /// let scripts = vec![
     ///     (Script::Superscript, 73),
@@ -3429,7 +3429,7 @@ impl Script {
     /// Basic usage:
     ///
     /// ```
-    /// use termionix_ansicodes::Script;
+    /// use termionix_ansicodec::Script;
     ///
     /// assert_eq!(Script::from_u8(73), Some(Script::Superscript));
     /// assert_eq!(Script::from_u8(74), Some(Script::Subscript));
@@ -3439,7 +3439,7 @@ impl Script {
     /// Handling invalid codes:
     ///
     /// ```
-    /// use termionix_ansicodes::Script;
+    /// use termionix_ansicodec::Script;
     ///
     /// assert_eq!(Script::from_u8(0), None);
     /// assert_eq!(Script::from_u8(72), None);
@@ -3450,7 +3450,7 @@ impl Script {
     /// Parsing ANSI sequences:
     ///
     /// ```
-    /// use termionix_ansicodes::Script;
+    /// use termionix_ansicodec::Script;
     ///
     /// // Parse a code from an ANSI sequence parameter
     /// let sgr_params: Vec<u8> = vec![1, 73, 31]; // Bold, Superscript, Red
@@ -3465,7 +3465,7 @@ impl Script {
     /// Round-trip conversion:
     ///
     /// ```
-    /// use termionix_ansicodes::Script;
+    /// use termionix_ansicodec::Script;
     ///
     /// let original = Script::Subscript;
     /// let code = original.to_u8();
@@ -3477,7 +3477,7 @@ impl Script {
     /// Using in a parser:
     ///
     /// ```
-    /// use termionix_ansicodes::Script;
+    /// use termionix_ansicodec::Script;
     ///
     /// fn parse_sgr_code(code: u8) -> Option<String> {
     ///     Script::from_u8(code).map(|script| {
@@ -3594,7 +3594,7 @@ impl Script {
 /// Basic usage:
 ///
 /// ```
-/// use termionix_ansicodes::{Style, Ideogram, ColorMode, AnsiConfig};
+/// use termionix_ansicodec::{Style, Ideogram, ColorMode, AnsiConfig};
 ///
 /// let config = AnsiConfig::enabled();
 /// let ideogram_style = Style {
@@ -3610,7 +3610,7 @@ impl Script {
 /// Double overline for emphasis:
 ///
 /// ```
-/// use termionix_ansicodes::{Ideogram, Style, ColorMode, AnsiConfig};
+/// use termionix_ansicodec::{Ideogram, Style, ColorMode, AnsiConfig};
 ///
 /// let config = AnsiConfig::enabled();
 /// let emphasis_style = Style {
@@ -3626,7 +3626,7 @@ impl Script {
 /// Stress marking:
 ///
 /// ```
-/// use termionix_ansicodes::{Ideogram, Style, ColorMode, AnsiConfig};
+/// use termionix_ansicodec::{Ideogram, Style, ColorMode, AnsiConfig};
 ///
 /// let config = AnsiConfig::enabled();
 /// let stress_style = Style {
@@ -3642,7 +3642,7 @@ impl Script {
 /// Resetting ideogram attributes:
 ///
 /// ```
-/// use termionix_ansicodes::{Ideogram, Style, ColorMode, AnsiConfig};
+/// use termionix_ansicodec::{Ideogram, Style, ColorMode, AnsiConfig};
 ///
 /// let config = AnsiConfig::enabled();
 /// let reset_style = Style {
@@ -3665,7 +3665,7 @@ impl Script {
 /// The `Ideogram` enum can be converted to and from SGR codes:
 ///
 /// ```
-/// use termionix_ansicodes::Ideogram;
+/// use termionix_ansicodec::Ideogram;
 ///
 /// // To SGR codes
 /// assert_eq!(Ideogram::Underline.to_u8(), 60);
@@ -3724,7 +3724,7 @@ pub enum Ideogram {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Ideogram;
+    /// use termionix_ansicodec::Ideogram;
     /// assert_eq!(Ideogram::Underline.to_u8(), 60);
     /// ```
     Underline,
@@ -3740,7 +3740,7 @@ pub enum Ideogram {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Ideogram;
+    /// use termionix_ansicodec::Ideogram;
     /// assert_eq!(Ideogram::DoubleUnderline.to_u8(), 61);
     /// ```
     DoubleUnderline,
@@ -3756,7 +3756,7 @@ pub enum Ideogram {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Ideogram;
+    /// use termionix_ansicodec::Ideogram;
     /// assert_eq!(Ideogram::Overline.to_u8(), 62);
     /// ```
     Overline,
@@ -3772,7 +3772,7 @@ pub enum Ideogram {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Ideogram;
+    /// use termionix_ansicodec::Ideogram;
     /// assert_eq!(Ideogram::DoubleOverline.to_u8(), 63);
     /// ```
     DoubleOverline,
@@ -3789,7 +3789,7 @@ pub enum Ideogram {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Ideogram;
+    /// use termionix_ansicodec::Ideogram;
     /// assert_eq!(Ideogram::StressMarking.to_u8(), 64);
     /// ```
     StressMarking,
@@ -3805,7 +3805,7 @@ pub enum Ideogram {
     /// # Example
     ///
     /// ```
-    /// use termionix_ansicodes::Ideogram;
+    /// use termionix_ansicodec::Ideogram;
     /// assert_eq!(Ideogram::NoIdeogramAttributes.to_u8(), 65);
     /// ```
     #[default]
@@ -3834,7 +3834,7 @@ impl Ideogram {
     /// Basic conversion:
     ///
     /// ```
-    /// use termionix_ansicodes::Ideogram;
+    /// use termionix_ansicodec::Ideogram;
     ///
     /// assert_eq!(Ideogram::Underline.to_u8(), 60);
     /// assert_eq!(Ideogram::DoubleUnderline.to_u8(), 61);
@@ -3847,7 +3847,7 @@ impl Ideogram {
     /// Building ANSI sequences:
     ///
     /// ```
-    /// use termionix_ansicodes::Ideogram;
+    /// use termionix_ansicodec::Ideogram;
     ///
     /// let ideogram = Ideogram::StressMarking;
     /// let code = ideogram.to_u8();
@@ -3909,7 +3909,7 @@ impl Ideogram {
     /// Basic usage:
     ///
     /// ```
-    /// use termionix_ansicodes::Ideogram;
+    /// use termionix_ansicodec::Ideogram;
     ///
     /// assert_eq!(Ideogram::from_u8(60), Some(Ideogram::Underline));
     /// assert_eq!(Ideogram::from_u8(61), Some(Ideogram::DoubleUnderline));
@@ -3922,7 +3922,7 @@ impl Ideogram {
     /// Handling invalid codes:
     ///
     /// ```
-    /// use termionix_ansicodes::Ideogram;
+    /// use termionix_ansicodec::Ideogram;
     ///
     /// assert_eq!(Ideogram::from_u8(0), None);
     /// assert_eq!(Ideogram::from_u8(59), None);
@@ -3933,7 +3933,7 @@ impl Ideogram {
     /// Parsing ANSI sequences:
     ///
     /// ```
-    /// use termionix_ansicodes::Ideogram;
+    /// use termionix_ansicodec::Ideogram;
     ///
     /// // Parse a code from an ANSI sequence parameter
     /// let sgr_params: Vec<u8> = vec![1, 64, 31]; // Bold, StressMarking, Red
@@ -3948,7 +3948,7 @@ impl Ideogram {
     /// Round-trip conversion:
     ///
     /// ```
-    /// use termionix_ansicodes::Ideogram;
+    /// use termionix_ansicodec::Ideogram;
     ///
     /// let original = Ideogram::StressMarking;
     /// let code = original.to_u8();
@@ -3960,7 +3960,7 @@ impl Ideogram {
     /// Using in a parser:
     ///
     /// ```
-    /// use termionix_ansicodes::Ideogram;
+    /// use termionix_ansicodec::Ideogram;
     ///
     /// fn parse_sgr_code(code: u8) -> Option<String> {
     ///     Ideogram::from_u8(code).map(|ideogram| {
@@ -4061,7 +4061,7 @@ impl Ideogram {
 /// # Examples
 ///
 /// ```rust
-/// use termionix_ansicodes::{SGRParameter, Color};
+/// use termionix_ansicodec::{SGRParameter, Color};
 ///
 /// // Reset foreground to default
 /// let param = SGRParameter::DefaultForegroundColor;
@@ -4137,7 +4137,7 @@ pub enum SGRParameter {
     ///
     /// # Example
     /// ```rust
-    /// use termionix_ansicodes::{SGRParameter, Color};
+    /// use termionix_ansicodec::{SGRParameter, Color};
     ///
     /// // Red underline
     /// let red_underline = SGRParameter::SetUnderlineColor(Color::Red);
@@ -4161,7 +4161,7 @@ pub enum SGRParameter {
     ///
     /// # Example
     /// ```rust
-    /// use termionix_ansicodes::SGRParameter;
+    /// use termionix_ansicodec::SGRParameter;
     ///
     /// let unknown = SGRParameter::Unknown(99);
     /// ```
@@ -4192,7 +4192,7 @@ impl SGRParameter {
     /// # Examples
     ///
     /// ```
-    /// use termionix_ansicodes::{SGRParameter, Color};
+    /// use termionix_ansicodec::{SGRParameter, Color};
     ///
     /// assert_eq!(SGRParameter::DefaultForegroundColor.to_u8(), 39);
     /// assert_eq!(SGRParameter::Overlined.to_u8(), 53);
@@ -4242,7 +4242,7 @@ impl SGRParameter {
     /// # Examples
     ///
     /// ```
-    /// use termionix_ansicodes::SGRParameter;
+    /// use termionix_ansicodec::SGRParameter;
     ///
     /// assert_eq!(
     ///     SGRParameter::from_u8(39),

@@ -178,7 +178,8 @@ impl AnsiSequence {
     /// # Examples
     ///
     /// ```rust
-    /// use termionix_ansicodec::AnsiSequence;
+    /// // TODO: Fix this Test
+    /// use termionix_ansicodec::{AnsiSequence, AnsiControlCode, AnsiSelectGraphicRendition};
     ///
     /// // Single ASCII character
     /// let seq = AnsiSequence::Character('A');
@@ -287,10 +288,11 @@ impl AnsiSequence {
     /// ## Encoding ANSI Escape Sequences
     ///
     /// ```rust
+    /// // TODO: Fix this example
     /// use termionix_ansicodec::{AnsiSequence, ansi::AnsiSelectGraphicRendition};
     /// use bytes::BytesMut;
     ///
-    /// let sgr = AnsiSelectGraphicRendition(vec![31]); // Red
+    /// let sgr = AnsiSelectGraphicRendition::parse(vec![31]); // Red
     /// let seq = AnsiSequence::AnsiSGR(sgr);
     /// let mut buffer = BytesMut::new();
     /// seq.encode(&mut buffer).unwrap();
@@ -1354,7 +1356,7 @@ impl AnsiControlSequenceIntroducer {
     /// ```rust
     /// use termionix_ansicodec::ansi::AnsiControlSequenceIntroducer;
     ///
-    /// assert_eq!(AnsiControlSequenceIntroducer::CursorUp(1).len(), 3); // ESC[1A
+    /// assert_eq!(AnsiControlSequenceIntroducer::CursorUp(1).len(), 4); // ESC[1A
     /// assert_eq!(AnsiControlSequenceIntroducer::CursorUp(255).len(), 6); // ESC[255A
     /// assert_eq!(AnsiControlSequenceIntroducer::SaveCursorPosition.len(), 3); // ESC[s
     /// ```

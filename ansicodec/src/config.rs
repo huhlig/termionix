@@ -146,8 +146,8 @@ impl Default for AnsiConfig {
 /// Basic usage with styled text:
 ///
 /// ```
-/// use termionix_ansicodec::{AnsiConfig};
-/// use termionix_ansicodec::utility::{Color, Intensity, AnsiSelectGraphicRendition, StyledString};
+/// use termionix_ansicodec::{AnsiConfig, Color, Intensity, AnsiSelectGraphicRendition};
+/// use termionix_ansicodec::utility::{StyledString};
 ///
 /// let config = AnsiConfig::enabled();
 /// let styled = StyledString::from_string("Hello", Some(AnsiSelectGraphicRendition {
@@ -194,8 +194,7 @@ impl Default for AnsiConfig {
 /// Conditional styling based on mode:
 ///
 /// ```
-/// use termionix_ansicodec::{ColorMode};
-/// use termionix_ansicodec::utility::Color;
+/// use termionix_ansicodec::{ColorMode, Color};
 ///
 /// fn get_color_for_mode(mode: &ColorMode) -> Option<Color> {
 ///     match mode {

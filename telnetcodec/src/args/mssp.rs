@@ -170,7 +170,7 @@ impl MudServerStatus {
     /// # Examples
     ///
     /// ```
-    /// use telnetcodec::mssp::MudServerStatus;
+    /// use termionix_telnetcodec::mssp::MudServerStatus;
     /// use std::io::Cursor;
     ///
     /// let status = MudServerStatus::new();
