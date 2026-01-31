@@ -208,7 +208,7 @@ mod input;
 mod options;
 mod result;
 
-pub use self::args::{TelnetArgument, linemode, msdp, mssp, naocrd, naohts, naws, status};
+pub use self::args::{TelnetArgument, gmcp, linemode, msdp, mssp, naocrd, naohts, naws, status};
 pub use self::codec::TelnetCodec;
 pub use self::event::TelnetEvent;
 pub use self::frame::TelnetFrame;

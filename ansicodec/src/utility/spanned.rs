@@ -742,7 +742,7 @@ impl SpannedString {
     /// Working with Unicode content:
     ///
     /// ```rust
-    /// use termionix_ansicodes::SpannedString;
+    /// use termionix_ansicodec::SpannedString;
     ///
     /// let input = "Hello 世界\n";
     /// let spanned = SpannedString::parse(input);
@@ -944,7 +944,7 @@ impl SpannedString {
 /// ## Working with Control Codes
 ///
 /// ```rust
-/// use termionix_ansicodes::{SpannedString, Span, ControlCode};
+/// use termionix_ansicodec::{SpannedString, Span, ControlCode};
 ///
 /// let input = "Line 1\nLine 2";
 /// let spans = SpannedString::parse(input);
@@ -961,7 +961,7 @@ impl SpannedString {
 /// ## Filtering Specific Span Types
 ///
 /// ```rust
-/// use termionix_ansicodes::{SpannedString, Span};
+/// use termionix_ansicodec::{SpannedString, Span};
 ///
 /// let input = "\x1b[31mRed\x1b[0m Normal";
 /// let spans = SpannedString::parse(input);
@@ -1047,7 +1047,7 @@ pub enum Span {
     /// # Examples
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "Hello World";
     /// let spans = SpannedString::parse(input);
@@ -1076,7 +1076,7 @@ pub enum Span {
         /// # Examples
         ///
         /// ```rust
-        /// use termionix_ansicodes::{SpannedString, Span};
+        /// use termionix_ansicodec::{SpannedString, Span};
         ///
         /// let input = "Hello";
         /// let spans = SpannedString::parse(input);
@@ -1122,7 +1122,7 @@ pub enum Span {
     /// Pure Unicode:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "世界";
     /// let spans = SpannedString::parse(input);
@@ -1136,7 +1136,7 @@ pub enum Span {
     /// Mixed ASCII and Unicode (merged):
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "Hello世界";
     /// let spans = SpannedString::parse(input);
@@ -1166,7 +1166,7 @@ pub enum Span {
         /// # Examples
         ///
         /// ```rust
-        /// use termionix_ansicodes::{SpannedString, Span};
+        /// use termionix_ansicodec::{SpannedString, Span};
         ///
         /// let input = "こんにちは"; // 5 characters, 15 bytes
         /// let spans = SpannedString::parse(input);
@@ -1210,7 +1210,7 @@ pub enum Span {
     /// Single control code:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span, ControlCode};
+    /// use termionix_ansicodec::{SpannedString, Span, ControlCode};
     ///
     /// let input = "Hello\nWorld";
     /// let spans = SpannedString::parse(input);
@@ -1224,7 +1224,7 @@ pub enum Span {
     /// Multiple consecutive control codes (merged):
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span, ControlCode};
+    /// use termionix_ansicodec::{SpannedString, Span, ControlCode};
     ///
     /// let input = "\n\n\n";
     /// let spans = SpannedString::parse(input);
@@ -1240,7 +1240,7 @@ pub enum Span {
     /// Different control codes (not merged):
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "\n\t"; // Newline followed by tab
     /// let spans = SpannedString::parse(input);
@@ -1263,7 +1263,7 @@ pub enum Span {
         /// # Examples
         ///
         /// ```rust
-        /// use termionix_ansicodes::{SpannedString, Span};
+        /// use termionix_ansicodec::{SpannedString, Span};
         ///
         /// let input = "A\nB"; // 'A', newline, 'B'
         /// let spans = SpannedString::parse(input);
@@ -1287,7 +1287,7 @@ pub enum Span {
         /// # Examples
         ///
         /// ```rust
-        /// use termionix_ansicodes::{SpannedString, Span, ControlCode};
+        /// use termionix_ansicodec::{SpannedString, Span, ControlCode};
         ///
         /// let input = "Line 1\rLine 2"; // Carriage return
         /// let spans = SpannedString::parse(input);
@@ -1318,7 +1318,7 @@ pub enum Span {
     /// Lone escape at end:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "Hello\x1b"; // ESC at end
     /// let spans = SpannedString::parse(input);
@@ -1332,7 +1332,7 @@ pub enum Span {
     /// Unknown escape sequence:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "\x1bZ"; // ESC followed by 'Z' (not a recognized sequence)
     /// let spans = SpannedString::parse(input);
@@ -1358,7 +1358,7 @@ pub enum Span {
         /// # Examples
         ///
         /// ```rust
-        /// use termionix_ansicodes::{SpannedString, Span};
+        /// use termionix_ansicodec::{SpannedString, Span};
         ///
         /// let input = "Text\x1b"; // Incomplete escape at end
         /// let spans = SpannedString::parse(input);
@@ -1397,7 +1397,7 @@ pub enum Span {
     /// Cursor positioning:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span, CSICommand};
+    /// use termionix_ansicodec::{SpannedString, Span, CSICommand};
     ///
     /// let input = "\x1b[10;20H"; // Move cursor to row 10, column 20
     /// let spans = SpannedString::parse(input);
@@ -1411,7 +1411,7 @@ pub enum Span {
     /// Erase screen:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span, CSICommand, EraseInDisplayMode};
+    /// use termionix_ansicodec::{SpannedString, Span, CSICommand, EraseInDisplayMode};
     ///
     /// let input = "\x1b[2J"; // Clear entire screen
     /// let spans = SpannedString::parse(input);
@@ -1440,7 +1440,7 @@ pub enum Span {
         /// # Examples
         ///
         /// ```rust
-        /// use termionix_ansicodes::{SpannedString, Span};
+        /// use termionix_ansicodec::{SpannedString, Span};
         ///
         /// let input = "Before\x1b[31mRed\x1b[0mAfter";
         /// let spans = SpannedString::parse(input);
@@ -1465,7 +1465,7 @@ pub enum Span {
         /// # Examples
         ///
         /// ```rust
-        /// use termionix_ansicodes::{SpannedString, Span, CSICommand};
+        /// use termionix_ansicodec::{SpannedString, Span, CSICommand};
         ///
         /// let input = "\x1b[5A"; // Move cursor up 5 lines
         /// let spans = SpannedString::parse(input);
@@ -1506,7 +1506,7 @@ pub enum Span {
     /// Setting window title:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "\x1b]0;My Window\x07"; // Set title with BEL terminator
     /// let spans = SpannedString::parse(input);
@@ -1519,7 +1519,7 @@ pub enum Span {
     /// With ST terminator:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "\x1b]2;Title\x1b\\"; // Set title with ST terminator
     /// let spans = SpannedString::parse(input);
@@ -1545,7 +1545,7 @@ pub enum Span {
         /// # Examples
         ///
         /// ```rust
-        /// use termionix_ansicodes::{SpannedString, Span};
+        /// use termionix_ansicodec::{SpannedString, Span};
         ///
         /// let input = "\x1b]0;Window Title\x07";
         /// let spans = SpannedString::parse(input);
@@ -1584,7 +1584,7 @@ pub enum Span {
     /// Simple DCS sequence:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "\x1bP1$tx\x1b\\"; // Request terminal ID
     /// let spans = SpannedString::parse(input);
@@ -1610,7 +1610,7 @@ pub enum Span {
         /// # Examples
         ///
         /// ```rust
-        /// use termionix_ansicodes::{SpannedString, Span};
+        /// use termionix_ansicodec::{SpannedString, Span};
         ///
         /// let input = "\x1bPData\x1b\\";
         /// let spans = SpannedString::parse(input);
@@ -1644,7 +1644,7 @@ pub enum Span {
     /// # Examples
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "\x1bXsome data\x1b\\";
     /// let spans = SpannedString::parse(input);
@@ -1689,7 +1689,7 @@ pub enum Span {
     /// # Examples
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "Text\x1b\\"; // Standalone ST
     /// let spans = SpannedString::parse(input);
@@ -1736,7 +1736,7 @@ pub enum Span {
     /// # Examples
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "\x1b^private data\x1b\\";
     /// let spans = SpannedString::parse(input);
@@ -1783,7 +1783,7 @@ pub enum Span {
     /// # Examples
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "\x1b_Gcommand=value\x1b\\";
     /// let spans = SpannedString::parse(input);
@@ -1809,7 +1809,7 @@ pub enum Span {
         /// # Examples
         ///
         /// ```rust
-        /// use termionix_ansicodes::{SpannedString, Span};
+        /// use termionix_ansicodec::{SpannedString, Span};
         ///
         /// let input = "\x1b_application data\x1b\\";
         /// let spans = SpannedString::parse(input);
@@ -1847,7 +1847,7 @@ impl Span {
     /// For ASCII text, the byte length equals the character count:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "Hello";
     /// let spans = SpannedString::parse(input);
@@ -1863,7 +1863,7 @@ impl Span {
     /// For Unicode text, the byte length is greater than the character count:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "世界"; // Two characters, 6 bytes (3 bytes each)
     /// let spans = SpannedString::parse(input);
@@ -1879,7 +1879,7 @@ impl Span {
     /// For ANSI sequences, includes all bytes including escape codes:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "\x1b[31m"; // Red color CSI sequence
     /// let spans = SpannedString::parse(input);
@@ -1894,7 +1894,7 @@ impl Span {
     /// Control codes can be merged, so length may be greater than 1:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span, ControlCode};
+    /// use termionix_ansicodec::{SpannedString, Span, ControlCode};
     ///
     /// let input = "\n\n\n"; // Three newlines merged
     /// let spans = SpannedString::parse(input);
@@ -1911,7 +1911,7 @@ impl Span {
     /// create empty spans):
     ///
     /// ```rust
-    /// use termionix_ansicodes::Span;
+    /// use termionix_ansicodec::Span;
     /// use std::ops::Range;
     ///
     /// // Manual span creation (not from parsing)
@@ -1924,7 +1924,7 @@ impl Span {
     /// Sum all span lengths to get total byte length:
     ///
     /// ```rust
-    /// use termionix_ansicodes::SpannedString;
+    /// use termionix_ansicodec::SpannedString;
     ///
     /// let input = "Hello\nWorld";
     /// let spans = SpannedString::parse(input);
@@ -1982,7 +1982,7 @@ impl Span {
     /// ## Basic Usage
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "Hello World";
     /// let spans = SpannedString::parse(input);
@@ -1996,7 +1996,7 @@ impl Span {
     /// Consecutive spans have adjacent start positions:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "Hello\nWorld";
     /// let spans = SpannedString::parse(input);
@@ -2016,7 +2016,7 @@ impl Span {
     /// Locate specific content by finding spans with certain start positions:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "One\nTwo\nThree";
     /// let spans = SpannedString::parse(input);
@@ -2032,7 +2032,7 @@ impl Span {
     /// Use start position to extract content from the source string:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SpannedString, Span};
+    /// use termionix_ansicodec::{SpannedString, Span};
     ///
     /// let input = "Hello\x1b[31mRed\x1b[0m";
     /// let spans = SpannedString::parse(input);

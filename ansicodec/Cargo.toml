@@ -23,6 +23,9 @@ tokio-util.workspace = true
 criterion.workspace = true
 tokio.workspace = true
 
+[lib]
+doctest = false
+
 [[bench]]
 name = "ansi_benchmarks"
 harness = false

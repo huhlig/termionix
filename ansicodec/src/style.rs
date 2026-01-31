@@ -567,8 +567,9 @@ impl AnsiSelectGraphicRendition {
         let codes = self.codes(color_mode);
 
         if !codes.is_empty() {
-            write!(writer, "\x1b[{}m", codes.join(";"))?;
-            Ok(0)
+            let sequence = format!("\x1b[{}m", codes.join(";"));
+            writer.write_all(sequence.as_bytes())?;
+            Ok(sequence.len())
         } else {
             Ok(0)
         }
@@ -589,8 +590,12 @@ impl AnsiSelectGraphicRendition {
         }
     }
 
-    /// TODO: Use color_mode
     fn codes(&self, color_mode: Option<ColorMode>) -> Vec<String> {
+        // If color mode is None, return empty vector (no ANSI codes)
+        if let Some(ColorMode::None) = color_mode {
+            return Vec::new();
+        }
+
         let mut codes = Vec::new();
 
         // Write Intensity (Bold `1` or Dim/Faint `2` or Normal `22`)
@@ -987,7 +992,7 @@ impl AnsiSelectGraphicRendition {
 /// The `Intensity` enum can be converted to and from u8 values representing ANSI SGR codes:
 ///
 /// ```
-/// use termionix_ansicodes::Intensity;
+/// use termionix_ansicodec::Intensity;
 ///
 /// // Convert to ANSI code
 /// assert_eq!(Intensity::Bold.to_u8(), 1);
@@ -1046,7 +1051,7 @@ impl Intensity {
     /// # Examples
     ///
     /// ```
-    /// use termionix_ansicodes::Intensity;
+    /// use termionix_ansicodec::Intensity;
     ///
     /// assert_eq!(Intensity::Bold.to_u8(), 1);
     /// assert_eq!(Intensity::Dim.to_u8(), 2);
@@ -1058,7 +1063,7 @@ impl Intensity {
     /// The returned code can be used directly in ANSI escape sequences:
     ///
     /// ```
-    /// use termionix_ansicodes::Intensity;
+    /// use termionix_ansicodec::Intensity;
     ///
     /// let code = Intensity::Bold.to_u8();
     /// let ansi_sequence = format!("\x1b[{}m", code);
@@ -1093,7 +1098,7 @@ impl Intensity {
     /// Basic usage:
     ///
     /// ```
-    /// use termionix_ansicodes::Intensity;
+    /// use termionix_ansicodec::Intensity;
     ///
     /// assert_eq!(Intensity::from_u8(1), Some(Intensity::Bold));
     /// assert_eq!(Intensity::from_u8(2), Some(Intensity::Dim));
@@ -1103,7 +1108,7 @@ impl Intensity {
     /// Handling invalid codes:
     ///
     /// ```
-    /// use termionix_ansicodes::Intensity;
+    /// use termionix_ansicodec::Intensity;
     ///
     /// assert_eq!(Intensity::from_u8(99), None);
     /// assert_eq!(Intensity::from_u8(0), None);
@@ -1112,7 +1117,7 @@ impl Intensity {
     /// Parsing ANSI sequences:
     ///
     /// ```
-    /// use termionix_ansicodes::Intensity;
+    /// use termionix_ansicodec::Intensity;
     ///
     /// // Parse a code from an ANSI sequence parameter
     /// let code: u8 = 1; // From "\x1b[1m"
@@ -1153,7 +1158,7 @@ impl Intensity {
 /// # Examples
 ///
 /// ```rust
-/// use termionix_ansicodes::{Underline, Style, StyledString, ColorMode, AnsiConfig};
+/// use termionix_ansicodec::{Underline, Style, StyledString, ColorMode, AnsiConfig};
 ///
 /// let config = AnsiConfig::enabled();
 /// // Create a styled string with underline
@@ -1209,7 +1214,7 @@ impl Underline {
     /// # Examples
     ///
     /// ```rust
-    /// use termionix_ansicodes::Underline;
+    /// use termionix_ansicodec::Underline;
     ///
     /// assert_eq!(Underline::Single.to_u8(), 4);
     /// assert_eq!(Underline::Double.to_u8(), 21);
@@ -1242,7 +1247,7 @@ impl Underline {
     /// # Examples
     ///
     /// ```rust
-    /// use termionix_ansicodes::Underline;
+    /// use termionix_ansicodec::Underline;
     ///
     /// assert_eq!(Underline::from_u8(4), Some(Underline::Single));
     /// assert_eq!(Underline::from_u8(21), Some(Underline::Double));
@@ -1326,7 +1331,7 @@ impl Underline {
 /// Using basic colors:
 ///
 /// ```
-/// use termionix_ansicodes::{StyledString, Style, Color, ColorMode};
+/// use termionix_ansicodec::{StyledString, Style, Color, ColorMode};
 ///
 /// let styled = StyledString::from_string("Error", Some(Style {
 ///     foreground: Some(Color::Red),
@@ -1337,7 +1342,7 @@ impl Underline {
 /// Using bright colors:
 ///
 /// ```
-/// use termionix_ansicodes::{Color, Style};
+/// use termionix_ansicodec::{Color, Style};
 ///
 /// let style = Style {
 ///     foreground: Some(Color::BrightRed),
@@ -1349,7 +1354,7 @@ impl Underline {
 /// Using 256-color palette:
 ///
 /// ```
-/// use termionix_ansicodes::Color;
+/// use termionix_ansicodec::Color;
 ///
 /// // Use color #196 from the 256-color palette (bright red)
 /// let bright_red = Color::Fixed(196);
@@ -1361,7 +1366,7 @@ impl Underline {
 /// Using true color (RGB):
 ///
 /// ```
-/// use termionix_ansicodes::Color;
+/// use termionix_ansicodec::Color;
 ///
 /// // Create a custom orange color
 /// let orange = Color::RGB(255, 165, 0);
@@ -1373,7 +1378,7 @@ impl Underline {
 /// Converting between color modes:
 ///
 /// ```
-/// use termionix_ansicodes::Color;
+/// use termionix_ansicodec::Color;
 ///
 /// let true_color = Color::RGB(255, 100, 50);
 ///
@@ -1522,7 +1527,7 @@ impl Color {
     /// Basic colors are preserved:
     ///
     /// ```
-    /// use termionix_ansicodes::Color;
+    /// use termionix_ansicodec::Color;
     ///
     /// let red = Color::Red;
     /// assert_eq!(red.to_basic(), Color::Red);
@@ -1534,7 +1539,7 @@ impl Color {
     /// Fixed palette colors are converted:
     ///
     /// ```
-    /// use termionix_ansicodes::Color;
+    /// use termionix_ansicodec::Color;
     ///
     /// // Color 0-7 map to basic colors
     /// let fixed_red = Color::Fixed(1);
@@ -1552,7 +1557,7 @@ impl Color {
     /// RGB colors are approximated:
     ///
     /// ```
-    /// use termionix_ansicodes::Color;
+    /// use termionix_ansicodec::Color;
     ///
     /// // Bright red RGB
     /// let rgb_red = Color::RGB(255, 0, 0);
@@ -1570,7 +1575,7 @@ impl Color {
     /// Fallback for limited terminals:
     ///
     /// ```
-    /// use termionix_ansicodes::{Color, ColorMode};
+    /// use termionix_ansicodec::{Color, ColorMode};
     ///
     /// fn get_color_for_mode(color: Color, mode: &ColorMode) -> Color {
     ///     match mode {
@@ -1690,7 +1695,7 @@ impl Color {
     /// Basic colors to fixed indices:
     ///
     /// ```
-    /// use termionix_ansicodes::Color;
+    /// use termionix_ansicodec::Color;
     ///
     /// assert_eq!(Color::Black.to_fixed(), Color::Fixed(0));
     /// assert_eq!(Color::Red.to_fixed(), Color::Fixed(1));
@@ -1700,7 +1705,7 @@ impl Color {
     /// Bright colors to fixed indices:
     ///
     /// ```
-    /// use termionix_ansicodes::Color;
+    /// use termionix_ansicodec::Color;
     ///
     /// assert_eq!(Color::BrightBlack.to_fixed(), Color::Fixed(8));
     /// assert_eq!(Color::BrightRed.to_fixed(), Color::Fixed(9));
@@ -1710,7 +1715,7 @@ impl Color {
     /// RGB colors are approximated:
     ///
     /// ```
-    /// use termionix_ansicodes::Color;
+    /// use termionix_ansicodec::Color;
     ///
     /// // Bright red approximated to fixed palette
     /// let red = Color::RGB(255, 0, 0);
@@ -1726,7 +1731,7 @@ impl Color {
     /// Converting colors for 256-color terminals:
     ///
     /// ```
-    /// use termionix_ansicodes::{Color, Style, ColorMode};
+    /// use termionix_ansicodec::{Color, Style, ColorMode};
     ///
     /// let style = Style {
     ///     foreground: Some(Color::RGB(255, 100, 50).to_fixed()),
@@ -1739,7 +1744,7 @@ impl Color {
     /// Progressive enhancement:
     ///
     /// ```
-    /// use termionix_ansicodes::{Color, ColorMode};
+    /// use termionix_ansicodec::{Color, ColorMode};
     ///
     /// fn adapt_color(color: Color, mode: &ColorMode) -> Color {
     ///     match mode {
@@ -1849,7 +1854,7 @@ impl Color {
     /// Basic colors to RGB:
     ///
     /// ```
-    /// use termionix_ansicodes::Color;
+    /// use termionix_ansicodec::Color;
     ///
     /// let red = Color::Red.to_truecolor();
     /// assert_eq!(red, Color::RGB(205, 0, 0));
@@ -1861,7 +1866,7 @@ impl Color {
     /// Fixed palette to RGB:
     ///
     /// ```
-    /// use termionix_ansicodes::Color;
+    /// use termionix_ansicodec::Color;
     ///
     /// // Fixed color 1 (Red) converts to standard red RGB
     /// let fixed_red = Color::Fixed(1).to_truecolor();

@@ -24,11 +24,22 @@ mod string;
 mod style;
 pub mod utility;
 
+pub use self::ansi::{
+    AnsiApplicationProgramCommand, AnsiControlCode, AnsiControlSequenceIntroducer,
+    AnsiDeviceControlString, AnsiOperatingSystemCommand, AnsiPrivacyMessage,
+    AnsiSelectGraphicRendition, AnsiSequence, AnsiStartOfString, TelnetCommand,
+};
 pub use self::codec::AnsiCodec;
 pub use self::config::{AnsiConfig, ColorMode};
 pub use self::parser::AnsiParser;
 pub use self::result::{AnsiError, AnsiResult};
 pub use self::string::{Segment, SegmentedString};
+pub use self::style::{Blink, Color, Font, Ideogram, Intensity, SGRParameter, Script, Underline};
+pub use self::utility::{Span, SpannedString, StyledString, strip_ansi_codes};
+
+// Type aliases for backward compatibility
+pub type Style = AnsiSelectGraphicRendition;
+pub type ControlCode = AnsiControlCode;
 
 #[cfg(test)]
 mod tests {

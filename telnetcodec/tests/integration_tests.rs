@@ -626,7 +626,6 @@ fn rfc854_iac_escaping() {
     assert_eq!(events, vec![TelnetEvent::Data(0xFF)]);
 }
 
-
 // ============================================================================
 // EOR (End of Record) Tests
 // ============================================================================
@@ -678,12 +677,12 @@ fn client_server_prompt_with_eor() {
 
     // Simulate a MUD server sending a prompt with EOR marker
     let mut buffer = BytesMut::new();
-    
+
     // Send prompt text without \r\n
     for &byte in b"HP:100 MP:50> " {
         server.encode(TelnetFrame::Data(byte), &mut buffer).unwrap();
     }
-    
+
     // Mark end of prompt with EOR
     server
         .encode(TelnetFrame::EndOfRecord, &mut buffer)
@@ -691,7 +690,7 @@ fn client_server_prompt_with_eor() {
 
     // Client receives prompt data followed by EOR
     let events = decode_all(&mut client, &mut buffer);
-    
+
     // Extract data bytes
     let data: Vec<u8> = events
         .iter()
@@ -700,9 +699,9 @@ fn client_server_prompt_with_eor() {
             _ => None,
         })
         .collect();
-    
+
     assert_eq!(data, b"HP:100 MP:50> ");
-    
+
     // Verify EOR event is present
     assert!(events.contains(&TelnetEvent::EndOfRecord));
 }
@@ -713,12 +712,12 @@ fn client_server_eor_with_regular_output() {
 
     // Send regular output (with \r\n) followed by prompt (with EOR)
     let mut buffer = BytesMut::new();
-    
+
     // Regular output line
     for &byte in b"You enter the room.\r\n" {
         server.encode(TelnetFrame::Data(byte), &mut buffer).unwrap();
     }
-    
+
     // Prompt without \r\n, marked with EOR
     for &byte in b"> " {
         server.encode(TelnetFrame::Data(byte), &mut buffer).unwrap();
@@ -728,7 +727,7 @@ fn client_server_eor_with_regular_output() {
         .unwrap();
 
     let events = decode_all(&mut client, &mut buffer);
-    
+
     // Extract all data
     let data: Vec<u8> = events
         .iter()
@@ -737,9 +736,9 @@ fn client_server_eor_with_regular_output() {
             _ => None,
         })
         .collect();
-    
+
     assert_eq!(data, b"You enter the room.\r\n> ");
-    
+
     // Verify EOR is at the end
     assert_eq!(events.last(), Some(&TelnetEvent::EndOfRecord));
 }
@@ -747,15 +746,269 @@ fn client_server_eor_with_regular_output() {
 #[test]
 fn encode_decode_eor_roundtrip() {
     let mut codec = TelnetCodec::new();
-    
+
     // Encode EOR
     let mut buffer = BytesMut::new();
     codec.encode(TelnetFrame::EndOfRecord, &mut buffer).unwrap();
-    
+
     // Decode EOR
     let event = codec.decode(&mut buffer).unwrap();
     assert_eq!(event, Some(TelnetEvent::EndOfRecord));
-    
+
     // Buffer should be empty
     assert!(codec.decode(&mut buffer).unwrap().is_none());
+}
+
+// ============================================================================
+// GMCP Tests
+// ============================================================================
+
+#[test]
+fn test_gmcp_negotiation() {
+    let (mut client, mut server) = create_client_server_pair();
+
+    // Client requests to enable GMCP locally
+    let frame = client.enable_local(TelnetOption::GMCP);
+    assert_eq!(frame, Some(TelnetFrame::Will(TelnetOption::GMCP)));
+
+    // Send WILL GMCP to server
+    let mut buffer = encode_frames(&mut client, vec![TelnetFrame::Will(TelnetOption::GMCP)]);
+    let events = decode_all(&mut server, &mut buffer);
+
+    // Server should accept and enable GMCP remotely
+    assert_eq!(events.len(), 1);
+    match &events[0] {
+        TelnetEvent::OptionStatus(option, side, enabled) => {
+            assert_eq!(*option, TelnetOption::GMCP);
+            assert_eq!(*side, TelnetSide::Remote);
+            assert!(enabled);
+        }
+        _ => panic!("Expected OptionStatus event"),
+    }
+
+    assert!(server.is_enabled_remote(TelnetOption::GMCP));
+}
+
+#[test]
+fn test_gmcp_message_with_data() {
+    use termionix_telnetcodec::gmcp::GmcpMessage;
+
+    let (mut client, mut server) = create_client_server_pair();
+
+    // Enable GMCP on both sides
+    client.enable_local(TelnetOption::GMCP);
+    server.enable_remote(TelnetOption::GMCP);
+
+    // Create a GMCP message
+    let gmcp_msg = GmcpMessage::new(
+        "Core.Hello",
+        Some(r#"{"client":"TestClient","version":"1.0"}"#),
+    );
+    let frame = TelnetFrame::Subnegotiate(TelnetArgument::GMCP(gmcp_msg.clone()));
+
+    // Encode and send
+    let mut buffer = encode_frames(&mut client, vec![frame]);
+    let events = decode_all(&mut server, &mut buffer);
+
+    // Verify received GMCP message
+    assert_eq!(events.len(), 1);
+    match &events[0] {
+        TelnetEvent::Subnegotiate(TelnetArgument::GMCP(msg)) => {
+            assert_eq!(msg.package(), "Core.Hello");
+            assert_eq!(
+                msg.data(),
+                Some(r#"{"client":"TestClient","version":"1.0"}"#)
+            );
+        }
+        _ => panic!("Expected GMCP subnegotiation event, got: {:?}", events[0]),
+    }
+}
+
+#[test]
+fn test_gmcp_message_without_data() {
+    use termionix_telnetcodec::gmcp::GmcpMessage;
+
+    let (mut client, mut server) = create_client_server_pair();
+
+    // Create a GMCP command without data
+    let gmcp_msg = GmcpMessage::command("Core.Ping");
+    let frame = TelnetFrame::Subnegotiate(TelnetArgument::GMCP(gmcp_msg));
+
+    // Encode and send
+    let mut buffer = encode_frames(&mut client, vec![frame]);
+    let events = decode_all(&mut server, &mut buffer);
+
+    // Verify received GMCP message
+    assert_eq!(events.len(), 1);
+    match &events[0] {
+        TelnetEvent::Subnegotiate(TelnetArgument::GMCP(msg)) => {
+            assert_eq!(msg.package(), "Core.Ping");
+            assert_eq!(msg.data(), None);
+            assert!(!msg.has_data());
+        }
+        _ => panic!("Expected GMCP subnegotiation event"),
+    }
+}
+
+#[test]
+fn test_gmcp_msdp_over_gmcp() {
+    use termionix_telnetcodec::gmcp::GmcpMessage;
+
+    let (mut client, mut server) = create_client_server_pair();
+
+    // MSDP over GMCP - package name must be "MSDP" (case-sensitive)
+    let gmcp_msg = GmcpMessage::new("MSDP", Some(r#"{"LIST":"COMMANDS"}"#));
+    let frame = TelnetFrame::Subnegotiate(TelnetArgument::GMCP(gmcp_msg));
+
+    // Encode and send
+    let mut buffer = encode_frames(&mut client, vec![frame]);
+    let events = decode_all(&mut server, &mut buffer);
+
+    // Verify MSDP over GMCP message
+    assert_eq!(events.len(), 1);
+    match &events[0] {
+        TelnetEvent::Subnegotiate(TelnetArgument::GMCP(msg)) => {
+            assert_eq!(msg.package(), "MSDP");
+            assert_eq!(msg.data(), Some(r#"{"LIST":"COMMANDS"}"#));
+        }
+        _ => panic!("Expected GMCP subnegotiation event"),
+    }
+}
+
+#[test]
+fn test_gmcp_char_vitals() {
+    use termionix_telnetcodec::gmcp::GmcpMessage;
+
+    let (mut client, mut server) = create_client_server_pair();
+
+    // Typical MUD character vitals message
+    let gmcp_msg = GmcpMessage::new(
+        "Char.Vitals",
+        Some(r#"{"hp":100,"maxhp":120,"mp":50,"maxmp":80,"ep":75,"maxep":100}"#),
+    );
+    let frame = TelnetFrame::Subnegotiate(TelnetArgument::GMCP(gmcp_msg));
+
+    // Encode and send
+    let mut buffer = encode_frames(&mut client, vec![frame]);
+    let events = decode_all(&mut server, &mut buffer);
+
+    // Verify message
+    assert_eq!(events.len(), 1);
+    match &events[0] {
+        TelnetEvent::Subnegotiate(TelnetArgument::GMCP(msg)) => {
+            assert_eq!(msg.package(), "Char.Vitals");
+            assert!(msg.has_data());
+            let data = msg.data().unwrap();
+            assert!(data.contains("\"hp\":100"));
+            assert!(data.contains("\"maxhp\":120"));
+        }
+        _ => panic!("Expected GMCP subnegotiation event"),
+    }
+}
+
+#[test]
+fn test_gmcp_room_info() {
+    use termionix_telnetcodec::gmcp::GmcpMessage;
+
+    let (mut client, mut server) = create_client_server_pair();
+
+    // Room information message
+    let gmcp_msg = GmcpMessage::new(
+        "Room.Info",
+        Some(
+            r#"{"num":1234,"name":"Town Square","area":"Midgaard","exits":["north","south","east","west"]}"#,
+        ),
+    );
+    let frame = TelnetFrame::Subnegotiate(TelnetArgument::GMCP(gmcp_msg));
+
+    // Encode and send
+    let mut buffer = encode_frames(&mut client, vec![frame]);
+    let events = decode_all(&mut server, &mut buffer);
+
+    // Verify message
+    assert_eq!(events.len(), 1);
+    match &events[0] {
+        TelnetEvent::Subnegotiate(TelnetArgument::GMCP(msg)) => {
+            assert_eq!(msg.package(), "Room.Info");
+            assert!(msg.data().unwrap().contains("Town Square"));
+        }
+        _ => panic!("Expected GMCP subnegotiation event"),
+    }
+}
+
+#[test]
+fn test_gmcp_roundtrip() {
+    use termionix_telnetcodec::gmcp::GmcpMessage;
+
+    let (mut client, mut server) = create_client_server_pair();
+
+    // Create original message
+    let original_msg = GmcpMessage::new("Test.Package", Some(r#"{"key":"value","num":42}"#));
+    let frame = TelnetFrame::Subnegotiate(TelnetArgument::GMCP(original_msg.clone()));
+
+    // Encode
+    let mut buffer = encode_frames(&mut client, vec![frame]);
+
+    // Decode
+    let events = decode_all(&mut server, &mut buffer);
+
+    // Verify roundtrip
+    assert_eq!(events.len(), 1);
+    match &events[0] {
+        TelnetEvent::Subnegotiate(TelnetArgument::GMCP(decoded_msg)) => {
+            assert_eq!(decoded_msg.package(), original_msg.package());
+            assert_eq!(decoded_msg.data(), original_msg.data());
+        }
+        _ => panic!("Expected GMCP subnegotiation event"),
+    }
+}
+
+#[test]
+fn test_gmcp_multiple_messages() {
+    use termionix_telnetcodec::gmcp::GmcpMessage;
+
+    let (mut client, mut server) = create_client_server_pair();
+
+    // Send multiple GMCP messages
+    let frames = vec![
+        TelnetFrame::Subnegotiate(TelnetArgument::GMCP(GmcpMessage::command("Core.Ping"))),
+        TelnetFrame::Subnegotiate(TelnetArgument::GMCP(GmcpMessage::new(
+            "Core.Hello",
+            Some(r#"{"client":"Test"}"#),
+        ))),
+        TelnetFrame::Subnegotiate(TelnetArgument::GMCP(GmcpMessage::new(
+            "Char.Vitals",
+            Some(r#"{"hp":100}"#),
+        ))),
+    ];
+
+    let mut buffer = encode_frames(&mut client, frames);
+    let events = decode_all(&mut server, &mut buffer);
+
+    // Verify all messages received
+    assert_eq!(events.len(), 3);
+
+    match &events[0] {
+        TelnetEvent::Subnegotiate(TelnetArgument::GMCP(msg)) => {
+            assert_eq!(msg.package(), "Core.Ping");
+            assert!(!msg.has_data());
+        }
+        _ => panic!("Expected GMCP message 1"),
+    }
+
+    match &events[1] {
+        TelnetEvent::Subnegotiate(TelnetArgument::GMCP(msg)) => {
+            assert_eq!(msg.package(), "Core.Hello");
+            assert!(msg.has_data());
+        }
+        _ => panic!("Expected GMCP message 2"),
+    }
+
+    match &events[2] {
+        TelnetEvent::Subnegotiate(TelnetArgument::GMCP(msg)) => {
+            assert_eq!(msg.package(), "Char.Vitals");
+            assert!(msg.has_data());
+        }
+        _ => panic!("Expected GMCP message 3"),
+    }
 }

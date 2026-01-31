@@ -498,7 +498,7 @@ pub mod option {
         (false, false), // 198 -
         (false, false), // 199 -
         (false, false), // 200 -
-        (false, false), // 201 - GMCP
+        ( true,  true), // 201 - GMCP
         (false, false), // 202 -
         (false, false), // 203 -
         (false, false), // 204 -

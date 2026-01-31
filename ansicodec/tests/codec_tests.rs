@@ -111,8 +111,8 @@ fn test_encode_sgr_default() {
     let sgr = AnsiSelectGraphicRendition::default();
     codec.encode(sgr, &mut buffer).unwrap();
 
-    // Default SGR should produce some output
-    assert!(!buffer.is_empty());
+    // Default SGR (with all fields None) should produce no output
+    assert!(buffer.is_empty());
 }
 
 #[test]

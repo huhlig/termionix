@@ -219,6 +219,16 @@ telnet localhost 4000
 - [CHANGELOG](CHANGELOG.md) - Version history and changes
 - [Integration Guide](../TERMIONIX_INTEGRATION_REFACTOR.md) - Downstream integration notes
 
+## Roadmap Items
+- Fix the myriad of Doctests
+- Add Support for GMCP as described [here](https://tintin.mudhalla.net/protocols/gmcp/)
+- Add Support for Compression and MCCP2 as described [here](https://tintin.mudhalla.net/protocols/mccp/)
+- Add support for MMCP as described [here](https://tintin.mudhalla.net/protocols/mmcp/)
+- Add support for MNES as described [here](https://tintin.mudhalla.net/protocols/mnes/)
+- Add support for MTTS as described [here](https://tintin.mudhalla.net/protocols/mtts/)
+- Add support for MSLP as described [here](https://tintin.mudhalla.net/protocols/mslp/)
+- Add Support for MSP as described [here](https://www.zuggsoft.com/zmud/msp.htm)
+
 ## License
 
 This project is licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).

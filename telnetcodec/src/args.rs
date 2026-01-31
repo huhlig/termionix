@@ -15,11 +15,14 @@
 //
 
 use crate::TelnetOption;
+use crate::args::gmcp::GmcpMessage;
 use crate::args::naws::WindowSize;
 use crate::result::CodecResult;
 use bytes::{BufMut, BytesMut};
 use std::fmt::Formatter;
 
+/// GMCP (Generic Mud Communication Protocol) argument parsing and handling
+pub mod gmcp;
 pub mod linemode;
 pub mod msdp;
 pub mod mssp;
@@ -48,6 +51,9 @@ pub enum TelnetArgument {
     /// Indicates that the receiver acknowledges a TTABLE-IS message but is
     /// unable to handle it. This will terminate subnegotiation.
     CharsetTTableRejected,
+    /// GMCP (Generic Mud Communication Protocol) message.
+    /// Contains a package name and optional JSON data payload.
+    GMCP(GmcpMessage),
     /// A subnegotiation for an unknown option.
     Unknown(TelnetOption, BytesMut),
 }
@@ -86,6 +92,7 @@ impl TelnetArgument {
     pub fn len(&self) -> usize {
         match self {
             TelnetArgument::NAWSWindowSize(inner) => inner.len(),
+            TelnetArgument::GMCP(inner) => inner.len(),
             TelnetArgument::Unknown(_option, inner) => inner.len(),
             _ => unimplemented!(),
         }
@@ -177,6 +184,7 @@ impl TelnetArgument {
     pub fn write<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<usize> {
         match self {
             TelnetArgument::NAWSWindowSize(inner) => inner.write(writer),
+            TelnetArgument::GMCP(inner) => inner.write(writer),
             TelnetArgument::Unknown(_option, payload) => writer.write(payload),
             _ => unimplemented!(),
         }
@@ -229,6 +237,7 @@ impl TelnetArgument {
             TelnetArgument::CharsetAccepted(_) => TelnetOption::Charset,
             TelnetArgument::CharsetRejected => TelnetOption::Charset,
             TelnetArgument::CharsetTTableRejected => TelnetOption::Charset,
+            TelnetArgument::GMCP(_) => TelnetOption::GMCP,
             TelnetArgument::Unknown(option, _) => TelnetOption::Unknown(option.to_u8()),
         }
     }
@@ -242,6 +251,7 @@ impl std::fmt::Display for TelnetArgument {
             TelnetArgument::CharsetAccepted(v) => write!(f, "CharsetAccepted({v:?})"),
             TelnetArgument::CharsetRejected => write!(f, "CharsetRejected"),
             TelnetArgument::CharsetTTableRejected => write!(f, "CharsetTableRejected"),
+            TelnetArgument::GMCP(v) => write!(f, "GMCP({})", v),
             TelnetArgument::Unknown(o, v) => write!(f, "{o}-{v:?}"),
         }
     }

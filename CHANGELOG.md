@@ -10,6 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Telnet Protocol Support
+- Added support for GMCP (Generic Mud Communication Protocol) option
+  - `TelnetArgument::GMCP(GmcpMessage)` - Argument variant for GMCP messages
+  - `GmcpMessage` struct for parsing and encoding GMCP data
+  - GMCP option (201) enabled in SUPPORT table for both local and remote
+  - Supports package.subpackage.command format with optional JSON data
+  - Automatic parsing of GMCP subnegotiations in codec
+  - Full support for MSDP over GMCP (case-sensitive "MSDP" package name)
+  - Comprehensive test coverage for GMCP functionality
+  - Reference: https://tintin.mudhalla.net/protocols/gmcp/
 - Added support for Telnet EOR (End of Record) option (RFC 885)
   - `TelnetFrame::EndOfRecord` - Frame variant for IAC EOR command
   - `TelnetEvent::EndOfRecord` - Event variant emitted when EOR is received

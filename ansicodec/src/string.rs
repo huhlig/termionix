@@ -616,7 +616,7 @@ impl SegmentedString {
     /// Multiple styles:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, Style, Color};
+    /// use termionix_ansicodec::{SegmentedString, Style, Color};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_style(Style {
@@ -654,7 +654,7 @@ impl SegmentedString {
     /// Adding a custom CSI command:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, Segment, CSICommand};
+    /// use termionix_ansicodec::{SegmentedString, Segment, CSICommand};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Before");
@@ -665,7 +665,7 @@ impl SegmentedString {
     /// Manually creating text segments:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, Segment};
+    /// use termionix_ansicodec::{SegmentedString, Segment};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_segment(Segment::ASCII("Hello".to_string()));
@@ -676,7 +676,7 @@ impl SegmentedString {
     /// Building from parsed segments:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, Segment, ControlCode};
+    /// use termionix_ansicodec::{SegmentedString, Segment, ControlCode};
     ///
     /// let segments = vec![
     ///     Segment::ASCII("Line 1".to_string()),
@@ -717,7 +717,7 @@ impl SegmentedString {
     /// Basic iteration:
     ///
     /// ```rust
-    /// use termionix_ansicodes::SegmentedString;
+    /// use termionix_ansicodec::SegmentedString;
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Hello");
@@ -731,7 +731,7 @@ impl SegmentedString {
     /// Filtering specific segment types:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, Segment, Style, Color};
+    /// use termionix_ansicodec::{SegmentedString, Segment, Style, Color};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_style(Style {
@@ -748,7 +748,7 @@ impl SegmentedString {
     /// Counting specific segment types:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, Segment, ControlCode};
+    /// use termionix_ansicodec::{SegmentedString, Segment, ControlCode};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Line 1");
@@ -789,7 +789,7 @@ impl SegmentedString {
     /// Basic text stripping:
     ///
     /// ```rust
-    /// use termionix_ansicodes::SegmentedString;
+    /// use termionix_ansicodec::SegmentedString;
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Hello World");
@@ -800,7 +800,7 @@ impl SegmentedString {
     /// Removing style codes:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, Style, Color, Intensity};
+    /// use termionix_ansicodec::{SegmentedString, Style, Color, Intensity};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_style(Style {
@@ -818,7 +818,7 @@ impl SegmentedString {
     /// Removing control codes:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, ControlCode};
+    /// use termionix_ansicodec::{SegmentedString, ControlCode};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Line 1");
@@ -832,7 +832,7 @@ impl SegmentedString {
     /// Mixed ASCII and Unicode:
     ///
     /// ```rust
-    /// use termionix_ansicodes::SegmentedString;
+    /// use termionix_ansicodec::SegmentedString;
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Hello");
@@ -844,7 +844,7 @@ impl SegmentedString {
     /// Complex example with multiple segment types:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, Style, Color, ControlCode, CSICommand};
+    /// use termionix_ansicodec::{SegmentedString, Style, Color, ControlCode, CSICommand};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Status: ");
@@ -921,7 +921,7 @@ impl SegmentedString {
     /// Basic usage:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, AnsiConfig};
+    /// use termionix_ansicodec::{SegmentedString, AnsiConfig};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Hello World");
@@ -936,7 +936,7 @@ impl SegmentedString {
     /// Clearing styled content:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, Style, Color, Intensity};
+    /// use termionix_ansicodec::{SegmentedString, Style, Color, Intensity};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_style(Style {
@@ -954,7 +954,7 @@ impl SegmentedString {
     /// Clearing mixed segment types:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, Style, Color, ControlCode};
+    /// use termionix_ansicodec::{SegmentedString, Style, Color, ControlCode};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Line 1");
@@ -975,7 +975,7 @@ impl SegmentedString {
     /// Reusing after clear:
     ///
     /// ```rust
-    /// use termionix_ansicodes::SegmentedString;
+    /// use termionix_ansicodec::SegmentedString;
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("First message");
@@ -990,7 +990,7 @@ impl SegmentedString {
     /// Clearing in a loop (efficient memory reuse):
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, Style, Color};
+    /// use termionix_ansicodec::{SegmentedString, Style, Color};
     ///
     /// let mut segmented = SegmentedString::empty();
     ///
@@ -1011,7 +1011,7 @@ impl SegmentedString {
     /// Clearing complex terminal output:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, Style, Color, ControlCode, CSICommand, Intensity};
+    /// use termionix_ansicodec::{SegmentedString, Style, Color, ControlCode, CSICommand, Intensity};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Status: ");
@@ -1078,7 +1078,7 @@ impl SegmentedString {
     /// Basic usage:
     ///
     /// ```rust
-    /// use termionix_ansicodes::SegmentedString;
+    /// use termionix_ansicodec::SegmentedString;
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Hello");
@@ -1091,7 +1091,7 @@ impl SegmentedString {
     /// Popping from an empty string:
     ///
     /// ```rust
-    /// use termionix_ansicodes::SegmentedString;
+    /// use termionix_ansicodec::SegmentedString;
     ///
     /// let mut segmented = SegmentedString::empty();
     /// assert_eq!(segmented.pop(), None);
@@ -1100,7 +1100,7 @@ impl SegmentedString {
     /// Unicode character support:
     ///
     /// ```rust
-    /// use termionix_ansicodes::SegmentedString;
+    /// use termionix_ansicodec::SegmentedString;
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_char('🦀'); // Rust crab emoji (4 bytes)
@@ -1114,7 +1114,7 @@ impl SegmentedString {
     /// Handling non-text segments:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, ControlCode};
+    /// use termionix_ansicodec::{SegmentedString, ControlCode};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Hello");
@@ -1131,7 +1131,7 @@ impl SegmentedString {
     /// Mixed ASCII and Unicode segments:
     ///
     /// ```rust
-    /// use termionix_ansicodes::SegmentedString;
+    /// use termionix_ansicodec::SegmentedString;
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Hello");
@@ -1145,7 +1145,7 @@ impl SegmentedString {
     /// Segment removal when empty:
     ///
     /// ```rust
-    /// use termionix_ansicodes::SegmentedString;
+    /// use termionix_ansicodec::SegmentedString;
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("AB");
@@ -1205,7 +1205,7 @@ impl SegmentedString {
     /// # Examples
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, AnsiConfig};
+    /// use termionix_ansicodec::{SegmentedString, AnsiConfig};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Hello");
@@ -1217,7 +1217,7 @@ impl SegmentedString {
     /// With control codes (which don't contribute to display length):
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, AnsiConfig, ControlCode};
+    /// use termionix_ansicodec::{SegmentedString, AnsiConfig, ControlCode};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Hello");
@@ -1392,7 +1392,7 @@ impl SegmentedString {
     /// Writing plain text:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, ColorMode, AnsiConfig};
+    /// use termionix_ansicodec::{SegmentedString, ColorMode, AnsiConfig};
     /// let config = AnsiConfig::default();
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_str("Hello World");
@@ -1405,7 +1405,7 @@ impl SegmentedString {
     /// Writing styled text with color mode:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, Style, Color, ColorMode, Intensity, AnsiConfig};
+    /// use termionix_ansicodec::{SegmentedString, Style, Color, ColorMode, Intensity, AnsiConfig};
     ///
     /// let config = AnsiConfig::default();
     /// let mut segmented = SegmentedString::empty();
@@ -1424,7 +1424,7 @@ impl SegmentedString {
     /// Writing with control codes:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, ControlCode, ColorMode, AnsiConfig};
+    /// use termionix_ansicodec::{SegmentedString, ControlCode, ColorMode, AnsiConfig};
     ///
     /// let config = AnsiConfig::default();
     /// let mut segmented = SegmentedString::empty();
@@ -1440,7 +1440,7 @@ impl SegmentedString {
     /// Different color modes produce different output:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{SegmentedString, Style, Color, ColorMode, AnsiConfig};
+    /// use termionix_ansicodec::{SegmentedString, Style, Color, ColorMode, AnsiConfig};
     ///
     /// let mut segmented = SegmentedString::empty();
     /// segmented.push_style(Style {
@@ -1511,7 +1511,8 @@ impl SegmentedString {
                         // Strip CSI Sequence
                     } else {
                         // Write CSI sequence
-                        csi.write(writer)?;
+                        let len = csi.write(writer)?;
+                        total_len += len;
                     }
                 }
                 Segment::SGR(sgr) => {
@@ -1520,10 +1521,12 @@ impl SegmentedString {
                             // Strip SGR Sequence
                         } else {
                             // Write SGR sequence
-                            sgr.write(writer, Some(config.color_mode))?;
+                            let len = sgr.write(writer, Some(config.color_mode))?;
+                            total_len += len;
                         }
                     } else {
-                        sgr.write(writer, None)?;
+                        let len = sgr.write(writer, None)?;
+                        total_len += len;
                     }
                 }
                 Segment::OSC(osc) => {
@@ -1533,7 +1536,8 @@ impl SegmentedString {
                         // Strip OSC Sequence
                     } else {
                         // Write OSC sequence
-                        osc.write(writer)?;
+                        let len = osc.write(writer)?;
+                        total_len += len;
                     }
                 }
                 Segment::DCS(dcs) => {
@@ -1543,7 +1547,8 @@ impl SegmentedString {
                         // Strip DCS Sequence
                     } else {
                         // Write DCS sequence
-                        dcs.write(writer)?;
+                        let len = dcs.write(writer)?;
+                        total_len += len;
                     }
                 }
                 Segment::SOS(sos) => {
@@ -1553,7 +1558,8 @@ impl SegmentedString {
                         // Strip SOS Sequence
                     } else {
                         // Write SOS sequence
-                        sos.write(writer)?;
+                        let len = sos.write(writer)?;
+                        total_len += len;
                     }
                 }
                 Segment::ST => {
@@ -1564,6 +1570,7 @@ impl SegmentedString {
                     } else {
                         // Write ST sequence
                         writer.write_all(b"\x1b\\")?;
+                        total_len += 2;
                     }
                 }
                 Segment::PM(pm) => {
@@ -1573,7 +1580,8 @@ impl SegmentedString {
                         // Strip PM Sequence
                     } else {
                         // Write PM sequence
-                        pm.write(writer)?;
+                        let len = pm.write(writer)?;
+                        total_len += len;
                     }
                 }
                 Segment::APC(apc) => {
@@ -1583,7 +1591,8 @@ impl SegmentedString {
                         // Strip APC Sequence
                     } else {
                         // Write APC sequence
-                        apc.write(writer)?;
+                        let len = apc.write(writer)?;
+                        total_len += len;
                     }
                 }
                 Segment::TelnetCommand(tc) => {
@@ -1593,7 +1602,8 @@ impl SegmentedString {
                         // Strip Telnet Sequence
                     } else {
                         // Write Telnet sequence
-                        tc.write(writer)?;
+                        let len = tc.write(writer)?;
+                        total_len += len;
                     }
                 }
             }
@@ -2571,8 +2581,8 @@ mod tests {
         let len = seg.write(&mut output, Some(&config)).unwrap();
 
         // Should contain ANSI codes
-        assert_eq!(len, 13);
-        assert_eq!(output, b"\x1b[31mText\x1b[0m");
+        assert_eq!(len, 9);
+        assert_eq!(output, b"\x1b[31mText");
     }
 
     #[test]

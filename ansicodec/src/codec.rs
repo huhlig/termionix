@@ -90,9 +90,9 @@ where
                 TelnetEvent::GoAhead => {
                     Ok(Some(AnsiSequence::TelnetCommand(TelnetCommand::GoAhead)))
                 }
-                TelnetEvent::EndOfRecord => {
-                    Ok(Some(AnsiSequence::TelnetCommand(TelnetCommand::EndOfRecord)))
-                }
+                TelnetEvent::EndOfRecord => Ok(Some(AnsiSequence::TelnetCommand(
+                    TelnetCommand::EndOfRecord,
+                ))),
                 TelnetEvent::OptionStatus(option, side, enabled) => Ok(Some(
                     AnsiSequence::TelnetCommand(TelnetCommand::OptionStatus(option, side, enabled)),
                 )),

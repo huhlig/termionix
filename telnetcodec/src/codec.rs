@@ -16,6 +16,7 @@
 
 use super::{CodecError, TelnetEvent, TelnetFrame, TelnetOption, consts};
 use crate::args::TelnetArgument;
+use crate::args::gmcp::GmcpMessage;
 use crate::options::{TelnetOptions, TelnetSide};
 use bytes::{Buf, BufMut, BytesMut};
 use tokio_util::codec::{Decoder, Encoder};
@@ -503,6 +504,16 @@ impl Decoder for TelnetCodec {
                     let option = TelnetOption::from_u8(option);
                     let buffer = BytesMut::from(self.decoder_buffer.as_ref());
                     let argument = match option {
+                        TelnetOption::GMCP => {
+                            // Parse GMCP message from buffer
+                            if let Some(gmcp_msg) = GmcpMessage::parse(&buffer) {
+                                TelnetArgument::GMCP(gmcp_msg)
+                            } else {
+                                // If parsing fails, treat as unknown
+                                warn!("Failed to parse GMCP message, treating as unknown");
+                                TelnetArgument::Unknown(option, buffer)
+                            }
+                        }
                         _ => TelnetArgument::Unknown(option, buffer),
                     };
                     self.decoder_buffer.clear();

@@ -1961,7 +1961,7 @@ impl AnsiDeviceControlString {
     /// # Examples
     ///
     /// ```rust
-    /// use termionix_ansicodes::AnsiDeviceControlString;
+    /// use termionix_ansicodec::AnsiDeviceControlString;
     ///
     /// let dcs = AnsiDeviceControlString::Unknown(b"1$t".to_vec());
     /// let mut output = Vec::new();
@@ -3154,7 +3154,10 @@ mod tests {
 
         let char_seq = AnsiSequence::Character('A');
         let csi_seq = AnsiSequence::AnsiCSI(AnsiControlSequenceIntroducer::SaveCursorPosition);
-        let sgr_seq = AnsiSequence::AnsiSGR(AnsiSelectGraphicRendition::default());
+        let sgr_seq = AnsiSequence::AnsiSGR(AnsiSelectGraphicRendition {
+            intensity: Some(Intensity::Bold),
+            ..Default::default()
+        });
 
         char_seq.encode(&mut buffer).unwrap();
         csi_seq.encode(&mut buffer).unwrap();

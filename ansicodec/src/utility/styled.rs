@@ -752,7 +752,7 @@ impl StyledString {
     /// Basic conversion:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{StyledString, Style, Color, Intensity};
+    /// use termionix_ansicodec::{StyledString, Style, Color, Intensity};
     ///
     /// let mut styled = StyledString::empty();
     /// styled.concat_with_style("Error", Style {
@@ -769,7 +769,7 @@ impl StyledString {
     /// Multiple styled segments:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{StyledString, Style, Color};
+    /// use termionix_ansicodec::{StyledString, Style, Color};
     ///
     /// let mut styled = StyledString::empty();
     /// styled.concat_with_style("Red", Style {
@@ -789,7 +789,7 @@ impl StyledString {
     /// Plain text without styling:
     ///
     /// ```rust
-    /// use termionix_ansicodes::StyledString;
+    /// use termionix_ansicodec::StyledString;
     ///
     /// let styled = StyledString::from_string("Plain text", None);
     /// let segmented = styled.segmented();
@@ -801,7 +801,7 @@ impl StyledString {
     /// Complex styling with range-based styles:
     ///
     /// ```rust
-    /// use termionix_ansicodes::{StyledString, Style, Color};
+    /// use termionix_ansicodec::{StyledString, Style, Color};
     ///
     /// let mut styled = StyledString::from_string("Hello World", None);
     /// styled.set_style(Style {
