@@ -50,7 +50,7 @@ fn telnet_option_from_u8() {
     assert_eq!(TelnetOption::from(0), TelnetOption::TransmitBinary);
     assert_eq!(TelnetOption::from(1), TelnetOption::Echo);
     assert_eq!(TelnetOption::from(3), TelnetOption::SuppressGoAhead);
-    assert_eq!(TelnetOption::from(255), TelnetOption::Unknown(255));
+    assert_eq!(TelnetOption::from(255), TelnetOption::EXOPL);
 }
 
 #[test]
@@ -379,12 +379,23 @@ fn decode_negotiation_will() {
 #[test]
 fn decode_negotiation_dont() {
     let mut codec = TelnetCodec::new();
-    // First enable Echo
+    // First enable Echo - this sends WILL and puts us in WantYes state
     codec.enable_local(TelnetOption::Echo);
-    let mut buffer = BytesMut::from(&[0xFF, 0xFB, 0x01][..]); // WILL Echo (from remote)
-    decode_all(&mut codec, &mut buffer);
+    // Receive DO Echo to complete negotiation and move to Yes state
+    let mut buffer = BytesMut::from(&[0xFF, 0xFD, 0x01][..]); // DO Echo (not WILL)
+    let events = decode_all(&mut codec, &mut buffer);
+    // Should get OptionStatus(Echo, Local, true) when negotiation completes
+    assert_eq!(
+        events,
+        vec![TelnetEvent::OptionStatus(
+            TelnetOption::Echo,
+            TelnetSide::Local,
+            true
+        )]
+    );
+    assert!(codec.is_enabled_local(TelnetOption::Echo));
 
-    // Now send DONT
+    // Now send DONT to disable
     let mut buffer = BytesMut::from(&[0xFF, 0xFE, 0x01][..]); // DONT Echo
     let events = decode_all(&mut codec, &mut buffer);
     assert_eq!(
@@ -401,12 +412,23 @@ fn decode_negotiation_dont() {
 #[test]
 fn decode_negotiation_wont() {
     let mut codec = TelnetCodec::new();
-    // First enable Echo on remote
+    // First enable Echo on remote - this sends DO and puts us in WantYes state
     codec.enable_remote(TelnetOption::Echo);
-    let mut buffer = BytesMut::from(&[0xFF, 0xFD, 0x01][..]); // DO Echo (from remote)
-    decode_all(&mut codec, &mut buffer);
+    // Receive WILL Echo to complete negotiation and move to Yes state
+    let mut buffer = BytesMut::from(&[0xFF, 0xFB, 0x01][..]); // WILL Echo (not DO)
+    let events = decode_all(&mut codec, &mut buffer);
+    // Should get OptionStatus(Echo, Remote, true) when negotiation completes
+    assert_eq!(
+        events,
+        vec![TelnetEvent::OptionStatus(
+            TelnetOption::Echo,
+            TelnetSide::Remote,
+            true
+        )]
+    );
+    assert!(codec.is_enabled_remote(TelnetOption::Echo));
 
-    // Now send WONT
+    // Now send WONT to disable
     let mut buffer = BytesMut::from(&[0xFF, 0xFC, 0x01][..]); // WONT Echo
     let events = decode_all(&mut codec, &mut buffer);
     assert_eq!(

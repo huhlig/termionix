@@ -789,7 +789,7 @@ impl Encoder<TelnetEvent> for TelnetCodec {
     fn encode(&mut self, item: TelnetEvent, dst: &mut BytesMut) -> Result<(), Self::Error> {
         match item {
             TelnetEvent::Data(byte) => self.encode(TelnetFrame::Data(byte), dst),
-            TelnetEvent::NoOperation => self.encode(TelnetEvent::NoOperation, dst),
+            TelnetEvent::NoOperation => self.encode(TelnetFrame::NoOperation, dst),
             TelnetEvent::DataMark => self.encode(TelnetFrame::DataMark, dst),
             TelnetEvent::Break => self.encode(TelnetFrame::Break, dst),
             TelnetEvent::InterruptProcess => self.encode(TelnetFrame::InterruptProcess, dst),
@@ -1119,8 +1119,7 @@ mod tests {
 
     #[test]
     fn encode_subnegotiation_with_iac_in_args() {
-        // Note: The encoder does NOT escape IAC in subnegotiation args
-        // This may be a bug or intentional - documenting current behavior
+        // IAC bytes in subnegotiation args must be escaped as IAC IAC
         let args = BytesMut::from(&[0x01, consts::IAC, 0x03][..]);
         let dst = encode_frame(TelnetFrame::Subnegotiate(TelnetArgument::Unknown(
             TelnetOption::TransmitBinary,
@@ -1134,6 +1133,7 @@ mod tests {
                 consts::option::BINARY,
                 0x01,
                 consts::IAC,
+                consts::IAC,  // IAC is escaped as IAC IAC
                 0x03,
                 consts::IAC,
                 consts::SE,

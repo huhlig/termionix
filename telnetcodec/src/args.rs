@@ -185,7 +185,21 @@ impl TelnetArgument {
         match self {
             TelnetArgument::NAWSWindowSize(inner) => inner.write(writer),
             TelnetArgument::GMCP(inner) => inner.write(writer),
-            TelnetArgument::Unknown(_option, payload) => writer.write(payload),
+            TelnetArgument::Unknown(_option, payload) => {
+                // Write payload with IAC escaping
+                let mut written = 0;
+                for &byte in payload.iter() {
+                    if byte == 0xFF {
+                        // IAC byte must be escaped as IAC IAC
+                        writer.write_all(&[0xFF, 0xFF])?;
+                        written += 2;
+                    } else {
+                        writer.write_all(&[byte])?;
+                        written += 1;
+                    }
+                }
+                Ok(written)
+            }
             _ => unimplemented!(),
         }
     }
