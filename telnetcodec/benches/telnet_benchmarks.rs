@@ -17,10 +17,9 @@
 //! Benchmarks for telnetcodec performance
 
 use bytes::BytesMut;
-use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
-use termionix_telnetcodec::{
-    TelnetArgument, TelnetCodec, TelnetEvent, TelnetFrame, TelnetOption, naws,
-};
+use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
+use std::hint::black_box;
+use termionix_telnetcodec::{TelnetArgument, TelnetCodec, TelnetFrame, TelnetOption, naws};
 use tokio_util::codec::{Decoder, Encoder};
 
 // ============================================================================

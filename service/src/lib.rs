@@ -87,3 +87,33 @@ pub use metrics::{MetricsSnapshot, ServerMetrics};
 pub use server::TelnetServer;
 pub use types::{ConnectionId, ConnectionInfo, ConnectionState, ServerSnapshot};
 pub use worker::{ConnectionWorker, ControlMessage, WorkerConfig};
+
+// Re-export types from termionix_terminal
+pub use termionix_terminal::{
+    CursorPosition, TerminalBuffer, TerminalCodec, TerminalCommand, TerminalError, TerminalEvent,
+    TerminalResult, TerminalSize,
+};
+
+// Re-export types from termionix_telnetcodec
+pub use termionix_telnetcodec::{
+    CodecError as TelnetCodecError, CodecResult as TelnetCodecResult, SubnegotiationErrorKind,
+    TelnetArgument, TelnetCodec, TelnetEvent, TelnetFrame, TelnetOption, TelnetSide,
+};
+
+// Re-export telnet argument modules
+pub use termionix_telnetcodec::{gmcp, linemode, msdp, mssp, naocrd, naohts, naws, status};
+
+// Re-export types from termionix_ansicodec
+pub use termionix_ansicodec::{
+    AnsiApplicationProgramCommand, AnsiCodec, AnsiConfig, AnsiControlCode,
+    AnsiControlSequenceIntroducer, AnsiDeviceControlString, AnsiError, AnsiOperatingSystemCommand,
+    AnsiParser, AnsiPrivacyMessage, AnsiResult, AnsiSelectGraphicRendition, AnsiSequence,
+    AnsiStartOfString, Blink, Color, ColorMode, Font, Ideogram, Intensity, SGRParameter, Script,
+    Segment, SegmentedString, Span, SpannedString, StyledString, Underline,
+};
+
+// Re-export ansi utility functions
+pub use termionix_ansicodec::utility::strip_ansi_codes;
+
+// Type aliases for convenience
+pub use termionix_ansicodec::{ControlCode, Style, TelnetCommand};

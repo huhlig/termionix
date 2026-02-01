@@ -73,7 +73,7 @@ impl MudServerStatus {
     /// Returns the encoded length of the `MudServerStatus` in bytes.
     ///
     /// Calculates the total number of bytes that will be needed to encode this
-    /// `MudServerStatus` according to the MSSP protocol. This accounts for all
+    /// `MudServerStatus` according to the MSSP sidechannel. This accounts for all
     /// keys, values, and their separator markers but does not include the effect
     /// of character filtering that occurs during actual encoding.
     ///
@@ -110,7 +110,7 @@ impl MudServerStatus {
     ///
     /// Serializes the MSSP status information into the provided mutable buffer.
     /// Invalid characters (NUL, IAC, VAR, VAL) are filtered out from keys and values
-    /// during encoding to ensure protocol compliance.
+    /// during encoding to ensure sidechannel compliance.
     ///
     /// # Arguments
     ///
@@ -143,7 +143,7 @@ impl MudServerStatus {
     ///
     /// Low-level method that serializes the MSSP status to an implementer of
     /// `std::io::Write`. Keys and values are filtered to remove any characters
-    /// that are invalid in the MSSP protocol (NUL, IAC, VAR, VAL).
+    /// that are invalid in the MSSP sidechannel (NUL, IAC, VAR, VAL).
     ///
     /// The encoding format uses:
     /// - VAR marker (0x01) to prefix each key

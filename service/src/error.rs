@@ -90,7 +90,7 @@ impl TelnetError {
         )
     }
 
-    /// Check if the error is a protocol error
+    /// Check if the error is a sidechannel error
     pub fn is_protocol_error(&self) -> bool {
         matches!(self, TelnetError::Protocol(_) | TelnetError::Terminal(_))
     }

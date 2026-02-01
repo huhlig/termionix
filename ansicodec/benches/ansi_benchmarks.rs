@@ -16,7 +16,8 @@
 
 //! Benchmarks for AnsiCodec performance
 
-use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
+use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
+use std::hint::black_box;
 use termionix_ansicodec::ansi::{AnsiControlCode, AnsiControlSequenceIntroducer, AnsiSequence};
 use termionix_ansicodec::{AnsiCodec, AnsiConfig, AnsiParser, ColorMode};
 use termionix_telnetcodec::TelnetCodec;

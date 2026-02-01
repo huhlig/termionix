@@ -54,6 +54,8 @@ pub enum TelnetArgument {
     /// GMCP (Generic Mud Communication Protocol) message.
     /// Contains a package name and optional JSON data payload.
     GMCP(GmcpMessage),
+    /// Terminal type subnegotiation.
+    TerminalType(String),
     /// A subnegotiation for an unknown option.
     Unknown(TelnetOption, BytesMut),
 }
@@ -207,7 +209,7 @@ impl TelnetArgument {
     /// Returns the `TelnetOption` associated with this argument.
     ///
     /// Identifies which Telnet option this argument is for, enabling proper routing
-    /// and handling of subnegotiation data during protocol processing.
+    /// and handling of subnegotiation data during sidechannel processing.
     ///
     /// # Returns
     ///
@@ -252,6 +254,7 @@ impl TelnetArgument {
             TelnetArgument::CharsetRejected => TelnetOption::Charset,
             TelnetArgument::CharsetTTableRejected => TelnetOption::Charset,
             TelnetArgument::GMCP(_) => TelnetOption::GMCP,
+            TelnetArgument::TerminalType(_) => TelnetOption::TTYPE,
             TelnetArgument::Unknown(option, _) => TelnetOption::Unknown(option.to_u8()),
         }
     }
@@ -266,6 +269,7 @@ impl std::fmt::Display for TelnetArgument {
             TelnetArgument::CharsetRejected => write!(f, "CharsetRejected"),
             TelnetArgument::CharsetTTableRejected => write!(f, "CharsetTableRejected"),
             TelnetArgument::GMCP(v) => write!(f, "GMCP({})", v),
+            TelnetArgument::TerminalType(ttype) => write!(f, "TerminalType({ttype})"),
             TelnetArgument::Unknown(o, v) => write!(f, "{o}-{v:?}"),
         }
     }

@@ -2,10 +2,11 @@
 resolver = "3"
 members = [
     "ansicodec",
+    "client",
     "compress",
     "service",
     "telnetcodec",
-    "terminal",
+    "terminal", "suite",
 ]
 
 [workspace.package]
@@ -38,6 +39,7 @@ metrics = { version = "0.24" }
 pin-project-lite = { version = "0.2" }
 proptest = { version = "1.9" }
 termionix-ansicodec = { path = "ansicodec" }
+termionix-client = { path = "client" }
 termionix-telnetcodec = { path = "telnetcodec" }
 termionix-compress = { path = "compress" }
 termionix-service = { path = "service" }

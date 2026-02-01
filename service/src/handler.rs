@@ -60,6 +60,45 @@ pub trait ServerHandler: Send + Sync + 'static {
     /// event received from the client.
     async fn on_event(&self, _id: ConnectionId, _conn: &TelnetConnection, _event: TerminalEvent) {}
 
+    /// Called when a Telnet option is enabled
+    ///
+    /// This is called when a Telnet option negotiation completes successfully
+    /// and the option is enabled for either the local or remote side.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The connection ID
+    /// * `conn` - The connection handle
+    /// * `option` - The Telnet option that was enabled
+    /// * `local` - `true` if the option was enabled locally, `false` if remotely
+    async fn on_option_enabled(
+        &self,
+        _id: ConnectionId,
+        _conn: &TelnetConnection,
+        _option: termionix_telnetcodec::TelnetOption,
+        _local: bool,
+    ) {
+    }
+
+    /// Called when a Telnet subnegotiation is received
+    ///
+    /// This is called when a complete subnegotiation sequence is received
+    /// from the client. Subnegotiations provide additional parameters for
+    /// negotiated options (e.g., window size for NAWS, terminal type for TTYPE).
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The connection ID
+    /// * `conn` - The connection handle
+    /// * `subneg` - The parsed subnegotiation data
+    async fn on_subnegotiation(
+        &self,
+        _id: ConnectionId,
+        _conn: &TelnetConnection,
+        _subneg: termionix_telnetcodec::TelnetArgument,
+    ) {
+    }
+
     /// Called when an error occurs on a connection
     ///
     /// This is called when an error occurs during event processing. The

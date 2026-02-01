@@ -126,7 +126,7 @@ impl ServerMetrics {
         self.connection_errors.fetch_add(1, Ordering::Relaxed);
     }
 
-    /// Record a protocol error
+    /// Record a sidechannel error
     pub fn protocol_error(&self) {
         self.protocol_errors.fetch_add(1, Ordering::Relaxed);
     }
@@ -187,7 +187,7 @@ pub struct MetricsSnapshot {
     pub messages_received: u64,
     /// Total connection errors
     pub connection_errors: u64,
-    /// Total protocol errors
+    /// Total sidechannel errors
     pub protocol_errors: u64,
     /// Total timeout errors
     pub timeout_errors: u64,

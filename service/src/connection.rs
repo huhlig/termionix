@@ -363,7 +363,7 @@ impl TelnetConnection {
         }
     }
 
-    /// Check if there are pending protocol responses that need to be flushed
+    /// Check if there are pending sidechannel responses that need to be flushed
     pub async fn has_pending_responses(&self) -> bool {
         let framed = self.framed.lock().await;
         let codec = framed.codec();
@@ -372,7 +372,7 @@ impl TelnetConnection {
         codec.codec().inner().has_pending_responses()
     }
 
-    /// Flush any pending protocol responses to the connection
+    /// Flush any pending sidechannel responses to the connection
     pub async fn flush_responses(&self) -> Result<()> {
         use tokio::io::AsyncWriteExt;
 

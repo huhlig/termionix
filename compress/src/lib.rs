@@ -614,7 +614,7 @@ where
     /// # Warning
     ///
     /// Directly modifying the underlying stream while compression is active may
-    /// lead to data corruption or protocol violations. Prefer using the
+    /// lead to data corruption or sidechannel violations. Prefer using the
     /// `CompressionStream` API when possible.
     ///
     /// # Panics

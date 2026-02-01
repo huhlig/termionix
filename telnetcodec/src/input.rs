@@ -18,7 +18,7 @@ use super::TelnetOption;
 use crate::args::TelnetArgument;
 
 ///
-/// `TelnetInput` is an input to the telnet protocol.
+/// `TelnetInput` is an input to the telnet sidechannel.
 ///
 #[derive(Clone, Debug, PartialEq)]
 pub enum TelnetInput {

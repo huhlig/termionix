@@ -31,6 +31,7 @@ use std::time::Instant;
 use tokio::net::TcpListener;
 use tokio::sync::Notify;
 use tokio::task::JoinHandle;
+use tracing::instrument;
 
 /// Telnet server ( implementation)
 ///
@@ -142,6 +143,7 @@ impl TelnetServer {
     }
 
     /// Spawn the accept loop task
+    #[instrument(skip(self, handler))]
     async fn spawn_accept_loop(&self, handler: Arc<dyn ServerHandler>) -> JoinHandle<()> {
         let listener = self.listener.clone();
         let manager = self.manager.clone();
@@ -168,6 +170,15 @@ impl TelnetServer {
                 match accept_result {
                     Ok((socket, peer_addr)) => {
                         tracing::debug!("Accepted connection from {}", peer_addr);
+
+                        // Set TCP_NODELAY to reduce latency
+                        if let Err(e) = socket.set_nodelay(true) {
+                            tracing::warn!(
+                                "Failed to set TCP_NODELAY on connection from {}: {}",
+                                peer_addr,
+                                e
+                            );
+                        }
 
                         // Check connection limit
                         if manager.connection_count() >= config.max_connections {

@@ -22,6 +22,7 @@ use termionix_ansicodec::ansi::{
 };
 use tokio_util::bytes::BytesMut;
 use tokio_util::codec::{Decoder, Encoder};
+use tracing::instrument;
 
 /// Wraps a codec that decodes [`AnsiSequence`] and manages terminal state and events.
 pub struct TerminalCodec<I> {
@@ -72,6 +73,7 @@ where
     type Item = TerminalEvent;
     type Error = TerminalError;
 
+    #[instrument(skip_all)]
     fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
         match self.codec.decode(src)? {
             Some(sequence) => {

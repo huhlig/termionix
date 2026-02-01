@@ -300,5 +300,3 @@ mod tests {
         assert_eq!(original, parsed);
     }
 }
-
-// Made with Bob

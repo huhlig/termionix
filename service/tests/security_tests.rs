@@ -441,5 +441,3 @@ async fn test_unicode_edge_cases() {
     tokio::time::sleep(Duration::from_millis(100)).await;
     server.shutdown().await.unwrap();
 }
-
-// Made with Bob

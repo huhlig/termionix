@@ -389,5 +389,3 @@ pub fn terminal_word_unwrap(text: &str) -> SegmentedString {
 
     output
 }
-
-// Made with Bob

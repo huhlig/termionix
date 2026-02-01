@@ -101,7 +101,7 @@ impl EchoHandler {
             ..Default::default()
         });
         welcome.push_str("Type anything and it will be echoed back.\r\n");
-        welcome.push_str("Type 'quit' or 'exit' to disconnect.\r\n");
+        welcome.push_str("Type 'quit' or 'exit' to logout.txt.\r\n");
 
         welcome.push_style(AnsiSelectGraphicRendition::default());
         welcome.push_str("\r\n> ");

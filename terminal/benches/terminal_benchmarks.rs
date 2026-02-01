@@ -14,7 +14,8 @@
 // limitations under the License.
 //
 
-use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
+use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
+use std::hint::black_box;
 use termionix_terminal::{TerminalBuffer, TerminalCodec};
 use tokio_util::bytes::BytesMut;
 use tokio_util::codec::{Decoder, Encoder};

@@ -18,6 +18,7 @@ use crate::types::{CursorPosition, TerminalSize};
 use std::collections::BTreeMap;
 use termionix_ansicodec::utility::StyledString;
 use termionix_ansicodec::{AnsiConfig, SegmentedString};
+use tracing::instrument;
 
 /// Virtual Terminal Buffer
 pub struct TerminalBuffer {
@@ -282,6 +283,7 @@ impl TerminalBuffer {
     // ===== Line-level API =====
 
     /// Completes the current line and adds it to completed lines
+    #[instrument(skip(self))]
     pub fn complete_line(&mut self) -> SegmentedString {
         let line = std::mem::take(&mut self.current_line);
         self.completed_lines.push(line.clone());
@@ -425,7 +427,7 @@ impl TerminalBuffer {
     /// - [`complete_line()`](TerminalBuffer::complete_line) - Finish the current line and move to the next
     /// - [`set_cursor_position()`](TerminalBuffer::set_cursor_position) - Manually set cursor position
     /// - [`move_cursor()`](TerminalBuffer::move_cursor) - Move cursor by relative offset
-
+    #[instrument(level = "trace", skip(self, c))]
     pub fn append_char(&mut self, c: char) {
         // Handle control characters
         match c {

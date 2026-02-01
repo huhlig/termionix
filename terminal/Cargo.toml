@@ -19,6 +19,7 @@ termionix-ansicodec.workspace = true
 termionix-telnetcodec.workspace = true
 tokio.workspace = true
 tokio-util.workspace = true
+tracing.workspace = true
 
 [dev-dependencies]
 criterion.workspace = true

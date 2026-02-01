@@ -23,6 +23,7 @@ use crate::{AnsiConfig, AnsiError, AnsiParser, AnsiResult};
 use termionix_telnetcodec::TelnetEvent;
 use tokio_util::bytes::BytesMut;
 use tokio_util::codec::{Decoder, Encoder};
+use tracing::instrument;
 
 /// ANSI codec for encoding and decoding ANSI sequences over a Telnet connection.
 ///
@@ -64,6 +65,7 @@ where
     type Item = AnsiSequence;
     type Error = AnsiError;
 
+    #[instrument(skip_all)]
     fn decode(&mut self, src: &mut BytesMut) -> AnsiResult<Option<Self::Item>> {
         if let Some(event) = self.inner.decode(src)? {
             match event {

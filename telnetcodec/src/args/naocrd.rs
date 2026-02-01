@@ -33,7 +33,7 @@ use bytes::{Buf, BufMut};
 /// This enum represents the NAOCRD subnegotiation option as defined in
 /// [RFC 8549 Section 3.1.1](https://tools.ietf.org/html/rfc8549#section-3.1.1).
 ///
-/// The NAOCRD option is used in TELNET protocol negotiations to agree upon the handling
+/// The NAOCRD option is used in TELNET sidechannel negotiations to agree upon the handling
 /// of carriage-return characters in output data. It allows both the server and client
 /// to communicate their preferred carriage-return disposition.
 ///
@@ -93,7 +93,7 @@ impl NAOCRD {
     /// Encodes this NAOCRD subnegotiation into the provided buffer.
     ///
     /// This method serializes the NAOCRD data into binary format suitable for transmission
-    /// over a TELNET connection. The encoding follows the TELNET protocol specification.
+    /// over a TELNET connection. The encoding follows the TELNET sidechannel specification.
     ///
     /// # Arguments
     ///
@@ -166,7 +166,7 @@ impl NAOCRD {
 
     /// Decodes a NAOCRD subnegotiation from the provided buffer.
     ///
-    /// This method deserializes binary TELNET protocol data into a `NAOCRD` enum variant.
+    /// This method deserializes binary TELNET sidechannel data into a `NAOCRD` enum variant.
     /// It reads exactly 2 bytes from the buffer: the side identifier and the disposition value.
     ///
     /// # Arguments

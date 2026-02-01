@@ -22,19 +22,19 @@ use bytes::{Buf, BufMut, BytesMut};
 use tokio_util::codec::{Decoder, Encoder};
 use tracing::warn;
 
-/// A codec for handling the Telnet protocol, providing functionality to encode and decode Telnet messages.
+/// A codec for handling the Telnet sidechannel, providing functionality to encode and decode Telnet messages.
 ///
 /// `TelnetCodec` is responsible for managing the state and buffers required for processing data
-/// when implementing the Telnet protocol. It is typically used in conjunction with asynchronous
+/// when implementing the Telnet sidechannel. It is typically used in conjunction with asynchronous
 /// service libraries to handle the transmission and reception of Telnet messages over a connection.
 ///
 /// This struct is typically paired with a transport-like implementation
-/// to facilitate stream I/O management for the Telnet protocol.
+/// to facilitate stream I/O management for the Telnet sidechannel.
 pub struct TelnetCodec {
     decoder_buffer: BytesMut,
     decoder_state: DecoderState,
     options: TelnetOptions,
-    /// Queue of response frames to send (from protocol negotiations)
+    /// Queue of response frames to send (from sidechannel negotiations)
     response_queue: std::collections::VecDeque<TelnetFrame>,
 }
 
@@ -60,7 +60,7 @@ impl TelnetCodec {
         TelnetCodec::default()
     }
 
-    /// Check if there are pending protocol responses
+    /// Check if there are pending sidechannel responses
     pub fn has_pending_responses(&self) -> bool {
         !self.response_queue.is_empty()
     }
@@ -252,7 +252,7 @@ impl Decoder for TelnetCodec {
     type Error = CodecError;
 
     /// Decodes bytes from the provided `src` buffer into a `TelnetEvent` object by interpreting them
-    /// using the internal `decoder_state`. The Telnet protocol supports various control and data
+    /// using the internal `decoder_state`. The Telnet sidechannel supports various control and data
     /// transmission commands that this function processes.
     ///
     /// # Parameters
@@ -302,7 +302,7 @@ impl Decoder for TelnetCodec {
     ///
     /// # Behavior
     /// - The function processes one frame at a time.
-    /// - Changes decoder state based on the byte and interprets commands as specified by the Telnet protocol.
+    /// - Changes decoder state based on the byte and interprets commands as specified by the Telnet sidechannel.
     /// - Logs warnings for unknown or unexpected commands.
     /// - Uses an internal buffer for subnegotiation data (`decoder_buffer`).
     ///
@@ -718,7 +718,7 @@ impl TelnetCodec {
 impl Encoder<TelnetFrame> for TelnetCodec {
     type Error = CodecError;
 
-    /// Encodes a `TelnetFrame` into a byte buffer for transmission over the Telnet protocol.
+    /// Encodes a `TelnetFrame` into a byte buffer for transmission over the Telnet sidechannel.
     ///
     /// # Parameters
     ///
@@ -733,7 +733,7 @@ impl Encoder<TelnetFrame> for TelnetCodec {
     /// # Behavior
     ///
     /// The method matches against the specific `TelnetFrame` variants and encodes them
-    /// into the required byte sequences for Telnet protocol specifications. Most frames
+    /// into the required byte sequences for Telnet sidechannel specifications. Most frames
     /// begin with the `IAC` (Interpret As Command) byte, followed by specific command or
     /// option bytes, and optionally any additional data.
     ///
@@ -771,7 +771,7 @@ impl Encoder<TelnetFrame> for TelnetCodec {
     /// This method generally does not produce errors unless there's a fault introduced by the implementing
     /// context (e.g., `Self::Error` defined by the encoder implementation).
     fn encode(&mut self, item: TelnetFrame, dst: &mut BytesMut) -> Result<(), Self::Error> {
-        // First, encode any queued response frames from protocol negotiations
+        // First, encode any queued response frames from sidechannel negotiations
         while let Some(response) = self.response_queue.pop_front() {
             self.encode_frame(response, dst)?;
         }
@@ -784,7 +784,7 @@ impl Encoder<TelnetFrame> for TelnetCodec {
 impl Encoder<TelnetEvent> for TelnetCodec {
     type Error = CodecError;
 
-    /// Encodes a `TelnetEvent` into a byte buffer for transmission over the Telnet protocol.
+    /// Encodes a `TelnetEvent` into a byte buffer for transmission over the Telnet sidechannel.
     ///
     /// Note: `OptionStatus` events are informational only and cannot be encoded.
     /// They represent completed negotiations and are emitted by the decoder.
@@ -814,7 +814,7 @@ impl Encoder<TelnetEvent> for TelnetCodec {
 
 ///
 /// Represents the internal state of a Telnet decoder.
-/// This enumeration is used to track the current decoding context while processing Telnet protocol
+/// This enumeration is used to track the current decoding context while processing Telnet sidechannel
 /// messages.
 ///
 /// # Variants

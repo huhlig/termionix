@@ -34,7 +34,7 @@ use std::collections::HashMap;
 ///
 /// It manages a collection of key-value pairs containing metadata about the MUD server.
 /// The data is stored internally as a `MudServerDataTable` and can be encoded/decoded
-/// according to the MSDP protocol (RFC 8549 Section 3.1.1).
+/// according to the MSDP sidechannel (RFC 8549 Section 3.1.1).
 ///
 /// # Examples
 ///
@@ -123,7 +123,7 @@ impl MudServerData {
     /// Gets the encoded length of this `MudServerData` structure.
     ///
     /// Returns the number of bytes that would be written when encoding this
-    /// structure according to the MSDP protocol.
+    /// structure according to the MSDP sidechannel.
     ///
     /// # Returns
     /// The total encoded byte length.
@@ -140,7 +140,7 @@ impl MudServerData {
 
     /// Encodes `MudServerData` into the provided mutable buffer.
     ///
-    /// Serializes the structure according to the MSDP protocol and writes it
+    /// Serializes the structure according to the MSDP sidechannel and writes it
     /// to the destination buffer.
     ///
     /// # Type Parameters
@@ -188,7 +188,7 @@ impl MudServerData {
 
     /// Decodes `MudServerData` from the provided buffer.
     ///
-    /// Deserializes data according to the MSDP protocol from the source buffer.
+    /// Deserializes data according to the MSDP sidechannel from the source buffer.
     ///
     /// # Type Parameters
     ///
@@ -223,7 +223,7 @@ impl std::fmt::Display for MudServerData {
     }
 }
 
-/// `MudServerDataValue` represents a value in the MSDP protocol.
+/// `MudServerDataValue` represents a value in the MSDP sidechannel.
 ///
 /// Values can be one of three types: simple strings, arrays of values,
 /// or nested tables of key-value pairs. This enum provides a flexible
@@ -288,7 +288,7 @@ impl MudServerDataValue {
     /// Gets the encoded length of this `MudServerDataValue`.
     ///
     /// Returns the number of bytes that would be written when encoding this
-    /// value according to the MSDP protocol. This includes any control bytes
+    /// value according to the MSDP sidechannel. This includes any control bytes
     /// and structural markers for arrays and tables.
     ///
     /// # Returns
@@ -310,7 +310,7 @@ impl MudServerDataValue {
 
     /// Encodes this `MudServerDataValue` into the provided mutable buffer.
     ///
-    /// Serializes the value according to the MSDP protocol and writes it
+    /// Serializes the value according to the MSDP sidechannel and writes it
     /// to the destination buffer.
     ///
     /// # Type Parameters
@@ -354,7 +354,7 @@ impl MudServerDataValue {
 
     /// Decodes a `MudServerDataValue` from the provided buffer.
     ///
-    /// Deserializes a value according to the MSDP protocol from the source buffer.
+    /// Deserializes a value according to the MSDP sidechannel from the source buffer.
     /// The method automatically detects the value type based on control bytes:
     /// - `ARRAY_OPEN` indicates an array
     /// - `TABLE_OPEN` indicates a table
@@ -505,7 +505,7 @@ impl MudServerDataArray {
     /// Gets the encoded length of this array.
     ///
     /// Returns the total number of bytes that would be written when encoding
-    /// this array according to the MSDP protocol. This includes the `ARRAY_OPEN`,
+    /// this array according to the MSDP sidechannel. This includes the `ARRAY_OPEN`,
     /// `ARRAY_CLOSE` delimiters and `VAL` markers for each element.
     ///
     /// # Returns
@@ -523,7 +523,7 @@ impl MudServerDataArray {
 
     /// Encodes this array into the provided mutable buffer.
     ///
-    /// Serializes the array according to the MSDP protocol and writes it
+    /// Serializes the array according to the MSDP sidechannel and writes it
     /// to the destination buffer.
     ///
     /// # Type Parameters
@@ -567,7 +567,7 @@ impl MudServerDataArray {
 
     /// Decodes an array from the provided buffer.
     ///
-    /// Deserializes an array according to the MSDP protocol from the source buffer.
+    /// Deserializes an array according to the MSDP sidechannel from the source buffer.
     /// Expects the buffer to start with an `ARRAY_OPEN` byte and end with an
     /// `ARRAY_CLOSE` byte, with elements preceded by `VAL` markers.
     ///
@@ -708,7 +708,7 @@ impl MudServerDataTable {
     /// Gets the encoded length of this table.
     ///
     /// Returns the total number of bytes that would be written when encoding
-    /// this table according to the MSDP protocol. This includes the `TABLE_OPEN`,
+    /// this table according to the MSDP sidechannel. This includes the `TABLE_OPEN`,
     /// `TABLE_CLOSE` delimiters, `VAR` and `VAL` markers for each key-value pair,
     /// and the encoded lengths of all keys and values.
     ///
@@ -729,7 +729,7 @@ impl MudServerDataTable {
 
     /// Encodes this table into the provided mutable buffer.
     ///
-    /// Serializes the table according to the MSDP protocol and writes it
+    /// Serializes the table according to the MSDP sidechannel and writes it
     /// to the destination buffer.
     ///
     /// # Type Parameters
@@ -775,7 +775,7 @@ impl MudServerDataTable {
 
     /// Decodes a table from the provided buffer.
     ///
-    /// Deserializes a table according to the MSDP protocol from the source buffer.
+    /// Deserializes a table according to the MSDP sidechannel from the source buffer.
     /// Handles both standalone tables (with `TABLE_OPEN`/`TABLE_CLOSE` markers)
     /// and nested tables within other structures.
     ///

@@ -16,7 +16,8 @@
 
 //! Benchmarks for the Telnet server
 
-use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
+use std::hint::black_box;
 use std::sync::Arc;
 use std::time::Duration;
 use termionix_service::{
@@ -34,13 +35,25 @@ impl ServerHandler for BenchHandler {}
 
 // Helper to create test connections
 async fn create_test_connection() -> (TcpStream, TcpStream) {
-    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let mut attempts = 0;
+    let listener = loop {
+        match TcpListener::bind("127.0.0.1:0").await {
+            Ok(listener) => break listener,
+            Err(e) if e.kind() == std::io::ErrorKind::AddrInUse && attempts < 10 => {
+                attempts += 1;
+                tokio::time::sleep(Duration::from_millis(100)).await;
+            }
+            Err(e) => panic!("Failed to bind to ephemeral port after {} attempts: {}", attempts, e),
+        }
+    };
     let addr = listener.local_addr().unwrap();
 
-    let client_task = tokio::spawn(async move { TcpStream::connect(addr).await.unwrap() });
+    let client_task = tokio::spawn(async move {
+        TcpStream::connect(addr).await.expect("Failed to connect to server")
+    });
 
-    let (server, _) = listener.accept().await.unwrap();
-    let client = client_task.await.unwrap();
+    let (server, _) = listener.accept().await.expect("Failed to accept connection");
+    let client = client_task.await.expect("Client task failed");
 
     (server, client)
 }
@@ -48,15 +61,29 @@ async fn create_test_connection() -> (TcpStream, TcpStream) {
 // Benchmark connection creation
 fn bench_connection_creation(c: &mut Criterion) {
     let runtime = tokio::runtime::Runtime::new().unwrap();
-
-    c.bench_function("connection_creation", |b| {
+    
+    // Configure benchmark to use fewer samples to avoid port exhaustion
+    let mut group = c.benchmark_group("connection_creation");
+    group.sample_size(50); // Reduce from default 100
+    group.measurement_time(Duration::from_secs(10)); // Give more time per sample
+    
+    group.bench_function("create", |b| {
         b.to_async(&runtime).iter(|| async {
-            let (server, _client) = create_test_connection().await;
+            let (server, client) = create_test_connection().await;
             let id = ConnectionId::new(1);
             let connection = TelnetConnection::wrap(server, id).unwrap();
-            black_box(connection);
+            black_box(&connection);
+            
+            // Properly close connections
+            drop(connection);
+            drop(client);
+            
+            // Small delay to allow port cleanup
+            tokio::time::sleep(Duration::from_millis(1)).await;
         });
     });
+    
+    group.finish();
 }
 
 // Benchmark metrics updates
@@ -151,11 +178,14 @@ fn bench_broadcast_scaling(c: &mut Criterion) {
                     }
 
                     // Give connections time to initialize
-                    tokio::time::sleep(Duration::from_millis(50)).await;
+                    tokio::time::sleep(Duration::from_millis(100)).await;
 
                     // Benchmark broadcast
                     let result = manager.broadcast(TerminalCommand::SendEraseLine).await;
                     black_box(result);
+
+                    // Give time for broadcast to complete
+                    tokio::time::sleep(Duration::from_millis(50)).await;
 
                     // Cleanup
                     manager.shutdown().await;
@@ -393,7 +423,7 @@ fn bench_filtered_broadcast(c: &mut Criterion) {
                 clients.push(client);
             }
 
-            tokio::time::sleep(Duration::from_millis(50)).await;
+            tokio::time::sleep(Duration::from_millis(100)).await;
 
             // Broadcast with filter (only even IDs)
             let result = manager
@@ -402,6 +432,9 @@ fn bench_filtered_broadcast(c: &mut Criterion) {
                 })
                 .await;
             black_box(result);
+
+            // Give time for broadcast to complete
+            tokio::time::sleep(Duration::from_millis(50)).await;
 
             manager.shutdown().await;
             drop(clients);
@@ -443,13 +476,16 @@ fn bench_broadcast_except(c: &mut Criterion) {
                 }
             }
 
-            tokio::time::sleep(Duration::from_millis(50)).await;
+            tokio::time::sleep(Duration::from_millis(100)).await;
 
             // Broadcast except excluded IDs
             let result = manager
                 .broadcast_except(TerminalCommand::SendEraseLine, &exclude_ids)
                 .await;
             black_box(result);
+
+            // Give time for broadcast to complete
+            tokio::time::sleep(Duration::from_millis(50)).await;
 
             manager.shutdown().await;
             drop(clients);
