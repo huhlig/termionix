@@ -31,7 +31,8 @@ use std::time::{Duration, Instant};
 use termionix_terminal::TerminalCommand;
 use tokio::select;
 use tokio::sync::mpsc;
-use tokio::time::{sleep, timeout};
+use tokio::time::timeout;
+use tracing::instrument;
 
 /// Control messages for the worker
 #[derive(Debug)]
@@ -134,6 +135,7 @@ impl ConnectionWorker {
     ///
     /// This is the main entry point for the worker. It will run until the
     /// connection is closed or an error occurs.
+    #[instrument(skip(self), fields(id = %self.id))]
     pub async fn run(mut self) {
         // Transition to Active state
         self.set_state(ConnectionState::Active);
@@ -154,10 +156,16 @@ impl ConnectionWorker {
     }
 
     /// Main event processing loop
+    #[instrument(skip(self))]
     async fn event_loop(&mut self) -> Result<()> {
+        // Track idle state transitions less frequently using bit masking
+        let mut idle_check_counter = 0u32;
+        const IDLE_CHECK_MASK: u32 = 0xFF; // Check every 256 iterations (faster than modulo)
+
         loop {
-            // Check for idle timeout
-            if self.is_idle() {
+            // Periodic idle timeout check using bit masking (faster than modulo)
+            idle_check_counter = idle_check_counter.wrapping_add(1);
+            if (idle_check_counter & IDLE_CHECK_MASK) == 0 && self.is_idle() {
                 self.handler
                     .on_idle_timeout(self.id, &self.connection)
                     .await;
@@ -165,43 +173,11 @@ impl ConnectionWorker {
             }
 
             // Wait for next event with timeout
+            // Optimized: removed sleep branch from select! to reduce overhead
             select! {
-                // Handle incoming events from the connection
-                result = timeout(self.config.read_timeout, self.connection.next()) => {
-                    match result {
-                        Ok(Ok(Some(event))) => {
-                            self.update_activity();
-                            self.set_state(ConnectionState::Active);
-                            self.handler.on_event(self.id, &self.connection, event).await;
+                biased; // Process in order: control messages first, then events
 
-                            // Flush any protocol responses generated during decode
-                            if self.connection.has_pending_responses().await {
-                                if let Err(e) = self.connection.flush_responses().await {
-                                    tracing::warn!(
-                                        connection_id = %self.id,
-                                        error = ?e,
-                                        "Failed to flush protocol responses"
-                                    );
-                                }
-                            }
-                        }
-                        Ok(Ok(None)) => {
-                            // Connection closed by peer
-                            return Ok(());
-                        }
-                        Ok(Err(e)) => {
-                            // Error reading from connection
-                            return Err(e);
-                        }
-                        Err(_) => {
-                            // Read timeout
-                            self.handler.on_timeout(self.id, &self.connection).await;
-                            return Err(TelnetError::Timeout);
-                        }
-                    }
-                }
-
-                // Handle control messages
+                // Handle control messages (higher priority)
                 msg = self.control_rx.recv() => {
                     match msg {
                         Some(ControlMessage::Close) => {
@@ -233,10 +209,55 @@ impl ConnectionWorker {
                     }
                 }
 
-                // Check for idle state transition
-                _ = sleep(Duration::from_secs(10)) => {
-                    if self.last_activity.elapsed() > Duration::from_secs(60) {
-                        self.set_state(ConnectionState::Idle);
+                // Handle incoming events from the connection
+                result = timeout(self.config.read_timeout, self.connection.next()) => {
+                    match result {
+                        Ok(Ok(Some(event))) => {
+                            self.update_activity();
+
+                            // Update state to Active only if not already active (reduce atomic ops)
+                            if self.state() != ConnectionState::Active {
+                                self.set_state(ConnectionState::Active);
+                            }
+
+                            // Check if this event type can generate sidechannel responses
+                            // Only telnet option negotiation events (TelnetOptionStatus) generate responses
+                            let needs_flush = matches!(event, termionix_terminal::TerminalEvent::TelnetOptionStatus(_));
+
+                            self.handler.on_event(self.id, &self.connection, event).await;
+
+                            // Flush sidechannel responses only if negotiation occurred
+                            // This avoids expensive lock acquisition on every character/line event
+                            if needs_flush {
+                                if self.connection.has_pending_responses().await {
+                                    if let Err(e) = self.connection.flush_responses().await {
+                                        tracing::warn!(
+                                            connection_id = %self.id,
+                                            error = ?e,
+                                            "Failed to flush sidechannel responses"
+                                        );
+                                    }
+                                }
+                            }
+
+                            // Check for idle state transition periodically
+                            if idle_check_counter % 60 == 0 && self.last_activity.elapsed() > Duration::from_secs(60) {
+                                self.set_state(ConnectionState::Idle);
+                            }
+                        }
+                        Ok(Ok(None)) => {
+                            // Connection closed by peer
+                            return Ok(());
+                        }
+                        Ok(Err(e)) => {
+                            // Error reading from connection
+                            return Err(e);
+                        }
+                        Err(_) => {
+                            // Read timeout
+                            self.handler.on_timeout(self.id, &self.connection).await;
+                            return Err(TelnetError::Timeout);
+                        }
                     }
                 }
             }

@@ -88,7 +88,7 @@ async fn handle_connection(
     framed
         .send("Type anything and it will be echoed back.\r\n")
         .await?;
-    framed.send("Type 'quit' to disconnect.\r\n").await?;
+    framed.send("Type 'quit' to logout.txt.\r\n").await?;
     framed.send("\r\n> ").await?;
 
     // Process events

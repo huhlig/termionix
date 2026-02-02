@@ -261,7 +261,7 @@ impl AnsiDemoHandler {
             ..Default::default()
         });
         content.push_str("─────────────────────────────────────────────────\r\n");
-        content.push_str("Type 'quit' to disconnect\r\n");
+        content.push_str("Type 'quit' to logout.txt\r\n");
         content.push_style(Style::default());
         content.push_str("> ");
 

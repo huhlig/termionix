@@ -22,6 +22,7 @@ use crate::ansi::{
 use crate::consts::MAX_SEQUENCE_LENGTH;
 use crate::style::AnsiSelectGraphicRendition;
 use crate::{AnsiError, AnsiResult};
+use tracing::instrument;
 
 /// Internal state machine states for the ANSI mapper parser.
 ///
@@ -175,6 +176,7 @@ impl AnsiParser {
     /// An `Option<AnsiSequence>` which may be:
     /// - `None` - More bytes needed to complete the current sequence
     /// - `Some(sequence)` - A complete sequence has been parsed
+    #[instrument(level = "trace", skip(self, byte))]
     pub fn next(&mut self, byte: u8) -> AnsiResult<Option<AnsiSequence>> {
         // Check buffer size before processing
         if self.bytes.len() >= MAX_SEQUENCE_LENGTH {

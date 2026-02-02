@@ -34,6 +34,7 @@ use std::time::Instant;
 use termionix_terminal::TerminalCommand;
 use tokio::sync::mpsc;
 use tokio::task::JoinHandle;
+use tracing::instrument;
 
 /// Result of a broadcast operation
 #[derive(Debug, Clone)]
@@ -144,12 +145,14 @@ impl ConnectionManager {
     /// Add a new connection
     ///
     /// This spawns a worker task for the connection and tracks it.
+    #[instrument(skip(self, connection, handler), fields(id))]
     pub fn add_connection(
         &self,
         connection: TelnetConnection,
         handler: Arc<dyn ServerHandler>,
     ) -> Result<ConnectionId> {
         let id = self.next_connection_id();
+        tracing::Span::current().record("id", id.to_string());
 
         // Create shared state
         let state = Arc::new(std::sync::atomic::AtomicU8::new(
@@ -265,30 +268,31 @@ impl ConnectionManager {
     ///
     /// This sends the command to all active connections concurrently.
     /// Returns a result with statistics about the broadcast.
+    #[instrument(skip(self))]
     pub async fn broadcast(&self, command: TerminalCommand) -> BroadcastResult {
+        use futures_util::stream::{self, StreamExt};
+        
         let mut result = BroadcastResult::new();
         result.total = self.connections.len();
 
-        // Collect all send futures
-        let mut sends = Vec::new();
-        for entry in self.connections.iter() {
+        // Create stream of send operations
+        let sends = self.connections.iter().map(|entry| {
             let id = *entry.key();
             let tx = entry.control_tx.clone();
             let cmd = command;
-
-            sends.push(async move {
+            
+            async move {
                 match tx.send(ControlMessage::Broadcast(cmd)).await {
                     Ok(_) => (id, Ok(())),
                     Err(e) => (id, Err(e.to_string())),
                 }
-            });
-        }
+            }
+        });
 
-        // Execute all sends concurrently
-        let results = futures_util::future::join_all(sends).await;
-
-        // Collect results
-        for (id, res) in results {
+        // Process in batches of 100 concurrent operations to avoid memory spike
+        let mut results_stream = stream::iter(sends).buffer_unordered(100);
+        
+        while let Some((id, res)) = results_stream.next().await {
             match res {
                 Ok(_) => result.succeeded += 1,
                 Err(e) => {
@@ -429,15 +433,14 @@ impl ConnectionManager {
             let _ = entry.control_tx.send(ControlMessage::Close).await;
         }
 
-        // Wait for all workers to finish (with timeout)
-        let _handles: Vec<_> = self
-            .connections
-            .iter()
-            .map(|entry| entry.worker_handle.abort())
-            .collect();
+        // Give workers a brief moment to process close messages
+        // This is much faster than the previous 2-second sleep
+        tokio::time::sleep(std::time::Duration::from_millis(50)).await;
 
-        // Give workers time to cleanup
-        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+        // Abort any remaining workers
+        for entry in self.connections.iter() {
+            entry.worker_handle.abort();
+        }
 
         // Clear all connections
         self.connections.clear();

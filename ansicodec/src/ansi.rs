@@ -202,7 +202,7 @@ impl AnsiSequence {
     ///
     /// - **Buffer allocation**: Pre-allocate buffers for encoding before calling `encode()`
     /// - **Progress tracking**: Calculate total bytes to be written
-    /// - **Wire protocol**: Determine message sizes for network transmission
+    /// - **Wire sidechannel**: Determine message sizes for network transmission
     /// - **Statistics**: Analyze the size distribution of sequences
     pub fn len(&self) -> usize {
         match self {
@@ -479,7 +479,7 @@ impl std::fmt::Display for AnsiSequence {
 
 /// Telnet command types
 ///
-/// This enum represents various Telnet protocol commands as defined in RFC 854 and related RFCs.
+/// This enum represents various Telnet sidechannel commands as defined in RFC 854 and related RFCs.
 /// Telnet commands are used to control the connection and request specific operations from the
 /// remote host or terminal.
 ///
@@ -620,7 +620,7 @@ impl TelnetCommand {
     /// # Use Cases
     ///
     /// - **Buffer allocation**: Pre-allocate space before encoding
-    /// - **Protocol implementation**: Calculate message sizes for Telnet protocol
+    /// - **Protocol implementation**: Calculate message sizes for Telnet sidechannel
     /// - **Stream management**: Track total bytes in a command sequence
     pub fn len(&self) -> usize {
         match self {
@@ -641,7 +641,7 @@ impl TelnetCommand {
 
     /// Encode this Telnet command to a `BufMut` buffer.
     ///
-    /// This method encodes the command into its wire format (Telnet protocol bytes) and writes
+    /// This method encodes the command into its wire format (Telnet sidechannel bytes) and writes
     /// it to the provided mutable buffer. The buffer's write position is automatically advanced.
     /// This is the preferred method for encoding into buffers that implement `BufMut`.
     ///
@@ -1857,8 +1857,8 @@ impl AnsiDeviceControlString {
     ///
     /// # Common Device Control String Sequences
     ///
-    /// - **Sixel Graphics**: `ESC P q ... ST` - Graphics protocol for displaying images
-    /// - **ReGIS Graphics**: `ESC P p ... ST` - Vector graphics protocol
+    /// - **Sixel Graphics**: `ESC P q ... ST` - Graphics sidechannel for displaying images
+    /// - **ReGIS Graphics**: `ESC P p ... ST` - Vector graphics sidechannel
     /// - **Device Status**: `ESC P s ... ST` - Device interrogation and status reporting
     /// - **Device Configuration**: `ESC P $ ... ST` - Configuration commands
     ///
@@ -2383,7 +2383,7 @@ impl std::fmt::Display for AnsiPrivacyMessage {
 ///
 /// # Examples
 ///
-/// - iTerm2 inline image protocol uses APC sequences
+/// - iTerm2 inline image sidechannel uses APC sequences
 /// - Some terminal multiplexers use APC for control
 /// - IDE remote execution protocols
 ///
@@ -2397,7 +2397,7 @@ pub enum AnsiApplicationProgramCommand {
     /// Unrecognized or custom APC command
     ///
     /// Contains the raw bytes of the APC sequence data, allowing applications to
-    /// handle custom APC commands according to their own protocol specifications.
+    /// handle custom APC commands according to their own sidechannel specifications.
     Unknown(Vec<u8>),
 }
 

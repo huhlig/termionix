@@ -16,7 +16,8 @@
 
 //! Benchmarks for termionix-compress
 
-use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
+use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
+use std::hint::black_box;
 use termionix_compress::{Algorithm, CompressionStream};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 

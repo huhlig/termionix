@@ -91,7 +91,7 @@ async fn test_abrupt_client_disconnect() {
 
     tokio::time::sleep(Duration::from_millis(300)).await;
 
-    // Should detect disconnect
+    // Should detect logout.txt
     assert!(handler.disconnect_count() >= 1);
 
     server.shutdown().await.unwrap();
@@ -137,7 +137,7 @@ async fn test_partial_write_disconnect() {
     let mut client = TcpStream::connect(addr).await.unwrap();
     tokio::time::sleep(Duration::from_millis(100)).await;
 
-    // Write partial data and disconnect
+    // Write partial data and logout.txt
     client.write_all(b"Partial").await.unwrap();
     // Don't flush, just drop
     drop(client);
@@ -317,14 +317,14 @@ async fn test_error_handler_invocation() {
 
     tokio::time::sleep(Duration::from_millis(100)).await;
 
-    // Connect and abruptly disconnect
+    // Connect and abruptly logout.txt
     let client = TcpStream::connect(addr).await.unwrap();
     tokio::time::sleep(Duration::from_millis(100)).await;
     drop(client);
 
     tokio::time::sleep(Duration::from_millis(300)).await;
 
-    // Error or disconnect handler should be called
+    // Error or logout.txt handler should be called
     assert!(handler.error_count() + handler.disconnect_count() >= 1);
 
     server.shutdown().await.unwrap();
@@ -395,5 +395,3 @@ async fn test_metrics_after_errors() {
 
     server.shutdown().await.unwrap();
 }
-
-// Made with Bob

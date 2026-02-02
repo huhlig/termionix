@@ -31,7 +31,7 @@ struct ProtocolTestHandler;
 #[async_trait]
 impl ServerHandler for ProtocolTestHandler {}
 
-// Telnet protocol constants
+// Telnet sidechannel constants
 const IAC: u8 = 255; // Interpret As Command
 const WILL: u8 = 251;
 const WONT: u8 = 252;
@@ -411,5 +411,3 @@ async fn test_incomplete_telnet_command() {
     tokio::time::sleep(Duration::from_millis(100)).await;
     server.shutdown().await.unwrap();
 }
-
-// Made with Bob

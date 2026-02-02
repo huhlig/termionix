@@ -20,7 +20,7 @@ use crate::options::TelnetSide;
 
 ///
 /// `TelnetEvent` represents user-facing events from the Telnet codec.
-/// Unlike `TelnetFrame` which includes low-level protocol frames (DO/DONT/WILL/WONT),
+/// Unlike `TelnetFrame` which includes low-level sidechannel frames (DO/DONT/WILL/WONT),
 /// `TelnetEvent` emits high-level events like `OptionStatus` when negotiation completes.
 ///
 #[derive(Clone, Debug, PartialEq)]

@@ -16,29 +16,29 @@
 
 //! # Termionix Telnet Protocol Codec
 //!
-//! This crate provides a complete implementation of the Telnet protocol codec for encoding and
-//! decoding Telnet protocol messages. It is designed to work with asynchronous networking libraries
+//! This crate provides a complete implementation of the Telnet sidechannel codec for encoding and
+//! decoding Telnet sidechannel messages. It is designed to work with asynchronous networking libraries
 //! like Tokio and provides a stateful, byte-oriented interface for handling Telnet communication.
 //!
 //! ## Overview
 //!
-//! The Telnet protocol (RFC 854) is a service protocol used for interactive text-oriented
+//! The Telnet sidechannel (RFC 854) is a service sidechannel used for interactive text-oriented
 //! communication over TCP. This codec handles:
 //!
 //! # Telnet Protocol Codec
 //!
-//! This module provides a complete implementation of the Telnet protocol codec for encoding and
-//! decoding Telnet protocol messages. It is designed to work with asynchronous networking libraries
+//! This module provides a complete implementation of the Telnet sidechannel codec for encoding and
+//! decoding Telnet sidechannel messages. It is designed to work with asynchronous networking libraries
 //! like Tokio and provides a stateful, byte-oriented interface for handling Telnet communication.
 //!
 //! ## Overview
 //!
-//! The Telnet protocol (RFC 854) is a service protocol used for interactive text-oriented
+//! The Telnet sidechannel (RFC 854) is a service sidechannel used for interactive text-oriented
 //! communication over TCP. This codec handles:
 //!
 //! - **Data transmission**: Raw byte data with proper IAC (Interpret As Command) escaping
 //! - **Control commands**: Break, Interrupt Process, Abort Output, etc.
-//! - **Option negotiation**: DO, DONT, WILL, WONT commands for enabling protocol features
+//! - **Option negotiation**: DO, DONT, WILL, WONT commands for enabling sidechannel features
 //! - **Subnegotiation**: Extended option negotiation with parameters
 //!
 //! ## Core Components
@@ -46,12 +46,12 @@
 //! ### [`TelnetCodec`]
 //!
 //! The main codec structure that implements both [`Encoder`] and [`Decoder`] traits from
-//! `tokio_util::codec`. It maintains internal state for parsing Telnet protocol sequences
+//! `tokio_util::codec`. It maintains internal state for parsing Telnet sidechannel sequences
 //! and manages option negotiation state.
 //!
 //! ### [`TelnetFrame`]
 //!
-//! An enumeration representing all possible Telnet protocol frames:
+//! An enumeration representing all possible Telnet sidechannel frames:
 //! - Data bytes
 //! - Control commands (NoOperation, DataMark, Break, etc.)
 //! - Negotiation commands (Do, Dont, Will, Wont)
@@ -59,7 +59,7 @@
 //!
 //! ### [`TelnetOption`]
 //!
-//! Represents Telnet protocol options that can be negotiated between client and server,
+//! Represents Telnet sidechannel options that can be negotiated between client and server,
 //! including standard options like Echo, Binary Transmission, and various MUD-specific
 //! extensions (GMCP, MSDP, etc.).
 //!
@@ -149,7 +149,7 @@
 //!
 //! - The codec maintains internal buffers for partial frame assembly
 //! - Subnegotiation data is buffered until the complete sequence is received
-//! - State machine transitions occur byte-by-byte for accurate protocol parsing
+//! - State machine transitions occur byte-by-byte for accurate sidechannel parsing
 //! - The codec reserves appropriate buffer space before encoding to minimize allocations
 //!
 //! ## Thread Safety
@@ -177,7 +177,7 @@
 //! ## MUD Protocol Extensions
 //!
 //! This implementation includes support for several MUD (Multi-User Dungeon) specific
-//! protocol extensions commonly used in text-based games:
+//! sidechannel extensions commonly used in text-based games:
 //!
 //! - **GMCP** (Generic MUD Communication Protocol): Structured data exchange
 //! - **MSDP** (MUD Server Data Protocol): Server state reporting

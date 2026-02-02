@@ -156,7 +156,7 @@ impl TelnetOption {
     /// This function maps each possible variant of the `TelnetOption` enum to its
     /// associated constant value defined under `consts::option`, or the raw byte value
     /// for the `TelnetOption::Unknown` variant. Each value corresponds to a specific
-    /// Telnet protocol option code.
+    /// Telnet sidechannel option code.
     pub fn to_u8(&self) -> u8 {
         match self {
             TelnetOption::TransmitBinary => consts::option::BINARY,
@@ -390,7 +390,7 @@ impl From<TelnetOption> for u8 {
 /// A structure representing the configuration and state of Telnet options.
 ///
 /// The `TelnetOptions` struct is designed to manage the options available within
-/// a Telnet protocol implementation. It tracks the support state of each option
+/// a Telnet sidechannel implementation. It tracks the support state of each option
 /// as well as the current negotiation state for each option.
 ///
 /// # Fields
@@ -407,7 +407,7 @@ impl From<TelnetOption> for u8 {
 ///
 /// # Notes
 ///
-/// The Telnet protocol uses option codes ranging from 0 to 254, which makes the size
+/// The Telnet sidechannel uses option codes ranging from 0 to 254, which makes the size
 /// of both arrays precisely 255 to represent all potential options. The fields ensure
 /// the ability to handle and manage all standard Telnet options.
 #[derive(Debug)]
@@ -536,7 +536,7 @@ impl TelnetOptions {
     ///
     /// This method sends a request to enable a Telnet option for the remote side
     /// of the connection. It communicates the desire for the remote side to
-    /// perform a specific feature or capability defined by the Telnet protocol.
+    /// perform a specific feature or capability defined by the Telnet sidechannel.
     ///
     /// # Parameters
     /// - `option`: The `TelnetOption` specifying the feature or capability to be enabled
@@ -893,7 +893,7 @@ impl Default for TelnetOptions {
 
 /// Represents the perspective of a Telnet option in a client-server negotiation.
 ///
-/// In the Telnet protocol, option negotiation involves two independent paths:
+/// In the Telnet sidechannel, option negotiation involves two independent paths:
 /// one for local options (what the local side wants to do) and one for remote options
 /// (what the remote side wants to do). `OptionSide` disambiguates between these two
 /// perspectives when managing option state.

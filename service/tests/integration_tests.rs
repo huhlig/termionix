@@ -809,7 +809,7 @@ async fn test_rapid_connection_cycling() {
 
     tokio::time::sleep(Duration::from_millis(100)).await;
 
-    // Rapidly connect and disconnect
+    // Rapidly connect and logout.txt
     for _ in 0..20 {
         let client = TcpStream::connect(addr).await.unwrap();
         tokio::time::sleep(Duration::from_millis(10)).await;

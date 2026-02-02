@@ -362,5 +362,3 @@ async fn test_connection_info_memory() {
     tokio::time::sleep(Duration::from_millis(200)).await;
     server.shutdown().await.unwrap();
 }
-
-// Made with Bob
