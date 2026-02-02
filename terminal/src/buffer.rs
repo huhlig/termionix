@@ -21,6 +21,7 @@ use termionix_ansicodec::{AnsiConfig, SegmentedString};
 use tracing::instrument;
 
 /// Virtual Terminal Buffer
+#[derive(Clone)]
 pub struct TerminalBuffer {
     /// Terminal dimensions (width, height)
     size: TerminalSize,

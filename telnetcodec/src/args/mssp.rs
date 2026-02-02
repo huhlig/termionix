@@ -24,7 +24,7 @@
 //! client. The information is sent in a series of key-value pairs.
 //!
 //!
-use crate::{CodecResult, consts};
+use crate::{TelnetCodecResult, consts};
 use byteorder::WriteBytesExt;
 use bytes::BufMut;
 use std::collections::HashMap;
@@ -46,7 +46,7 @@ use std::collections::HashMap;
 /// let mut status = MudServerStatus::new();
 /// // Add server information...
 /// ```
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MudServerStatus(HashMap<String, Vec<String>>);
 
 impl MudServerStatus {
@@ -135,7 +135,7 @@ impl MudServerStatus {
     ///     Err(e) => eprintln!("Encoding error: {:?}", e),
     /// }
     /// ```
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> CodecResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> TelnetCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -212,5 +212,11 @@ impl MudServerStatus {
             }
         }
         Ok(len)
+    }
+}
+
+impl std::fmt::Display for MudServerStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Debug::fmt(self, f)
     }
 }

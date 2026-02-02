@@ -16,14 +16,14 @@
 
 //! Comprehensive correctness tests for Termionix
 //!
-//! This test suite performs a full assessment of a client connected to a server,
+//! This test testsuite performs a full assessment of a client connected to a server,
 //! testing option handling, subnegotiation, text data, binary data, and protocol correctness.
 
 use async_trait::async_trait;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::time::Duration;
-use termionix_service::{
+use termionix_server::{
     ConnectionId, ServerConfig, ServerHandler, TelnetArgument, TelnetConnection, TelnetOption,
     TelnetServer, TerminalEvent,
 };
@@ -35,8 +35,10 @@ use tokio::sync::{Notify, RwLock};
 // ============================================================================
 
 struct TestServerHandler {
-    echo_enabled: Arc<AtomicBool>,
-    binary_enabled: Arc<AtomicBool>,
+    local_echo_enabled: Arc<AtomicBool>,
+    remote_echo_enabled: Arc<AtomicBool>,
+    local_binary_enabled: Arc<AtomicBool>,
+    remote_binary_enabled: Arc<AtomicBool>,
     naws_received: Arc<RwLock<Option<(u16, u16)>>>,
     terminal_type_received: Arc<RwLock<Option<String>>>,
     messages_received: Arc<AtomicU64>,
@@ -51,8 +53,10 @@ struct TestServerHandler {
 impl TestServerHandler {
     fn new() -> Self {
         Self {
-            echo_enabled: Arc::new(AtomicBool::new(false)),
-            binary_enabled: Arc::new(AtomicBool::new(false)),
+            local_echo_enabled: Arc::new(AtomicBool::new(false)),
+            remote_echo_enabled: Arc::new(AtomicBool::new(false)),
+            local_binary_enabled: Arc::new(AtomicBool::new(false)),
+            remote_binary_enabled: Arc::new(AtomicBool::new(false)),
             naws_received: Arc::new(RwLock::new(None)),
             terminal_type_received: Arc::new(RwLock::new(None)),
             messages_received: Arc::new(AtomicU64::new(0)),
@@ -82,33 +86,54 @@ impl ServerHandler for TestServerHandler {
                 self.messages_received.fetch_add(1, Ordering::Relaxed);
                 let text = line.to_string();
                 self.lines_received.write().await.push(text.clone());
-                let _ = conn.send(&format!("ECHO: {}\r\n", text)).await;
+                let _ = conn.send(&format!("ECHO: {}\r\n", text), true).await;
             }
             TerminalEvent::CharacterData { character, .. } => {
                 self.characters_received.fetch_add(1, Ordering::Relaxed);
-                if self.echo_enabled.load(Ordering::Relaxed) {
-                    let _ = conn.send_char(character).await;
+                if self.local_echo_enabled.load(Ordering::Relaxed) {
+                    let _ = conn.send_char(character, true).await;
                 }
             }
             _ => {}
         }
     }
 
-    async fn on_option_enabled(
+    async fn on_option_changed(
         &self,
         _id: ConnectionId,
         _conn: &TelnetConnection,
         option: TelnetOption,
+        enabled: bool,
         local: bool,
     ) {
         self.options_enabled.write().await.push((option, local));
 
-        match option {
-            TelnetOption::Echo => {
-                self.echo_enabled.store(true, Ordering::Relaxed);
+        match (option, local, enabled) {
+            // Handle Echo
+            (TelnetOption::Echo, true, true) => {
+                self.local_echo_enabled.store(true, Ordering::Relaxed);
             }
-            TelnetOption::TransmitBinary => {
-                self.binary_enabled.store(true, Ordering::Relaxed);
+            (TelnetOption::Echo, true, false) => {
+                self.local_echo_enabled.store(false, Ordering::Relaxed);
+            }
+            (TelnetOption::Echo, false, true) => {
+                self.remote_echo_enabled.store(true, Ordering::Relaxed);
+            }
+            (TelnetOption::Echo, false, false) => {
+                self.remote_echo_enabled.store(false, Ordering::Relaxed);
+            }
+            // Handle Transmit Binary
+            (TelnetOption::TransmitBinary, true, true) => {
+                self.local_binary_enabled.store(true, Ordering::Relaxed);
+            }
+            (TelnetOption::TransmitBinary, true, false) => {
+                self.local_binary_enabled.store(false, Ordering::Relaxed);
+            }
+            (TelnetOption::TransmitBinary, false, true) => {
+                self.remote_binary_enabled.store(true, Ordering::Relaxed);
+            }
+            (TelnetOption::TransmitBinary, false, false) => {
+                self.remote_binary_enabled.store(false, Ordering::Relaxed);
             }
             _ => {}
         }
@@ -254,7 +279,7 @@ async fn test_binary_data_transfer() {
     tokio::time::sleep(Duration::from_millis(100)).await;
 
     // Verify option was enabled
-    assert!(handler.binary_enabled.load(Ordering::Relaxed));
+    assert!(handler.local_binary_enabled.load(Ordering::Relaxed));
 
     // Send binary data (including bytes that look like IAC)
     let binary_data: Vec<u8> = (0..=255).collect();

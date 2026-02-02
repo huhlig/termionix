@@ -83,9 +83,6 @@ pub fn terminal_word_wrap(text: &str, width: usize) -> SegmentedString {
                                         for _ in 0..line_indent {
                                             output.push_char(' ');
                                         }
-                                        current_line_width = line_indent;
-                                    } else {
-                                        current_line_width = 0;
                                     }
                                 }
 
@@ -93,7 +90,6 @@ pub fn terminal_word_wrap(text: &str, width: usize) -> SegmentedString {
                                 for seg in word_buffer.segments() {
                                     output.push_segment(seg.clone());
                                 }
-                                current_line_width += word_width;
                                 word_buffer = SegmentedString::empty();
                                 word_width = 0;
                             }

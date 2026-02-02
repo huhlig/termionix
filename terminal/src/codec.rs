@@ -14,17 +14,17 @@
 // limitations under the License.
 //
 
-use super::{TerminalBuffer, TerminalError, TerminalEvent};
-use crate::command::TerminalCommand;
-use crate::types::CursorPosition;
-use termionix_ansicodec::ansi::{
-    AnsiControlCode, AnsiControlSequenceIntroducer, AnsiSequence, TelnetCommand,
+use crate::{CursorPosition, TerminalBuffer, TerminalCommand, TerminalError, TerminalEvent};
+use termionix_ansicodec::{
+    AnsiControlCode, AnsiControlSequenceIntroducer, AnsiSequence, TelnetArgument, TelnetCommand,
+    TelnetSide, status,
 };
 use tokio_util::bytes::BytesMut;
 use tokio_util::codec::{Decoder, Encoder};
 use tracing::instrument;
 
 /// Wraps a codec that decodes [`AnsiSequence`] and manages terminal state and events.
+#[derive(Clone)]
 pub struct TerminalCodec<I> {
     buffer: TerminalBuffer,
     codec: I,
@@ -87,7 +87,7 @@ where
                             character: ch,
                         }))
                     }
-                    AnsiSequence::Control(ctrl) => match ctrl {
+                    AnsiSequence::AnsiControlCode(ctrl) => match ctrl {
                         AnsiControlCode::BEL => Ok(Some(TerminalEvent::Bell)),
                         AnsiControlCode::BS => {
                             self.buffer.erase_character();
@@ -214,20 +214,18 @@ impl<I> TerminalCodec<I> {
             }
             TelnetCommand::GoAhead => Ok(None),
             TelnetCommand::EndOfRecord => Ok(None),
-            TelnetCommand::OptionStatus(option, side, enabled) => {
-                Ok(Some(TerminalEvent::TelnetOptionStatus(
-                    termionix_telnetcodec::status::TelnetOptionStatus {
-                        command: termionix_telnetcodec::status::StatusCommand::Is,
-                        options: std::collections::HashMap::from([(
-                            option,
-                            (side == termionix_telnetcodec::TelnetSide::Remote, enabled),
-                        )]),
-                    },
-                )))
-            }
+            TelnetCommand::OptionStatus(option, side, enabled) => Ok(Some(
+                TerminalEvent::TelnetOptionStatus(status::TelnetOptionStatus {
+                    command: status::StatusCommand::Is,
+                    options: std::collections::HashMap::from([(
+                        option,
+                        (side == TelnetSide::Remote, enabled),
+                    )]),
+                }),
+            )),
             TelnetCommand::Subnegotiation(arg) => {
                 // Handle subnegotiation based on the argument type
-                use termionix_telnetcodec::TelnetArgument;
+                use TelnetArgument;
                 match arg {
                     TelnetArgument::NAWSWindowSize(window_size) => {
                         let old = self.buffer.size();
@@ -239,6 +237,141 @@ impl<I> TerminalCodec<I> {
                     _ => Ok(None),
                 }
             }
+        }
+    }
+}
+
+impl<I, E> Encoder<TerminalCommand> for TerminalCodec<I>
+where
+    I: Encoder<TelnetCommand, Error = E>
+        + Encoder<char, Error = E>
+        + for<'a> Encoder<&'a str, Error = E>
+        + for<'a> Encoder<&'a [u8], Error = E>
+        + Encoder<AnsiSequence, Error = E>,
+    TerminalError: From<E>,
+{
+    type Error = TerminalError;
+
+    fn encode(&mut self, item: TerminalCommand, dst: &mut BytesMut) -> Result<(), Self::Error> {
+        match item {
+            // Text output variants - encode through inner codec
+            TerminalCommand::Text(s) => self.codec.encode(s.as_str(), dst).map_err(From::from),
+            TerminalCommand::Char(c) => self.codec.encode(c, dst).map_err(From::from),
+            TerminalCommand::Bytes(b) => self.codec.encode(b.as_slice(), dst).map_err(From::from),
+
+            // ANSI sequences - encode directly (AnsiCodec has Encoder impls for these types)
+            TerminalCommand::Control(code) => self
+                .codec
+                .encode(AnsiSequence::AnsiControlCode(code), dst)
+                .map_err(From::from),
+            TerminalCommand::AnsiEscape => self
+                .codec
+                .encode(AnsiSequence::AnsiEscape, dst)
+                .map_err(From::from),
+            TerminalCommand::AnsiCSI(csi) => self
+                .codec
+                .encode(AnsiSequence::AnsiCSI(csi), dst)
+                .map_err(From::from),
+            TerminalCommand::AnsiSGR(sgr) => self
+                .codec
+                .encode(AnsiSequence::AnsiSGR(sgr), dst)
+                .map_err(From::from),
+            TerminalCommand::AnsiOSC(osc) => self
+                .codec
+                .encode(AnsiSequence::AnsiOSC(osc), dst)
+                .map_err(From::from),
+            TerminalCommand::AnsiDCS(dcs) => self
+                .codec
+                .encode(AnsiSequence::AnsiDCS(dcs), dst)
+                .map_err(From::from),
+            TerminalCommand::AnsiSOS(sos) => self
+                .codec
+                .encode(AnsiSequence::AnsiSOS(sos), dst)
+                .map_err(From::from),
+            TerminalCommand::AnsiST => self
+                .codec
+                .encode(AnsiSequence::AnsiST, dst)
+                .map_err(From::from),
+            TerminalCommand::AnsiPM(pm) => self
+                .codec
+                .encode(AnsiSequence::AnsiPM(pm), dst)
+                .map_err(From::from),
+            TerminalCommand::AnsiAPC(apc) => self
+                .codec
+                .encode(AnsiSequence::AnsiAPC(apc), dst)
+                .map_err(From::from),
+
+            // Telnet commands - convert to TelnetCommand
+            TerminalCommand::NoOperation => self
+                .codec
+                .encode(TelnetCommand::NoOperation, dst)
+                .map_err(From::from),
+            TerminalCommand::DataMark => self
+                .codec
+                .encode(TelnetCommand::DataMark, dst)
+                .map_err(From::from),
+            TerminalCommand::Break => self
+                .codec
+                .encode(TelnetCommand::Break, dst)
+                .map_err(From::from),
+            TerminalCommand::InterruptProcess => self
+                .codec
+                .encode(TelnetCommand::InterruptProcess, dst)
+                .map_err(From::from),
+            TerminalCommand::AbortOutput => self
+                .codec
+                .encode(TelnetCommand::AbortOutput, dst)
+                .map_err(From::from),
+            TerminalCommand::AreYouThere => self
+                .codec
+                .encode(TelnetCommand::AreYouThere, dst)
+                .map_err(From::from),
+            TerminalCommand::EraseCharacter => self
+                .codec
+                .encode(TelnetCommand::EraseCharacter, dst)
+                .map_err(From::from),
+            TerminalCommand::EraseLine => self
+                .codec
+                .encode(TelnetCommand::EraseLine, dst)
+                .map_err(From::from),
+            TerminalCommand::GoAhead => self
+                .codec
+                .encode(TelnetCommand::GoAhead, dst)
+                .map_err(From::from),
+            TerminalCommand::EndOfRecord => self
+                .codec
+                .encode(TelnetCommand::EndOfRecord, dst)
+                .map_err(From::from),
+
+            // Telnet subnegotiation messages - these need special handling
+            // For now, we'll ignore them as they're typically not sent directly
+            TerminalCommand::GMCP(message) => self
+                .codec
+                .encode(
+                    AnsiSequence::TelnetCommand(TelnetCommand::Subnegotiation(
+                        TelnetArgument::GMCP(message),
+                    )),
+                    dst,
+                )
+                .map_err(From::from),
+            TerminalCommand::MSDP(data) => self
+                .codec
+                .encode(
+                    AnsiSequence::TelnetCommand(TelnetCommand::Subnegotiation(
+                        TelnetArgument::MudServerData(data),
+                    )),
+                    dst,
+                )
+                .map_err(From::from),
+            TerminalCommand::MSSP(data) => self
+                .codec
+                .encode(
+                    AnsiSequence::TelnetCommand(TelnetCommand::Subnegotiation(
+                        TelnetArgument::MudServerStatus(data),
+                    )),
+                    dst,
+                )
+                .map_err(From::from),
         }
     }
 }
@@ -279,54 +412,6 @@ where
     }
 }
 
-impl<I> Encoder<&TerminalCommand> for TerminalCodec<I>
-where
-    I: Encoder<TelnetCommand>,
-    TerminalError: From<I::Error>,
-{
-    type Error = TerminalError;
-
-    fn encode(&mut self, item: &TerminalCommand, dst: &mut BytesMut) -> Result<(), Self::Error> {
-        let cmd = match item {
-            TerminalCommand::SendBreak => TelnetCommand::Break,
-            TerminalCommand::SendInterruptProcess => TelnetCommand::InterruptProcess,
-            TerminalCommand::SendAbortOutput => TelnetCommand::AbortOutput,
-            TerminalCommand::SendAreYouThere => TelnetCommand::AreYouThere,
-            TerminalCommand::SendEraseCharacter => TelnetCommand::EraseCharacter,
-            TerminalCommand::SendEraseLine => TelnetCommand::EraseLine,
-        };
-        self.codec.encode(cmd, dst).map_err(From::from)
-    }
-}
-
-impl<I> Encoder<AnsiControlCode> for TerminalCodec<I>
-where
-    I: Encoder<AnsiControlCode>,
-    TerminalError: From<I::Error>,
-{
-    type Error = TerminalError;
-
-    fn encode(&mut self, item: AnsiControlCode, dst: &mut BytesMut) -> Result<(), Self::Error> {
-        self.codec.encode(item, dst).map_err(From::from)
-    }
-}
-
-impl<I> Encoder<AnsiControlSequenceIntroducer> for TerminalCodec<I>
-where
-    I: Encoder<AnsiControlSequenceIntroducer>,
-    TerminalError: From<I::Error>,
-{
-    type Error = TerminalError;
-
-    fn encode(
-        &mut self,
-        item: AnsiControlSequenceIntroducer,
-        dst: &mut BytesMut,
-    ) -> Result<(), Self::Error> {
-        self.codec.encode(item, dst).map_err(From::from)
-    }
-}
-
 impl<I> Encoder<AnsiSequence> for TerminalCodec<I>
 where
     I: Encoder<AnsiSequence>,
@@ -354,8 +439,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use termionix_ansicodec::{AnsiCodec, AnsiConfig};
-    use termionix_telnetcodec::TelnetCodec;
+    use termionix_ansicodec::{AnsiCodec, AnsiConfig, TelnetCodec};
 
     fn create_test_codec() -> TerminalCodec<AnsiCodec<TelnetCodec>> {
         let telnet_codec = TelnetCodec::new();

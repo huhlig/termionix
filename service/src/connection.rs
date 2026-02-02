@@ -14,397 +14,362 @@
 // limitations under the License.
 //
 
-//! Telnet connection implementation for
+//! Terminal-specific split connection implementation
+//!
+//! This module provides a specialized split connection for terminal I/O with
+//! independent read and write workers to prevent blocking issues.
+//!
+//! # Architecture
+//!
+//! The [`SplitTerminalConnection`] uses a dual-worker architecture:
+//!
+//! - **Read Worker**: Handles incoming terminal events independently
+//! - **Write Worker**: Handles outgoing terminal commands independently
+//!
+//! This separation ensures that reads never block writes and vice versa, solving
+//! the common problem where buffered writes wait for read timeouts.
+//!
+//! # Examples
+//!
+//! ```no_run
+//! use termionix_service::SplitTerminalConnection;
+//! use termionix_terminal::{TerminalCodec, TerminalCommand};
+//! use termionix_ansicodec::{AnsiCodec, AnsiConfig};
+//! use termionix_telnetcodec::TelnetCodec;
+//! use tokio::net::TcpStream;
+//!
+//! # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+//! let stream = TcpStream::connect("localhost:23").await?;
+//!
+//! // Create codec stack
+//! let telnet_codec = TelnetCodec::new();
+//! let ansi_codec = AnsiCodec::new(AnsiConfig::default(), telnet_codec);
+//! let codec = TerminalCodec::new(ansi_codec);
+//!
+//! let conn = SplitTerminalConnection::from_stream(
+//!     stream,
+//!     codec.clone(),
+//!     codec,
+//! );
+//!
+//! // Send command (never blocks on reads)
+//! conn.send(TerminalCommand::Text("Hello".to_string()), true).await?;
+//!
+//! // Receive events (never blocks on writes)
+//! while let Some(event) = conn.next().await? {
+//!     println!("Received: {:?}", event);
+//! }
+//! # Ok(())
+//! # }
+//! ```
 
-use crate::{ConnectionId, Result, TelnetError};
+use crate::{ConnectionError, ConnectionResult, FlushStrategy};
 use futures_util::{SinkExt, StreamExt};
-use metrics::{counter, gauge, histogram};
-use std::any::Any;
-use std::collections::HashMap;
-use std::net::SocketAddr;
-use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::{Arc, RwLock};
-use std::time::Instant;
-use termionix_ansicodec::{AnsiCodec, AnsiConfig};
-use termionix_compress::{Algorithm, CompressionStream};
-use termionix_telnetcodec::TelnetCodec;
-use termionix_terminal::{TerminalCodec, TerminalEvent};
-use tokio::net::TcpStream;
-use tokio::sync::Mutex;
-use tokio_util::codec::{Encoder, Framed};
-use tracing::{debug, error, info, instrument, trace, warn};
+use std::sync::Arc;
+use termionix_compress::{CompressionAlgorithm, CompressionReader, CompressionWriter};
+use termionix_terminal::{TerminalCommand, TerminalEvent};
+use tokio::io::{AsyncRead, AsyncWrite};
+use tokio::sync::{Mutex, RwLock, mpsc};
+use tokio_util::codec::{Encoder, FramedRead, FramedWrite};
 
-/// Type alias for the complete codec stack
-type FullTerminalCodec = TerminalCodec<AnsiCodec<TelnetCodec>>;
-
-/// A Telnet connection ( implementation)
-///
-/// This is a simplified connection that doesn't manage its own task.
-/// Task management is handled by the ConnectionWorker.
-#[derive(Clone)]
-pub struct TelnetConnection {
-    // Core I/O
-    framed: Arc<Mutex<Framed<CompressionStream<TcpStream>, FullTerminalCodec>>>,
-
-    // Metadata (lock-free access)
-    id: ConnectionId,
-    peer_addr: SocketAddr,
-    created_at: Instant,
-
-    // Metrics (lock-free)
-    bytes_sent: Arc<AtomicU64>,
-    bytes_received: Arc<AtomicU64>,
-    messages_sent: Arc<AtomicU64>,
-    messages_received: Arc<AtomicU64>,
-
-    // User-defined metadata storage
-    user_data: Arc<RwLock<HashMap<String, Box<dyn Any + Send + Sync>>>>,
+/// Write command for terminal output
+enum WriteCommand {
+    Send(TerminalCommand, bool), // (command, force_flush)
+    Flush,
+    Close,
+    SetCompression(CompressionAlgorithm), // Set compression algorithm
 }
 
-impl TelnetConnection {
-    /// Wrap a TCP stream into a TelnetConnection
-    #[instrument(skip(socket), fields(connection_id = %id))]
-    pub fn wrap(socket: TcpStream, id: ConnectionId) -> Result<Self> {
-        let peer_addr = socket.peer_addr()?;
+/// Read command for terminal input
+enum ReadCommand {
+    ReadNext(tokio::sync::oneshot::Sender<ConnectionResult<Option<TerminalEvent>>>),
+    Close,
+    SetCompression(CompressionAlgorithm), // Set decompression algorithm
+}
 
-        info!(
-            peer_addr = %peer_addr,
-            "Creating new telnet connection"
-        );
+/// Terminal-specific split connection
+///
+/// This connection uses concrete types:
+/// - Input: TerminalEvent (events coming from the terminal)
+/// - Output: TerminalCommand (commands going to the terminal)
+/// - Codec: TerminalCodec
+///
+/// Note: This struct can be cloned to create multiple handles to the same connection.
+/// The underlying reader and writer tasks are shared through channels.
+#[derive(Debug)]
+pub struct SplitTerminalConnection<R, W, C>
+where
+    R: AsyncRead + Unpin + Send + 'static,
+    W: AsyncWrite + Unpin + Send + 'static,
+    C: Encoder<TerminalCommand> + Clone + Send + 'static,
+{
+    /// Command sender for write operations
+    write_tx: mpsc::UnboundedSender<WriteCommand>,
 
-        // Metrics: increment connection counter
-        counter!("termionix.connections.total").increment(1);
-        gauge!("termionix.connections.active").increment(1.0);
+    /// Command sender for read operations
+    read_tx: mpsc::UnboundedSender<ReadCommand>,
 
-        // Create the codec stack: TelnetCodec -> AnsiCodec -> TerminalCodec
-        let telnet_codec = TelnetCodec::new();
-        let ansi_codec = AnsiCodec::new(AnsiConfig::default(), telnet_codec);
-        let terminal_codec = TerminalCodec::new(ansi_codec);
+    /// Flush strategy
+    flush_strategy: Arc<RwLock<FlushStrategy>>,
 
-        debug!("Codec stack initialized: TelnetCodec -> AnsiCodec -> TerminalCodec");
+    /// Reader task handle
+    reader_handle: Arc<Mutex<Option<tokio::task::JoinHandle<()>>>>,
 
-        Ok(Self {
-            framed: Arc::new(Mutex::new(Framed::new(
-                CompressionStream::new(socket, Algorithm::None),
-                terminal_codec,
-            ))),
-            id,
-            peer_addr,
-            created_at: Instant::now(),
-            bytes_sent: Arc::new(AtomicU64::new(0)),
-            bytes_received: Arc::new(AtomicU64::new(0)),
-            messages_sent: Arc::new(AtomicU64::new(0)),
-            messages_received: Arc::new(AtomicU64::new(0)),
-            user_data: Arc::new(RwLock::new(HashMap::new())),
-        })
-    }
+    /// Writer task handle
+    writer_handle: Arc<Mutex<Option<tokio::task::JoinHandle<()>>>>,
 
-    /// Get the connection ID
-    pub fn id(&self) -> ConnectionId {
-        self.id
-    }
+    /// Phantom data
+    _phantom: std::marker::PhantomData<(R, W, C)>,
+}
 
-    /// Get the peer address
-    pub fn peer_addr(&self) -> SocketAddr {
-        self.peer_addr
-    }
-
-    /// Get when the connection was created
-    pub fn created_at(&self) -> Instant {
-        self.created_at
-    }
-
-    /// Get bytes sent
-    pub fn bytes_sent(&self) -> u64 {
-        self.bytes_sent.load(Ordering::Relaxed)
-    }
-
-    /// Get bytes received
-    pub fn bytes_received(&self) -> u64 {
-        self.bytes_received.load(Ordering::Relaxed)
-    }
-
-    /// Get messages sent
-    pub fn messages_sent(&self) -> u64 {
-        self.messages_sent.load(Ordering::Relaxed)
-    }
-
-    /// Get messages received
-    pub fn messages_received(&self) -> u64 {
-        self.messages_received.load(Ordering::Relaxed)
-    }
-
-    /// Send a message
-    #[instrument(skip(self, msg), fields(connection_id = %self.id))]
-    pub async fn send<M>(&self, msg: M) -> Result<()>
+impl<R, W, C> SplitTerminalConnection<R, W, C>
+where
+    R: AsyncRead + Unpin + Send + 'static,
+    W: AsyncWrite + Unpin + Send + 'static,
+    C: tokio_util::codec::Decoder<Item = TerminalEvent>
+        + Encoder<TerminalCommand>
+        + Clone
+        + Send
+        + 'static,
+    <C as tokio_util::codec::Decoder>::Error: std::error::Error + Send + Sync + 'static,
+    <C as Encoder<TerminalCommand>>::Error: std::error::Error + Send + Sync + 'static,
+{
+    /// Create a new terminal split connection with compression support
+    ///
+    /// The reader and writer are wrapped with `CompressionReader` and `CompressionWriter`
+    /// respectively, starting with `Algorithm::None`. Compression can be enabled later
+    /// via `set_compression_algorithm`.
+    pub fn new(reader: R, writer: W, codec_read: C, codec_write: C) -> Self
     where
-        FullTerminalCodec: Encoder<M>,
-        TelnetError: From<<FullTerminalCodec as Encoder<M>>::Error>,
-        M: Send,
+        R: AsyncRead + Unpin + Send + 'static,
+        W: AsyncWrite + Unpin + Send + 'static,
     {
-        trace!("Sending message");
-        let start = Instant::now();
+        let (write_tx, write_rx) = mpsc::unbounded_channel();
+        let (read_tx, read_rx) = mpsc::unbounded_channel();
+        let flush_strategy = Arc::new(RwLock::new(FlushStrategy::default()));
 
-        match self.framed.lock().await.send(msg).await {
-            Ok(()) => {
-                self.messages_sent.fetch_add(1, Ordering::Relaxed);
+        // Wrap reader and writer with compression support
+        let compressed_reader = CompressionReader::new(reader, CompressionAlgorithm::None);
+        let compressed_writer = CompressionWriter::new(writer, CompressionAlgorithm::None);
 
-                // Metrics
-                counter!("termionix.messages.sent").increment(1);
-                histogram!("termionix.message.send_duration").record(start.elapsed().as_secs_f64());
+        // Spawn reader task
+        let reader_handle = tokio::spawn(Self::reader_task(
+            FramedRead::new(compressed_reader, codec_read),
+            read_rx,
+        ));
 
-                trace!("Message sent successfully");
-                Ok(())
-            }
-            Err(e) => {
-                counter!("termionix.errors.send").increment(1);
-                error!("Failed to send message");
-                Err(e.into())
+        // Spawn writer task
+        let writer_handle = tokio::spawn(Self::writer_task(
+            FramedWrite::new(compressed_writer, codec_write),
+            write_rx,
+            Arc::clone(&flush_strategy),
+        ));
+
+        Self {
+            write_tx,
+            read_tx,
+            flush_strategy,
+            reader_handle: Arc::new(Mutex::new(Some(reader_handle))),
+            writer_handle: Arc::new(Mutex::new(Some(writer_handle))),
+            _phantom: std::marker::PhantomData,
+        }
+    }
+
+    /// Create from a bidirectional stream with integrated compression
+    ///
+    /// The stream is split and each half is wrapped with compression support.
+    pub fn from_stream<S>(
+        stream: S,
+        codec_read: C,
+        codec_write: C,
+    ) -> SplitTerminalConnection<tokio::io::ReadHalf<S>, tokio::io::WriteHalf<S>, C>
+    where
+        S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
+    {
+        let (reader, writer) = tokio::io::split(stream);
+        SplitTerminalConnection::new(reader, writer, codec_read, codec_write)
+    }
+
+    /// Reader task with compression support
+    async fn reader_task(
+        mut reader: FramedRead<CompressionReader<R>, C>,
+        mut rx: mpsc::UnboundedReceiver<ReadCommand>,
+    ) {
+        while let Some(cmd) = rx.recv().await {
+            match cmd {
+                ReadCommand::ReadNext(response_tx) => {
+                    let result = match reader.next().await {
+                        Some(Ok(item)) => Ok(Some(item)),
+                        Some(Err(e)) => Err(ConnectionError::Codec(e.to_string())),
+                        None => Ok(None),
+                    };
+                    let _ = response_tx.send(result);
+                }
+                ReadCommand::SetCompression(algorithm) => {
+                    // Switch decompression algorithm
+                    if let Err(e) = reader.get_mut().switch_algorithm(algorithm) {
+                        eprintln!("Failed to switch decompression algorithm: {:?}", e);
+                    }
+                }
+                ReadCommand::Close => break,
             }
         }
     }
 
-    /// Send a character
-    #[instrument(skip(self), fields(connection_id = %self.id, character = %ch))]
-    pub async fn send_char(&self, ch: char) -> Result<()> {
-        self.framed.lock().await.send(ch).await?;
-        self.messages_sent.fetch_add(1, Ordering::Relaxed);
-        counter!("termionix.characters.sent").increment(1);
-        Ok(())
+    /// Writer task with compression support
+    async fn writer_task(
+        mut writer: FramedWrite<CompressionWriter<W>, C>,
+        mut rx: mpsc::UnboundedReceiver<WriteCommand>,
+        _flush_strategy: Arc<RwLock<FlushStrategy>>,
+    ) {
+        while let Some(cmd) = rx.recv().await {
+            match cmd {
+                WriteCommand::Send(item, force_flush) => {
+                    // Send by reference since codec implements Encoder<&TerminalCommand>
+                    if let Err(e) = writer.send(item).await {
+                        eprintln!("Write error: {:?}", e);
+                        break;
+                    }
+                    if force_flush {
+                        if let Err(e) = writer.flush().await {
+                            eprintln!("Flush error: {:?}", e);
+                            break;
+                        }
+                    }
+                }
+                WriteCommand::Flush => {
+                    if let Err(e) = writer.flush().await {
+                        eprintln!("Flush error: {:?}", e);
+                        break;
+                    }
+                }
+                WriteCommand::SetCompression(algorithm) => {
+                    // Switch compression algorithm
+                    if let Err(e) = writer.get_mut().switch_algorithm(algorithm).await {
+                        eprintln!("Failed to switch compression algorithm: {:?}", e);
+                    }
+                }
+                WriteCommand::Close => {
+                    let _ = writer.flush().await;
+                    break;
+                }
+            }
+        }
     }
 
     /// Send a terminal command
-    #[instrument(skip(self), fields(connection_id = %self.id))]
-    pub async fn send_command(&self, cmd: &termionix_terminal::TerminalCommand) -> Result<()> {
-        use futures_util::SinkExt;
-        debug!(command = ?cmd, "Sending terminal command");
-        let mut framed = self.framed.lock().await;
-        // Use SinkExt::send with explicit type annotation
-        SinkExt::<&termionix_terminal::TerminalCommand>::send(&mut *framed, cmd).await?;
-        self.messages_sent.fetch_add(1, Ordering::Relaxed);
-        counter!("termionix.commands.sent").increment(1);
+    pub async fn send(
+        &self,
+        data: impl Into<TerminalCommand>,
+        force_flush: bool,
+    ) -> ConnectionResult<()> {
+        self.write_tx
+            .send(WriteCommand::Send(data.into(), force_flush))
+            .map_err(|_| ConnectionError::Closed)?;
         Ok(())
     }
 
-    /// Receive the next event
-    #[instrument(skip(self), fields(connection_id = %self.id))]
-    pub async fn next(&mut self) -> Result<Option<TerminalEvent>> {
-        let start = Instant::now();
+    /// Receive the next terminal event
+    pub async fn next(&self) -> ConnectionResult<Option<TerminalEvent>> {
+        let (response_tx, response_rx) = tokio::sync::oneshot::channel();
 
-        match self.framed.lock().await.next().await {
-            Some(result) => {
-                match result {
-                    Ok(event) => {
-                        self.messages_received.fetch_add(1, Ordering::Relaxed);
+        self.read_tx
+            .send(ReadCommand::ReadNext(response_tx))
+            .map_err(|_| ConnectionError::Closed)?;
 
-                        // Metrics
-                        counter!("termionix.messages.received").increment(1);
-                        histogram!("termionix.message.receive_duration")
-                            .record(start.elapsed().as_secs_f64());
+        response_rx
+            .await
+            .map_err(|_| ConnectionError::ReceiveFailed("Reader task closed".to_string()))?
+    }
 
-                        trace!(event = ?event, "Event received");
-                        Ok(Some(event))
-                    }
-                    Err(e) => {
-                        counter!("termionix.errors.receive").increment(1);
-                        error!("Error receiving event");
-                        Err(e.into())
-                    }
-                }
-            }
-            None => {
-                debug!("Connection stream ended");
-                gauge!("termionix.connections.active").decrement(1.0);
-                Ok(None)
-            }
+    /// Manually flush
+    pub async fn flush(&self) -> ConnectionResult<()> {
+        self.write_tx
+            .send(WriteCommand::Flush)
+            .map_err(|_| ConnectionError::Closed)?;
+        Ok(())
+    }
+
+    /// Set flush strategy
+    pub async fn set_flush_strategy(&self, strategy: FlushStrategy) {
+        *self.flush_strategy.write().await = strategy;
+    }
+
+    /// Get flush strategy
+    pub async fn flush_strategy(&self) -> FlushStrategy {
+        *self.flush_strategy.read().await
+    }
+
+    /// Set the compression algorithm for both read and write operations
+    ///
+    /// This dynamically switches the compression algorithm used by the connection.
+    /// The change takes effect immediately for all subsequent data.
+    ///
+    /// # Parameters
+    ///
+    /// - `algorithm`: The compression algorithm to use (None, Gzip, Deflate, Brotli, Zlib, Zstd)
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # use termionix_service::SplitTerminalConnection;
+    /// # use termionix_compress::CompressionAlgorithm;
+    /// # async fn example(conn: &SplitTerminalConnection<_, _, _>) {
+    /// // Enable Gzip compression
+    /// conn.set_compression_algorithm(CompressionAlgorithm::Gzip).await.unwrap();
+    ///
+    /// // Disable compression
+    /// conn.set_compression_algorithm(CompressionAlgorithm::None).await.unwrap();
+    /// # }
+    /// ```
+    pub async fn set_compression_algorithm(
+        &self,
+        algorithm: CompressionAlgorithm,
+    ) -> ConnectionResult<()> {
+        // Send compression change command to both reader and writer tasks
+        self.read_tx
+            .send(ReadCommand::SetCompression(algorithm))
+            .map_err(|_| ConnectionError::Closed)?;
+
+        self.write_tx
+            .send(WriteCommand::SetCompression(algorithm))
+            .map_err(|_| ConnectionError::Closed)?;
+
+        Ok(())
+    }
+
+    /// Close the connection
+    pub async fn close(&self) -> ConnectionResult<()> {
+        let _ = self.write_tx.send(WriteCommand::Close);
+        let _ = self.read_tx.send(ReadCommand::Close);
+
+        if let Some(handle) = self.writer_handle.lock().await.take() {
+            let _ = handle.await;
         }
-    }
-
-    /// Store user-defined metadata
-    ///
-    /// # Example
-    /// ```no_run
-    /// # use termionix_service::TelnetConnection;
-    /// # async fn example(conn: &TelnetConnection) {
-    /// conn.set_data("session_id", 12345u64);
-    /// conn.set_data("username", "player1".to_string());
-    /// # }
-    /// ```
-    pub fn set_data<T: Any + Send + Sync + Clone>(&self, key: &str, value: T) {
-        self.user_data
-            .write()
-            .unwrap()
-            .insert(key.to_string(), Box::new(value));
-    }
-
-    /// Retrieve user-defined metadata
-    ///
-    /// Returns `None` if the key doesn't exist or the type doesn't match.
-    ///
-    /// # Example
-    /// ```no_run
-    /// # use termionix_service::TelnetConnection;
-    /// # async fn example(conn: &TelnetConnection) {
-    /// if let Some(session_id) = conn.get_data::<u64>("session_id") {
-    ///     println!("Session ID: {}", session_id);
-    /// }
-    /// # }
-    /// ```
-    pub fn get_data<T: Any + Send + Sync + Clone>(&self, key: &str) -> Option<T> {
-        self.user_data
-            .read()
-            .unwrap()
-            .get(key)
-            .and_then(|v| v.downcast_ref::<T>())
-            .cloned()
-    }
-
-    /// Remove user-defined metadata
-    ///
-    /// Returns `true` if the key existed and was removed.
-    ///
-    /// # Example
-    /// ```no_run
-    /// # use termionix_service::TelnetConnection;
-    /// # async fn example(conn: &TelnetConnection) {
-    /// conn.remove_data("session_id");
-    /// # }
-    /// ```
-    pub fn remove_data(&self, key: &str) -> bool {
-        self.user_data.write().unwrap().remove(key).is_some()
-    }
-
-    /// Check if user-defined metadata exists for a key
-    ///
-    /// # Example
-    /// ```no_run
-    /// # use termionix_service::TelnetConnection;
-    /// # async fn example(conn: &TelnetConnection) {
-    /// if conn.has_data("session_id") {
-    ///     println!("Session data exists");
-    /// }
-    /// # }
-    /// ```
-    pub fn has_data(&self, key: &str) -> bool {
-        self.user_data.read().unwrap().contains_key(key)
-    }
-
-    /// Get the negotiated window size (NAWS)
-    ///
-    /// Returns the current terminal window size if it has been negotiated,
-    /// or None if NAWS negotiation hasn't completed.
-    ///
-    /// # Example
-    /// ```no_run
-    /// # use termionix_service::TelnetConnection;
-    /// # async fn example(conn: &TelnetConnection) {
-    /// if let Some((width, height)) = conn.window_size().await {
-    ///     println!("Terminal size: {}x{}", width, height);
-    /// }
-    /// # }
-    /// ```
-    pub async fn window_size(&self) -> Option<(u16, u16)> {
-        let framed = self.framed.lock().await;
-        let buffer = framed.codec().buffer();
-        let size = buffer.size();
-        Some((size.cols as u16, size.rows as u16))
-    }
-
-    /// Get the negotiated terminal type
-    ///
-    /// Returns the terminal type string if it has been negotiated via
-    /// the TERMINAL-TYPE option, or None if not available.
-    ///
-    /// # Example
-    /// ```no_run
-    /// # use termionix_service::TelnetConnection;
-    /// # async fn example(conn: &TelnetConnection) {
-    /// if let Some(term_type) = conn.terminal_type().await {
-    ///     println!("Terminal type: {}", term_type);
-    /// }
-    /// # }
-    /// ```
-    pub async fn terminal_type(&self) -> Option<String> {
-        let framed = self.framed.lock().await;
-        let buffer = framed.codec().buffer();
-        buffer.get_environment("TERM").map(|s| s.to_string())
-    }
-
-    /// Check if a telnet option is enabled
-    ///
-    /// This checks the current negotiation state for a specific telnet option.
-    /// Note: This is a simplified check based on available state. For full
-    /// Q-state tracking, access the underlying codec directly.
-    ///
-    /// # Example
-    /// ```no_run
-    /// # use termionix_service::TelnetConnection;
-    /// # use termionix_telnetcodec::TelnetOption;
-    /// # async fn example(conn: &TelnetConnection) {
-    /// if conn.is_option_enabled(TelnetOption::NAWS).await {
-    ///     println!("NAWS is enabled");
-    /// }
-    /// # }
-    /// ```
-    pub async fn is_option_enabled(&self, option: termionix_telnetcodec::TelnetOption) -> bool {
-        // For now, we check based on available data
-        // NAWS is enabled if we have non-default size
-        // This is a simplified implementation
-        match option {
-            termionix_telnetcodec::TelnetOption::NAWS => {
-                let size = self.window_size().await;
-                size.is_some() && size != Some((80, 24))
-            }
-            _ => {
-                // For other options, we'd need to access the codec's option state
-                // This would require exposing more internal state
-                false
-            }
-        }
-    }
-
-    /// Check if there are pending sidechannel responses that need to be flushed
-    pub async fn has_pending_responses(&self) -> bool {
-        let framed = self.framed.lock().await;
-        let codec = framed.codec();
-
-        // Navigate through the codec stack: TerminalCodec -> AnsiCodec -> TelnetCodec
-        codec.codec().inner().has_pending_responses()
-    }
-
-    /// Flush any pending sidechannel responses to the connection
-    pub async fn flush_responses(&self) -> Result<()> {
-        use tokio::io::AsyncWriteExt;
-
-        let mut framed = self.framed.lock().await;
-
-        // Create a buffer for the responses
-        let mut buffer = tokio_util::bytes::BytesMut::new();
-
-        // Navigate through codec stack and flush responses
-        // TerminalCodec -> AnsiCodec -> TelnetCodec
-        {
-            let codec = framed.codec_mut();
-            codec.codec_mut().inner_mut().flush_responses(&mut buffer)?;
-        }
-
-        // If we have data to send, write it directly to the underlying stream
-        if !buffer.is_empty() {
-            let stream = framed.get_mut().get_mut();
-            stream.write_all(&buffer).await?;
-            stream.flush().await?;
+        if let Some(handle) = self.reader_handle.lock().await.take() {
+            let _ = handle.await;
         }
 
         Ok(())
     }
 }
 
-impl std::fmt::Debug for TelnetConnection {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TelnetConnection")
-            .field("id", &self.id)
-            .field("peer_addr", &self.peer_addr)
-            .field("created_at", &self.created_at)
-            .finish()
+// Manual Clone implementation since ReadHalf and WriteHalf don't implement Clone,
+// but the connection can be cloned through its channel-based architecture
+impl<R, W, C> Clone for SplitTerminalConnection<R, W, C>
+where
+    R: AsyncRead + Unpin + Send + 'static,
+    W: AsyncWrite + Unpin + Send + 'static,
+    C: Encoder<TerminalCommand> + Clone + Send + 'static,
+{
+    fn clone(&self) -> Self {
+        Self {
+            write_tx: self.write_tx.clone(),
+            read_tx: self.read_tx.clone(),
+            flush_strategy: Arc::clone(&self.flush_strategy),
+            reader_handle: Arc::clone(&self.reader_handle),
+            writer_handle: Arc::clone(&self.writer_handle),
+            _phantom: std::marker::PhantomData,
+        }
     }
 }

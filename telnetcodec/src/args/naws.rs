@@ -17,7 +17,7 @@
 //! Negotiate About Window Size
 //!
 
-use crate::{CodecError, CodecResult};
+use crate::{TelnetCodecError, TelnetCodecResult};
 use byteorder::{BigEndian, WriteBytesExt};
 use bytes::{Buf, BufMut};
 
@@ -95,7 +95,7 @@ impl WindowSize {
     /// let mut buf = BytesMut::new();
     /// size.encode(&mut buf)?;
     /// ```
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> CodecResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> TelnetCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -150,7 +150,7 @@ impl WindowSize {
     /// assert_eq!(size.cols, 80);
     /// assert_eq!(size.rows, 24);
     /// ```
-    pub fn decode<T: Buf>(src: &mut T) -> CodecResult<WindowSize> {
+    pub fn decode<T: Buf>(src: &mut T) -> TelnetCodecResult<WindowSize> {
         // NAWS format: WIDTH-HIGH WIDTH-LOW HEIGHT-HIGH HEIGHT-LOW
         if src.remaining() >= 4 {
             Ok(WindowSize {
@@ -158,7 +158,7 @@ impl WindowSize {
                 rows: src.get_u16(),
             })
         } else {
-            Err(CodecError::SubnegotiationError {
+            Err(TelnetCodecError::SubnegotiationError {
                 option: Some(crate::consts::option::NAWS),
                 reason: crate::SubnegotiationErrorKind::InsufficientData {
                     required: 4,

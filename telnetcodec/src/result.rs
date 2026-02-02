@@ -15,11 +15,11 @@
 //
 
 /// Result Type for Codec Operations
-pub type CodecResult<T> = Result<T, CodecError>;
+pub type TelnetCodecResult<T> = Result<T, TelnetCodecError>;
 
 /// Represents possible errors that can occur in the codec handling process.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum CodecError {
+pub enum TelnetCodecError {
     /// An I/O error occurred while reading from or writing to the underlying stream.
     ///
     /// Contains the error kind and a description of what operation failed.
@@ -115,29 +115,29 @@ pub enum SubnegotiationErrorKind {
     },
 }
 
-impl std::error::Error for CodecError {}
+impl std::error::Error for TelnetCodecError {}
 
-impl std::fmt::Display for CodecError {
+impl std::fmt::Display for TelnetCodecError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            CodecError::IOError { kind, operation } => {
+            TelnetCodecError::IOError { kind, operation } => {
                 write!(f, "I/O error during {}: {:?}", operation, kind)
             }
-            CodecError::NegotiationError { reason, frame_type } => {
+            TelnetCodecError::NegotiationError { reason, frame_type } => {
                 if let Some(ft) = frame_type {
                     write!(f, "Negotiation error ({}): {}", ft, reason)
                 } else {
                     write!(f, "Negotiation error: {}", reason)
                 }
             }
-            CodecError::SubnegotiationError { option, reason } => {
+            TelnetCodecError::SubnegotiationError { option, reason } => {
                 if let Some(opt) = option {
                     write!(f, "Subnegotiation error for option {}: {}", opt, reason)
                 } else {
                     write!(f, "Subnegotiation error: {}", reason)
                 }
             }
-            CodecError::UnknownCommand(cmd) => {
+            TelnetCodecError::UnknownCommand(cmd) => {
                 write!(f, "Unknown telnet command: 0x{:02X}", cmd)
             }
         }
@@ -197,9 +197,9 @@ impl std::fmt::Display for SubnegotiationErrorKind {
     }
 }
 
-impl From<std::io::Error> for CodecError {
+impl From<std::io::Error> for TelnetCodecError {
     fn from(err: std::io::Error) -> Self {
-        CodecError::IOError {
+        TelnetCodecError::IOError {
             kind: err.kind(),
             operation: err.to_string(),
         }

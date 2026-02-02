@@ -33,7 +33,7 @@
 
 use std::sync::Arc;
 use termionix_ansicodec::{Color, Intensity, SegmentedString, Style, Underline};
-use termionix_service::{
+use termionix_server::{
     CallbackHandler, ConnectionId, ServerConfig, ServerHandler, TelnetConnection, TelnetServer,
 };
 use termionix_terminal::TerminalEvent;

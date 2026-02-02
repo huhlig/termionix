@@ -16,17 +16,13 @@
 
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use std::hint::black_box;
-use termionix_terminal::{TerminalBuffer, TerminalCodec};
+use termionix_terminal::{AnsiCodec, TelnetCodec, TerminalBuffer, TerminalCodec};
 use tokio_util::bytes::BytesMut;
 use tokio_util::codec::{Decoder, Encoder};
 
-fn create_test_codec()
--> TerminalCodec<termionix_ansicodec::AnsiCodec<termionix_telnetcodec::TelnetCodec>> {
-    let telnet_codec = termionix_telnetcodec::TelnetCodec::new();
-    let ansi_codec = termionix_ansicodec::AnsiCodec::new(
-        termionix_ansicodec::AnsiConfig::default(),
-        telnet_codec,
-    );
+fn create_test_codec() -> TerminalCodec<AnsiCodec<TelnetCodec>> {
+    let telnet_codec = TelnetCodec::new();
+    let ansi_codec = AnsiCodec::new(termionix_ansicodec::AnsiConfig::default(), telnet_codec);
     TerminalCodec::new(ansi_codec)
 }
 

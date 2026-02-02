@@ -20,10 +20,10 @@ use async_trait::async_trait;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
-use termionix_service::{
+use termionix_server::{
     ConnectionId, ServerConfig, ServerHandler, TelnetConnection, TelnetError, TelnetServer,
+    TerminalCommand,
 };
-use termionix_terminal::TerminalEvent;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
 
@@ -249,9 +249,7 @@ async fn test_broadcast_with_failed_connections() {
 
     // Broadcast should handle partial failures
     let manager = server.manager();
-    let result = manager
-        .broadcast(termionix_terminal::TerminalCommand::SendEraseLine)
-        .await;
+    let result = manager.broadcast(TerminalCommand::EraseLine).await;
 
     // Some should succeed, some might fail
     assert!(result.total > 0);

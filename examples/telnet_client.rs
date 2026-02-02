@@ -40,7 +40,7 @@
 use async_trait::async_trait;
 use std::io::{self, Write};
 use std::sync::Arc;
-use termionix_client::{ClientConfig, ClientConnection, ClientError, ClientHandler, TelnetClient};
+use termionix_client::{ClientConfig, ClientError, TerminalClient, TerminalConnection, TerminalHandler};
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::sync::mpsc;
 use tracing::{debug, info};
@@ -52,14 +52,14 @@ struct TelnetHandler {
 }
 
 #[async_trait]
-impl ClientHandler for TelnetHandler {
-    async fn on_connect(&self, conn: &ClientConnection) {
+impl TerminalHandler for TelnetHandler {
+    async fn on_connect(&self, conn: &TerminalConnection) {
         info!("Connected to server!");
         println!("\n╔════════════════════════════════════════════════════════════╗");
         println!("║         Connected to Telnet Server                        ║");
         println!("╚════════════════════════════════════════════════════════════╝");
         println!("\nType your commands and press Enter.");
-        println!("Press Ctrl+C to logout.txt.\n");
+        println!("Press Ctrl+C to disconnect.\n");
         
         // Start input handler
         let conn = conn.clone();
@@ -75,49 +75,52 @@ impl ClientHandler for TelnetHandler {
         });
     }
     
-    async fn on_data(&self, _conn: &ClientConnection, data: &[u8]) {
-        // Print server data directly to stdout
-        print!("{}", String::from_utf8_lossy(data));
+    async fn on_character(&self, _conn: &TerminalConnection, ch: char) {
+        // Print characters as they arrive
+        print!("{}", ch);
         io::stdout().flush().ok();
     }
     
-    async fn on_line(&self, _conn: &ClientConnection, line: &str) {
+    async fn on_line(&self, _conn: &TerminalConnection, line: &str) {
         debug!("Received line: {}", line);
+    }
+
+    async fn on_bell(&self, _conn: &TerminalConnection) {
+        print!("\x07"); // Terminal bell
+        io::stdout().flush().ok();
     }
     
     async fn on_option_changed(
         &self,
-        _conn: &ClientConnection,
+        _conn: &TerminalConnection,
         option: termionix_client::TelnetOption,
         enabled: bool,
+        local: bool,
     ) {
         debug!(
-            "Option {:?} {}",
+            "Option {:?} {} ({})",
             option,
-            if enabled { "enabled" } else { "disabled" }
+            if enabled { "enabled" } else { "disabled" },
+            if local { "local" } else { "remote" }
         );
     }
     
-    async fn on_error(&self, _conn: &ClientConnection, error: ClientError) {
+    async fn on_error(&self, _conn: &TerminalConnection, error: ClientError) {
         eprintln!("\n[Error: {}]", error);
     }
     
-    async fn on_disconnect(&self, _conn: &ClientConnection) {
+    async fn on_disconnect(&self, _conn: &TerminalConnection) {
         println!("\n╔════════════════════════════════════════════════════════════╗");
         println!("║         Disconnected from Server                          ║");
         println!("╚════════════════════════════════════════════════════════════╝\n");
     }
     
-    async fn on_reconnect_attempt(&self, _conn: &ClientConnection, attempt: usize) -> bool {
+    async fn on_reconnect_attempt(&self, _conn: &TerminalConnection, attempt: u32) -> bool {
         println!("\n[Reconnection attempt {}...]", attempt);
         true
     }
     
-    async fn on_reconnected(&self, _conn: &ClientConnection) {
-        println!("\n[Reconnected successfully!]");
-    }
-    
-    async fn on_reconnect_failed(&self, _conn: &ClientConnection) {
+    async fn on_reconnect_failed(&self, _conn: &TerminalConnection) {
         eprintln!("\n[Reconnection failed - giving up]");
     }
 }
@@ -182,7 +185,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     });
     
     // Create and run client
-    let mut client = TelnetClient::new(config);
+    let mut client = TerminalClient::new(config);
     
     // Handle Ctrl+C gracefully
     let result = tokio::select! {

@@ -18,7 +18,7 @@
 
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use std::hint::black_box;
-use termionix_compress::{Algorithm, CompressionStream};
+use termionix_compress::{CompressionAlgorithm, CompressionStream};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 // ============================================================================
@@ -47,12 +47,12 @@ fn bench_compression_algorithms(c: &mut Criterion) {
 
     let sizes = vec![1024, 10 * 1024]; // 1KB, 10KB
     let algorithms = vec![
-        Algorithm::None,
-        Algorithm::Gzip,
-        Algorithm::Deflate,
-        Algorithm::Zlib,
-        Algorithm::Zstd,
-        Algorithm::Brotli,
+        CompressionAlgorithm::None,
+        CompressionAlgorithm::Gzip,
+        CompressionAlgorithm::Deflate,
+        CompressionAlgorithm::Zlib,
+        CompressionAlgorithm::Zstd,
+        CompressionAlgorithm::Brotli,
     ];
 
     for size in sizes {
@@ -112,7 +112,8 @@ fn bench_data_types(c: &mut Criterion) {
                     let data_clone = data.clone();
 
                     tokio::spawn(async move {
-                        let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+                        let mut compressor =
+                            CompressionStream::new(client, CompressionAlgorithm::Gzip);
                         compressor.write_all(black_box(&data_clone)).await.unwrap();
                         compressor.shutdown().await.unwrap();
                     });
@@ -153,7 +154,8 @@ fn bench_write_sizes(c: &mut Criterion) {
                         let num = *num_writes;
 
                         tokio::spawn(async move {
-                            let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+                            let mut compressor =
+                                CompressionStream::new(client, CompressionAlgorithm::Gzip);
                             for _ in 0..num {
                                 compressor.write_all(black_box(&data_clone)).await.unwrap();
                             }
@@ -187,10 +189,10 @@ fn bench_algorithm_switching(c: &mut Criterion) {
                 let data_clone = data.clone();
 
                 tokio::spawn(async move {
-                    let mut compressor = CompressionStream::new(client, Algorithm::None);
+                    let mut compressor = CompressionStream::new(client, CompressionAlgorithm::None);
                     compressor.write_all(black_box(&data_clone)).await.unwrap();
                     compressor
-                        .switch_algorithm(black_box(Algorithm::Gzip))
+                        .switch_algorithm(black_box(CompressionAlgorithm::Gzip))
                         .await
                         .unwrap();
                     compressor.write_all(black_box(&data_clone)).await.unwrap();
@@ -210,10 +212,10 @@ fn bench_algorithm_switching(c: &mut Criterion) {
                 let data_clone = data.clone();
 
                 tokio::spawn(async move {
-                    let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+                    let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Gzip);
                     compressor.write_all(black_box(&data_clone)).await.unwrap();
                     compressor
-                        .switch_algorithm(black_box(Algorithm::Deflate))
+                        .switch_algorithm(black_box(CompressionAlgorithm::Deflate))
                         .await
                         .unwrap();
                     compressor.write_all(black_box(&data_clone)).await.unwrap();
@@ -245,7 +247,7 @@ fn bench_stream_operations(c: &mut Criterion) {
                 let data_clone = data.clone();
 
                 tokio::spawn(async move {
-                    let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+                    let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Gzip);
                     compressor.write_all(black_box(&data_clone)).await.unwrap();
                     compressor.flush().await.unwrap();
                     compressor.shutdown().await.unwrap();
@@ -264,7 +266,7 @@ fn bench_stream_operations(c: &mut Criterion) {
                 let data_clone = data.clone();
 
                 tokio::spawn(async move {
-                    let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+                    let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Gzip);
                     let chunk_size = 1024;
                     for chunk in data_clone.chunks(chunk_size) {
                         compressor.write_all(black_box(chunk)).await.unwrap();
@@ -302,7 +304,8 @@ fn bench_small_data(c: &mut Criterion) {
                     let data_clone = data.clone();
 
                     tokio::spawn(async move {
-                        let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+                        let mut compressor =
+                            CompressionStream::new(client, CompressionAlgorithm::Gzip);
                         compressor.write_all(black_box(&data_clone)).await.unwrap();
                         compressor.shutdown().await.unwrap();
                     });
@@ -336,7 +339,7 @@ fn bench_large_data(c: &mut Criterion) {
                 let data_clone = data.clone();
 
                 tokio::spawn(async move {
-                    let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+                    let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Gzip);
                     compressor.write_all(black_box(&data_clone)).await.unwrap();
                     compressor.shutdown().await.unwrap();
                 });
@@ -354,7 +357,7 @@ fn bench_large_data(c: &mut Criterion) {
                 let data_clone = data.clone();
 
                 tokio::spawn(async move {
-                    let mut compressor = CompressionStream::new(client, Algorithm::Zstd);
+                    let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Zstd);
                     compressor.write_all(black_box(&data_clone)).await.unwrap();
                     compressor.shutdown().await.unwrap();
                 });
@@ -388,7 +391,7 @@ fn bench_real_world_scenarios(c: &mut Criterion) {
                 let data = http_response.clone();
 
                 tokio::spawn(async move {
-                    let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+                    let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Gzip);
                     compressor
                         .write_all(black_box(data.as_bytes()))
                         .await
@@ -413,7 +416,7 @@ fn bench_real_world_scenarios(c: &mut Criterion) {
                 let data = log_data.clone();
 
                 tokio::spawn(async move {
-                    let mut compressor = CompressionStream::new(client, Algorithm::Zstd);
+                    let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Zstd);
                     compressor
                         .write_all(black_box(data.as_bytes()))
                         .await

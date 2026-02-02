@@ -16,17 +16,17 @@
 
 //! Integration Benchmarks for Termionix
 //!
-//! This benchmark suite tests the full server-client integration over loopback,
+//! This benchmark testsuite tests the full server-client integration over loopback,
 //! measuring performance, efficiency, and correctness of the complete system.
 
 use async_trait::async_trait;
-use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main, Throughput};
+use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use std::hint::black_box;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 use termionix_client::{ClientConfig, TerminalClient, TerminalConnection, TerminalHandler};
-use termionix_service::{
+use termionix_server::{
     ConnectionId, ServerConfig, ServerHandler, TelnetConnection, TelnetServer, TerminalEvent,
 };
 use tokio::sync::{Barrier, Notify};
@@ -77,7 +77,7 @@ impl ServerHandler for EchoServerHandler {
             TerminalEvent::CharacterData { character, .. } => {
                 self.messages_received.fetch_add(1, Ordering::Relaxed);
                 self.bytes_received.fetch_add(1, Ordering::Relaxed);
-                let _ = conn.send_char(character).await;
+                let _ = conn.send_char(character, true).await;
                 self.messages_sent.fetch_add(1, Ordering::Relaxed);
                 self.bytes_sent.fetch_add(1, Ordering::Relaxed);
             }
@@ -88,7 +88,7 @@ impl ServerHandler for EchoServerHandler {
                 self.bytes_received.fetch_add(bytes, Ordering::Relaxed);
                 let response = format!("{}\r\n", text);
                 let response_bytes = response.len() as u64;
-                let _ = conn.send(&response).await;
+                let _ = conn.send(&response, true).await;
                 self.messages_sent.fetch_add(1, Ordering::Relaxed);
                 self.bytes_sent.fetch_add(response_bytes, Ordering::Relaxed);
             }
@@ -160,10 +160,10 @@ impl TerminalHandler for BenchmarkClientHandler {
         self.messages_received.fetch_add(1, Ordering::Relaxed);
         self.bytes_received.fetch_add(1, Ordering::Relaxed);
         self.chars_received.fetch_add(1, Ordering::Relaxed);
-        
+
         let received = self.chars_received.load(Ordering::Relaxed);
         let expected = self.expected_messages.load(Ordering::Relaxed) as u64;
-        
+
         if received >= expected {
             self.completion_notify.notify_waiters();
         }
@@ -172,11 +172,12 @@ impl TerminalHandler for BenchmarkClientHandler {
     async fn on_line(&self, _conn: &TerminalConnection, line: &str) {
         self.messages_received.fetch_add(1, Ordering::Relaxed);
         self.lines_received.fetch_add(1, Ordering::Relaxed);
-        self.bytes_received.fetch_add(line.len() as u64, Ordering::Relaxed);
-        
+        self.bytes_received
+            .fetch_add(line.len() as u64, Ordering::Relaxed);
+
         let received = self.lines_received.load(Ordering::Relaxed);
         let expected = self.expected_messages.load(Ordering::Relaxed) as u64;
-        
+
         if received >= expected {
             self.completion_notify.notify_waiters();
         }
@@ -232,16 +233,17 @@ fn bench_throughput_small_messages(c: &mut Criterion) {
         for msg_size in [10, 50, 100].iter() {
             let messages_per_client = 100;
             let total_bytes = client_count * messages_per_client * msg_size;
-            
+
             group.throughput(Throughput::Bytes(total_bytes as u64));
-            
+
             group.bench_with_input(
                 BenchmarkId::from_parameter(format!("{}clients_{}bytes", client_count, msg_size)),
                 &(client_count, msg_size),
                 |b, &(&client_count, &msg_size)| {
                     b.to_async(&runtime).iter(|| async move {
                         let server_handler = Arc::new(EchoServerHandler::new());
-                        let (server, addr) = setup_test_server(server_handler.clone()).await.unwrap();
+                        let (server, addr) =
+                            setup_test_server(server_handler.clone()).await.unwrap();
 
                         let barrier = Arc::new(Barrier::new(client_count + 1));
                         let mut client_handles = Vec::new();
@@ -258,7 +260,7 @@ fn bench_throughput_small_messages(c: &mut Criterion) {
                             let handle = tokio::spawn(async move {
                                 let mut stream = create_client_stream(addr).await.unwrap();
                                 use tokio::io::AsyncWriteExt;
-                                
+
                                 barrier.wait().await;
 
                                 let start = Instant::now();
@@ -275,7 +277,7 @@ fn bench_throughput_small_messages(c: &mut Criterion) {
                                 drop(stream);
                                 elapsed
                             });
-                            
+
                             client_handles.push(handle);
                         }
 
@@ -292,7 +294,12 @@ fn bench_throughput_small_messages(c: &mut Criterion) {
                         let overall_elapsed = overall_start.elapsed();
                         let (_, server_bytes_rx, _, server_bytes_tx) = server_handler.stats();
 
-                        black_box((overall_elapsed, max_client_time, server_bytes_rx, server_bytes_tx));
+                        black_box((
+                            overall_elapsed,
+                            max_client_time,
+                            server_bytes_rx,
+                            server_bytes_tx,
+                        ));
 
                         server.shutdown().await.unwrap();
                     });
@@ -322,16 +329,21 @@ fn bench_throughput_large_messages(c: &mut Criterion) {
         for msg_size in [1024, 4096, 8192].iter() {
             let messages_per_client = 50;
             let total_bytes = client_count * messages_per_client * msg_size;
-            
+
             group.throughput(Throughput::Bytes(total_bytes as u64));
-            
+
             group.bench_with_input(
-                BenchmarkId::from_parameter(format!("{}clients_{}KB", client_count, msg_size / 1024)),
+                BenchmarkId::from_parameter(format!(
+                    "{}clients_{}KB",
+                    client_count,
+                    msg_size / 1024
+                )),
                 &(client_count, msg_size),
                 |b, &(&client_count, &msg_size)| {
                     b.to_async(&runtime).iter(|| async move {
                         let server_handler = Arc::new(EchoServerHandler::new());
-                        let (server, addr) = setup_test_server(server_handler.clone()).await.unwrap();
+                        let (server, addr) =
+                            setup_test_server(server_handler.clone()).await.unwrap();
 
                         let barrier = Arc::new(Barrier::new(client_count + 1));
                         let mut client_handles = Vec::new();
@@ -346,7 +358,7 @@ fn bench_throughput_large_messages(c: &mut Criterion) {
                             let handle = tokio::spawn(async move {
                                 let mut stream = create_client_stream(addr).await.unwrap();
                                 use tokio::io::AsyncWriteExt;
-                                
+
                                 barrier.wait().await;
 
                                 let start = Instant::now();
@@ -363,7 +375,7 @@ fn bench_throughput_large_messages(c: &mut Criterion) {
                                 drop(stream);
                                 elapsed
                             });
-                            
+
                             client_handles.push(handle);
                         }
 
@@ -380,7 +392,12 @@ fn bench_throughput_large_messages(c: &mut Criterion) {
                         let overall_elapsed = overall_start.elapsed();
                         let (_, server_bytes_rx, _, server_bytes_tx) = server_handler.stats();
 
-                        black_box((overall_elapsed, max_client_time, server_bytes_rx, server_bytes_tx));
+                        black_box((
+                            overall_elapsed,
+                            max_client_time,
+                            server_bytes_rx,
+                            server_bytes_tx,
+                        ));
 
                         server.shutdown().await.unwrap();
                     });
@@ -408,9 +425,9 @@ fn bench_character_throughput(c: &mut Criterion) {
     for client_count in [1, 5, 10].iter() {
         let chars_per_client = 500;
         let total_chars = client_count * chars_per_client;
-        
+
         group.throughput(Throughput::Elements(total_chars as u64));
-        
+
         group.bench_with_input(
             BenchmarkId::from_parameter(format!("{}clients", client_count)),
             client_count,
@@ -429,7 +446,7 @@ fn bench_character_throughput(c: &mut Criterion) {
                         let handle = tokio::spawn(async move {
                             let mut stream = create_client_stream(addr).await.unwrap();
                             use tokio::io::AsyncWriteExt;
-                            
+
                             barrier.wait().await;
 
                             let start = Instant::now();
@@ -446,7 +463,7 @@ fn bench_character_throughput(c: &mut Criterion) {
                             drop(stream);
                             elapsed
                         });
-                        
+
                         client_handles.push(handle);
                     }
 
@@ -504,11 +521,11 @@ fn bench_mixed_workload(c: &mut Criterion) {
                         let handle = tokio::spawn(async move {
                             let mut stream = create_client_stream(addr).await.unwrap();
                             use tokio::io::AsyncWriteExt;
-                            
+
                             barrier.wait().await;
 
                             let start = Instant::now();
-                            
+
                             // Mix of small, medium, and large messages
                             for i in 0..100 {
                                 let msg = match i % 3 {
@@ -518,7 +535,7 @@ fn bench_mixed_workload(c: &mut Criterion) {
                                 };
                                 let _ = stream.write_all(msg.as_bytes()).await;
                                 let _ = stream.flush().await;
-                                
+
                                 // Vary the delay
                                 if client_id % 2 == 0 {
                                     tokio::time::sleep(Duration::from_micros(50)).await;
@@ -532,7 +549,7 @@ fn bench_mixed_workload(c: &mut Criterion) {
                             drop(stream);
                             elapsed
                         });
-                        
+
                         client_handles.push(handle);
                     }
 
@@ -569,7 +586,7 @@ fn bench_latency_distribution(c: &mut Criterion) {
             let (server, addr) = setup_test_server(server_handler.clone()).await.unwrap();
 
             let mut latencies = Vec::new();
-            
+
             let mut stream = create_client_stream(addr).await.unwrap();
             use tokio::io::AsyncWriteExt;
 
@@ -578,9 +595,9 @@ fn bench_latency_distribution(c: &mut Criterion) {
                 let msg = format!("ping {}\r\n", i);
                 let _ = stream.write_all(msg.as_bytes()).await;
                 let _ = stream.flush().await;
-                
+
                 tokio::time::sleep(Duration::from_millis(5)).await;
-                
+
                 latencies.push(start.elapsed());
             }
 
@@ -610,8 +627,10 @@ fn bench_sustained_load(c: &mut Criterion) {
 
     for client_count in [10, 25, 50].iter() {
         let messages_per_client = 200;
-        group.throughput(Throughput::Elements(*client_count as u64 * messages_per_client));
-        
+        group.throughput(Throughput::Elements(
+            *client_count as u64 * messages_per_client,
+        ));
+
         group.bench_with_input(
             BenchmarkId::from_parameter(format!("{}clients_sustained", client_count)),
             client_count,
@@ -624,18 +643,18 @@ fn bench_sustained_load(c: &mut Criterion) {
 
                     for client_id in 0..client_count {
                         let addr = addr.clone();
-                        
+
                         let handle = tokio::spawn(async move {
                             let mut stream = create_client_stream(addr).await.unwrap();
                             use tokio::io::AsyncWriteExt;
 
                             let start = Instant::now();
-                            
+
                             for i in 0..messages_per_client {
                                 let msg = format!("Client {} msg {}\r\n", client_id, i);
                                 let _ = stream.write_all(msg.as_bytes()).await;
                                 let _ = stream.flush().await;
-                                
+
                                 tokio::time::sleep(Duration::from_micros(100)).await;
                             }
 
@@ -646,7 +665,7 @@ fn bench_sustained_load(c: &mut Criterion) {
                             drop(stream);
                             elapsed
                         });
-                        
+
                         client_handles.push(handle);
                     }
 
@@ -680,5 +699,3 @@ criterion_group!(
 );
 
 criterion_main!(integration_benches);
-
-

@@ -31,7 +31,7 @@ use dashmap::DashMap;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Instant;
-use termionix_terminal::TerminalCommand;
+use termionix_service::TerminalCommand;
 use tokio::sync::mpsc;
 use tokio::task::JoinHandle;
 use tracing::instrument;
@@ -271,7 +271,7 @@ impl ConnectionManager {
     #[instrument(skip(self))]
     pub async fn broadcast(&self, command: TerminalCommand) -> BroadcastResult {
         use futures_util::stream::{self, StreamExt};
-        
+
         let mut result = BroadcastResult::new();
         result.total = self.connections.len();
 
@@ -279,8 +279,8 @@ impl ConnectionManager {
         let sends = self.connections.iter().map(|entry| {
             let id = *entry.key();
             let tx = entry.control_tx.clone();
-            let cmd = command;
-            
+            let cmd = command.clone();
+
             async move {
                 match tx.send(ControlMessage::Broadcast(cmd)).await {
                     Ok(_) => (id, Ok(())),
@@ -291,7 +291,7 @@ impl ConnectionManager {
 
         // Process in batches of 100 concurrent operations to avoid memory spike
         let mut results_stream = stream::iter(sends).buffer_unordered(100);
-        
+
         while let Some((id, res)) = results_stream.next().await {
             match res {
                 Ok(_) => result.succeeded += 1,
@@ -324,7 +324,7 @@ impl ConnectionManager {
                 result.total += 1;
                 let id = *entry.key();
                 let tx = entry.control_tx.clone();
-                let cmd = command;
+                let cmd = command.clone();
 
                 sends.push(async move {
                     match tx.send(ControlMessage::Broadcast(cmd)).await {
@@ -369,9 +369,9 @@ impl ConnectionManager {
     /// # Example
     ///
     /// ```no_run
-    /// # use termionix_service::ConnectionManager;
+    /// # use termionix_server::ConnectionManager;
     /// # use termionix_terminal::TerminalCommand;
-    /// # async fn example(manager: &ConnectionManager, sender_id: termionix_service::ConnectionId) {
+    /// # async fn example(manager: &ConnectionManager, sender_id: termionix_server::ConnectionId) {
     /// // Broadcast to all except the sender
     /// let result = manager.broadcast_except(
     ///     TerminalCommand::SendEraseLine,
@@ -399,7 +399,7 @@ impl ConnectionManager {
 
             result.total += 1;
             let tx = entry.control_tx.clone();
-            let cmd = command;
+            let cmd = command.clone();
 
             sends.push(async move {
                 match tx.send(ControlMessage::Broadcast(cmd)).await {
@@ -536,7 +536,7 @@ mod tests {
         assert_eq!(manager.connection_count(), 3);
 
         // Broadcast a command
-        let result = manager.broadcast(TerminalCommand::SendEraseLine).await;
+        let result = manager.broadcast(TerminalCommand::EraseLine).await;
         assert_eq!(result.total, 3);
 
         // Cleanup

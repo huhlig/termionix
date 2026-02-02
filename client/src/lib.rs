@@ -24,29 +24,29 @@
 //! - **Automatic Protocol Negotiation** - Handles NAWS, terminal type, and other options
 //! - **Reconnection Support** - Automatic reconnection with configurable retry logic
 //! - **Event-Driven** - Handler-based API for processing server events
-//! - **Type-Safe Metadata** - Store arbitrary typed data per connection
+//! - **Terminal-Aware** - Built-in terminal emulation and ANSI code processing
 //! - **Async-First** - Built on Tokio for high-performance async I/O
 //!
 //! ## Quick Start
 //!
 //! ```no_run
-//! use termionix_client::{TelnetClient, ClientConfig, ClientHandler, ClientConnection};
+//! use termionix_client::{TerminalClient, ClientConfig, TerminalHandler, TerminalConnection};
 //! use async_trait::async_trait;
 //! use std::sync::Arc;
 //!
 //! struct MyHandler;
 //!
 //! #[async_trait]
-//! impl ClientHandler for MyHandler {
-//!     async fn on_connect(&self, conn: &ClientConnection) {
+//! impl TerminalHandler for MyHandler {
+//!     async fn on_connect(&self, conn: &TerminalConnection) {
 //!         println!("Connected!");
 //!     }
 //!     
-//!     async fn on_data(&self, conn: &ClientConnection, data: &[u8]) {
-//!         print!("{}", String::from_utf8_lossy(data));
+//!     async fn on_character(&self, conn: &TerminalConnection, ch: char) {
+//!         print!("{}", ch);
 //!     }
 //!     
-//!     async fn on_line(&self, conn: &ClientConnection, line: &str) {
+//!     async fn on_line(&self, conn: &TerminalConnection, line: &str) {
 //!         println!("Received line: {}", line);
 //!     }
 //! }
@@ -57,7 +57,7 @@
 //!         .with_auto_reconnect(true)
 //!         .with_terminal_type("xterm-256color");
 //!     
-//!     let mut client = TelnetClient::new(config);
+//!     let mut client = TerminalClient::new(config);
 //!     client.connect(Arc::new(MyHandler)).await?;
 //!     
 //!     Ok(())
@@ -67,83 +67,39 @@
 //! ## Sending Data
 //!
 //! ```no_run
-//! # use termionix_client::{ClientConnection, ClientError};
-//! # async fn example(conn: &ClientConnection) -> Result<(), ClientError> {
-//! // Send raw bytes
-//! conn.send_bytes(b"Hello").await?;
-//!
+//! # use termionix_client::{TerminalConnection, ClientError};
+//! # async fn example(conn: &TerminalConnection) -> Result<(), ClientError> {
 //! // Send a string
-//! conn.send("Hello, server!").await?;
+//! conn.send("Hello, server!", false).await?;
 //!
-//! // Send a line (appends CR LF)
+//! // Send a line (appends CR LF and flushes)
 //! conn.send_line("quit").await?;
+//!
+//! // Send a terminal command
+//! use termionix_client::TerminalCommand;
+//! conn.send_command(TerminalCommand::ClearScreen).await?;
 //! # Ok(())
-//! # }
-//! ```
-//!
-//! ## Connection Metadata
-//!
-//! ```no_run
-//! # use termionix_client::ClientConnection;
-//! # async fn example(conn: &ClientConnection) {
-//! #[derive(Clone)]
-//! struct PlayerData {
-//!     name: String,
-//!     level: u32,
-//! }
-//!
-//! // Store data
-//! let player = PlayerData {
-//!     name: "Alice".to_string(),
-//!     level: 5,
-//! };
-//! conn.set_data("player", player).await;
-//!
-//! // Retrieve data
-//! if let Some(player) = conn.get_data::<PlayerData>("player").await {
-//!     println!("Player: {} (Level {})", player.name, player.level);
-//! }
 //! # }
 //! ```
 
 mod client;
 mod config;
-mod connection;
 mod error;
-mod handler;
 
-pub use client::{TerminalClient, TerminalConnection, TerminalHandler};
+pub use client::{ConnectionState, TerminalClient, TerminalConnection, TerminalHandler};
 pub use config::ClientConfig;
-pub use connection::{ClientConnection, ConnectionState};
 pub use error::{ClientError, Result};
-pub use handler::{CallbackHandler, ClientHandler};
 
-// Re-export types from termionix_terminal
-pub use termionix_terminal::{
-    CursorPosition, TerminalBuffer, TerminalCodec, TerminalCommand, TerminalError, TerminalEvent,
-    TerminalResult, TerminalSize,
+// Re-export types from termionix_service
+pub use termionix_service::{
+    gmcp, linemode, msdp, mssp, naocrd, naohts, naws, status, strip_ansi_codes,
+    terminal_word_unwrap, terminal_word_wrap, AnsiApplicationProgramCommand, AnsiCodec,
+    AnsiCodecError, AnsiCodecResult, AnsiConfig, AnsiControlCode, AnsiControlSequenceIntroducer,
+    AnsiDeviceControlString, AnsiOperatingSystemCommand, AnsiParser, AnsiPrivacyMessage,
+    AnsiSelectGraphicRendition, AnsiSequence, AnsiStartOfString, Blink, Color, ColorMode,
+    CompressionAlgorithm, CursorPosition, Font, Ideogram, Intensity, SGRParameter, Script, Segment,
+    SegmentedString, Span, SpannedString, StyledString, SubnegotiationErrorKind, TelnetArgument,
+    TelnetCodec, TelnetCodecError, TelnetCodecResult, TelnetCommand, TelnetEvent, TelnetFrame,
+    TelnetOption, TelnetSide, TerminalBuffer, TerminalCodec, TerminalCommand, TerminalError,
+    TerminalEvent, TerminalResult, TerminalSize, Underline,
 };
-
-// Re-export types from termionix_telnetcodec
-pub use termionix_telnetcodec::{
-    CodecError as TelnetCodecError, CodecResult as TelnetCodecResult, SubnegotiationErrorKind,
-    TelnetArgument, TelnetCodec, TelnetEvent, TelnetFrame, TelnetOption, TelnetSide,
-};
-
-// Re-export telnet argument modules
-pub use termionix_telnetcodec::{gmcp, linemode, msdp, mssp, naocrd, naohts, naws, status};
-
-// Re-export types from termionix_ansicodec
-pub use termionix_ansicodec::{
-    AnsiApplicationProgramCommand, AnsiCodec, AnsiConfig, AnsiControlCode,
-    AnsiControlSequenceIntroducer, AnsiDeviceControlString, AnsiError, AnsiOperatingSystemCommand,
-    AnsiParser, AnsiPrivacyMessage, AnsiResult, AnsiSelectGraphicRendition, AnsiSequence,
-    AnsiStartOfString, Blink, Color, ColorMode, Font, Ideogram, Intensity, SGRParameter, Script,
-    Segment, SegmentedString, Span, SpannedString, StyledString, Underline,
-};
-
-// Re-export ansi utility functions
-pub use termionix_ansicodec::utility::strip_ansi_codes;
-
-// Type aliases for convenience
-pub use termionix_ansicodec::{ControlCode, Style, TelnetCommand};

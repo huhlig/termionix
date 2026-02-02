@@ -40,7 +40,7 @@ use tracing::instrument;
 /// # Example
 ///
 /// ```no_run
-/// use termionix_service::{TelnetServer, ServerConfig, ServerHandler};
+/// use termionix_server::{TelnetServer, ServerConfig, ServerHandler};
 /// use async_trait::async_trait;
 ///
 /// struct MyHandler;

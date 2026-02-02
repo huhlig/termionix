@@ -1,12 +1,12 @@
 [package]
 name = "termionix-service"
-description = "Termionix Telnet Service"
 version.workspace = true
 edition.workspace = true
 publish.workspace = true
 keywords.workspace = true
 readme.workspace = true
 license.workspace = true
+description.workspace = true
 authors.workspace = true
 documentation.workspace = true
 homepage.workspace = true
@@ -14,39 +14,30 @@ repository.workspace = true
 categories.workspace = true
 
 [dependencies]
-async-debug.workspace = true
-async-trait.workspace = true
-dashmap.workspace = true
-futures.workspace = true
-futures-util.workspace = true
-metrics.workspace = true
-termionix-ansicodec.workspace = true
-termionix-telnetcodec.workspace = true
-termionix-compress.workspace = true
+# Internal Crates
 termionix-terminal.workspace = true
-thiserror.workspace = true
+termionix-compress.workspace = true
+
+# Async runtime
 tokio.workspace = true
 tokio-util.workspace = true
-tracing.workspace = true
-tracing-timing.workspace = true
+
+# Async utilities
+futures-util = { workspace = true, features = ["sink"] }
+
+# Error handling
+thiserror.workspace = true
+
+# Serialization
+bytes.workspace = true
 
 [dev-dependencies]
-criterion = { workspace = true, features = ["async_tokio", "html_reports"] }
-tracing-subscriber.workspace = true
-tracing-test.workspace = true
+tokio.workspace = true
+criterion = { version = "0.5", features = ["async_tokio"] }
+termionix-ansicodec.workspace = true
+termionix-telnetcodec.workspace = true
+bytes.workspace = true
 
 [[bench]]
-name = "server_benchmarks"
+name = "service_benchmarks"
 harness = false
-
-[[example]]
-name = "echo_server"
-path = "../examples/echo_server.rs"
-
-[[example]]
-name = "simple_server"
-path = "../examples/simple_server.rs"
-
-[[example]]
-name = "terminal_direct"
-path = "../examples/terminal_direct.rs"

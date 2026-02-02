@@ -18,6 +18,7 @@
 
 use std::fmt;
 use std::io;
+use termionix_service::{TelnetCodecError, TerminalError};
 
 /// Client error type
 #[derive(Debug, Clone)]
@@ -89,14 +90,14 @@ impl From<io::Error> for ClientError {
     }
 }
 
-impl From<termionix_telnetcodec::CodecError> for ClientError {
-    fn from(error: termionix_telnetcodec::CodecError) -> Self {
+impl From<TelnetCodecError> for ClientError {
+    fn from(error: TelnetCodecError) -> Self {
         Self::CodecError(error.to_string())
     }
 }
 
-impl From<termionix_terminal::TerminalError> for ClientError {
-    fn from(error: termionix_terminal::TerminalError) -> Self {
+impl From<TerminalError> for ClientError {
+    fn from(error: TerminalError) -> Self {
         Self::CodecError(error.to_string())
     }
 }

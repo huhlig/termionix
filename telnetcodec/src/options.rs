@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{CodecError, CodecResult, TelnetFrame, consts};
+use crate::{TelnetCodecError, TelnetCodecResult, TelnetFrame, consts};
 use std::fmt::Formatter;
 
 ///
@@ -410,7 +410,7 @@ impl From<TelnetOption> for u8 {
 /// The Telnet sidechannel uses option codes ranging from 0 to 254, which makes the size
 /// of both arrays precisely 255 to represent all potential options. The fields ensure
 /// the ability to handle and manage all standard Telnet options.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct TelnetOptions {
     config: [SupportState; 255],
     state: [OptionState; 255],
@@ -600,13 +600,16 @@ impl TelnetOptions {
     /// This function returns `Err(TerminalError::NegotationError)` if the received `frame`
     /// is of an unsupported or invalid type.
     ///
-    pub fn handle_received(&mut self, frame: TelnetFrame) -> CodecResult<Option<TelnetFrame>> {
+    pub fn handle_received(
+        &mut self,
+        frame: TelnetFrame,
+    ) -> TelnetCodecResult<Option<TelnetFrame>> {
         match frame {
             TelnetFrame::Do(option) => Ok(self.recv_do(option)),
             TelnetFrame::Dont(option) => Ok(self.recv_dont(option)),
             TelnetFrame::Will(option) => Ok(self.recv_will(option)),
             TelnetFrame::Wont(option) => Ok(self.recv_wont(option)),
-            _ => Err(CodecError::NegotiationError {
+            _ => Err(TelnetCodecError::NegotiationError {
                 reason: "Unsupported frame type".into(),
                 frame_type: Some(format!("{:?}", frame)),
             }),

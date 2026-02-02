@@ -303,7 +303,7 @@ fn bench_sequence_types(c: &mut Criterion) {
 
     group.bench_function("control", |b| {
         let mut codec = create_codec();
-        let seq = AnsiSequence::Control(AnsiControlCode::LF);
+        let seq = AnsiSequence::AnsiControlCode(AnsiControlCode::LF);
 
         b.iter(|| {
             let mut buffer = BytesMut::new();

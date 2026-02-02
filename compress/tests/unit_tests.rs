@@ -19,7 +19,7 @@
 use std::io;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use termionix_compress::{Algorithm, CompressionStream};
+use termionix_compress::{CompressionAlgorithm, CompressionStream};
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, ReadBuf};
 
 // ============================================================================
@@ -136,46 +136,46 @@ impl AsyncWrite for MockStream {
 
 #[test]
 fn test_algorithm_equality() {
-    assert_eq!(Algorithm::None, Algorithm::None);
-    assert_eq!(Algorithm::Gzip, Algorithm::Gzip);
-    assert_eq!(Algorithm::Deflate, Algorithm::Deflate);
-    assert_eq!(Algorithm::Brotli, Algorithm::Brotli);
-    assert_eq!(Algorithm::Zlib, Algorithm::Zlib);
-    assert_eq!(Algorithm::Zstd, Algorithm::Zstd);
+    assert_eq!(CompressionAlgorithm::None, CompressionAlgorithm::None);
+    assert_eq!(CompressionAlgorithm::Gzip, CompressionAlgorithm::Gzip);
+    assert_eq!(CompressionAlgorithm::Deflate, CompressionAlgorithm::Deflate);
+    assert_eq!(CompressionAlgorithm::Brotli, CompressionAlgorithm::Brotli);
+    assert_eq!(CompressionAlgorithm::Zlib, CompressionAlgorithm::Zlib);
+    assert_eq!(CompressionAlgorithm::Zstd, CompressionAlgorithm::Zstd);
 }
 
 #[test]
 fn test_algorithm_inequality() {
-    assert_ne!(Algorithm::None, Algorithm::Gzip);
-    assert_ne!(Algorithm::Gzip, Algorithm::Deflate);
-    assert_ne!(Algorithm::Deflate, Algorithm::Brotli);
-    assert_ne!(Algorithm::Brotli, Algorithm::Zlib);
-    assert_ne!(Algorithm::Zlib, Algorithm::Zstd);
-    assert_ne!(Algorithm::Zstd, Algorithm::None);
+    assert_ne!(CompressionAlgorithm::None, CompressionAlgorithm::Gzip);
+    assert_ne!(CompressionAlgorithm::Gzip, CompressionAlgorithm::Deflate);
+    assert_ne!(CompressionAlgorithm::Deflate, CompressionAlgorithm::Brotli);
+    assert_ne!(CompressionAlgorithm::Brotli, CompressionAlgorithm::Zlib);
+    assert_ne!(CompressionAlgorithm::Zlib, CompressionAlgorithm::Zstd);
+    assert_ne!(CompressionAlgorithm::Zstd, CompressionAlgorithm::None);
 }
 
 #[test]
 fn test_algorithm_clone() {
-    let algo = Algorithm::Gzip;
+    let algo = CompressionAlgorithm::Gzip;
     let cloned = algo.clone();
     assert_eq!(algo, cloned);
 }
 
 #[test]
 fn test_algorithm_copy() {
-    let algo = Algorithm::Gzip;
+    let algo = CompressionAlgorithm::Gzip;
     let copied = algo;
     assert_eq!(algo, copied);
 }
 
 #[test]
 fn test_algorithm_debug() {
-    assert_eq!(format!("{:?}", Algorithm::None), "None");
-    assert_eq!(format!("{:?}", Algorithm::Gzip), "Gzip");
-    assert_eq!(format!("{:?}", Algorithm::Deflate), "Deflate");
-    assert_eq!(format!("{:?}", Algorithm::Brotli), "Brotli");
-    assert_eq!(format!("{:?}", Algorithm::Zlib), "Zlib");
-    assert_eq!(format!("{:?}", Algorithm::Zstd), "Zstd");
+    assert_eq!(format!("{:?}", CompressionAlgorithm::None), "None");
+    assert_eq!(format!("{:?}", CompressionAlgorithm::Gzip), "Gzip");
+    assert_eq!(format!("{:?}", CompressionAlgorithm::Deflate), "Deflate");
+    assert_eq!(format!("{:?}", CompressionAlgorithm::Brotli), "Brotli");
+    assert_eq!(format!("{:?}", CompressionAlgorithm::Zlib), "Zlib");
+    assert_eq!(format!("{:?}", CompressionAlgorithm::Zstd), "Zstd");
 }
 
 // ============================================================================
@@ -185,43 +185,43 @@ fn test_algorithm_debug() {
 #[tokio::test]
 async fn test_new_with_none() {
     let stream = MockStream::new();
-    let compression = CompressionStream::new(stream, Algorithm::None);
-    assert_eq!(compression.algorithm(), Algorithm::None);
+    let compression = CompressionStream::new(stream, CompressionAlgorithm::None);
+    assert_eq!(compression.algorithm(), CompressionAlgorithm::None);
 }
 
 #[tokio::test]
 async fn test_new_with_gzip() {
     let stream = MockStream::new();
-    let compression = CompressionStream::new(stream, Algorithm::Gzip);
-    assert_eq!(compression.algorithm(), Algorithm::Gzip);
+    let compression = CompressionStream::new(stream, CompressionAlgorithm::Gzip);
+    assert_eq!(compression.algorithm(), CompressionAlgorithm::Gzip);
 }
 
 #[tokio::test]
 async fn test_new_with_deflate() {
     let stream = MockStream::new();
-    let compression = CompressionStream::new(stream, Algorithm::Deflate);
-    assert_eq!(compression.algorithm(), Algorithm::Deflate);
+    let compression = CompressionStream::new(stream, CompressionAlgorithm::Deflate);
+    assert_eq!(compression.algorithm(), CompressionAlgorithm::Deflate);
 }
 
 #[tokio::test]
 async fn test_new_with_brotli() {
     let stream = MockStream::new();
-    let compression = CompressionStream::new(stream, Algorithm::Brotli);
-    assert_eq!(compression.algorithm(), Algorithm::Brotli);
+    let compression = CompressionStream::new(stream, CompressionAlgorithm::Brotli);
+    assert_eq!(compression.algorithm(), CompressionAlgorithm::Brotli);
 }
 
 #[tokio::test]
 async fn test_new_with_zlib() {
     let stream = MockStream::new();
-    let compression = CompressionStream::new(stream, Algorithm::Zlib);
-    assert_eq!(compression.algorithm(), Algorithm::Zlib);
+    let compression = CompressionStream::new(stream, CompressionAlgorithm::Zlib);
+    assert_eq!(compression.algorithm(), CompressionAlgorithm::Zlib);
 }
 
 #[tokio::test]
 async fn test_new_with_zstd() {
     let stream = MockStream::new();
-    let compression = CompressionStream::new(stream, Algorithm::Zstd);
-    assert_eq!(compression.algorithm(), Algorithm::Zstd);
+    let compression = CompressionStream::new(stream, CompressionAlgorithm::Zstd);
+    assert_eq!(compression.algorithm(), CompressionAlgorithm::Zstd);
 }
 
 // ============================================================================
@@ -231,7 +231,7 @@ async fn test_new_with_zstd() {
 #[tokio::test]
 async fn test_write_no_compression() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::None);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     let data = b"Hello, World!";
     compression.write_all(data).await.unwrap();
@@ -244,7 +244,7 @@ async fn test_write_no_compression() {
 #[tokio::test]
 async fn test_write_empty_data() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::None);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     compression.write_all(b"").await.unwrap();
     compression.flush().await.unwrap();
@@ -256,7 +256,7 @@ async fn test_write_empty_data() {
 #[tokio::test]
 async fn test_write_single_byte() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::None);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     compression.write_all(b"A").await.unwrap();
     compression.flush().await.unwrap();
@@ -268,7 +268,7 @@ async fn test_write_single_byte() {
 #[tokio::test]
 async fn test_multiple_writes() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::None);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     compression.write_all(b"Hello").await.unwrap();
     compression.write_all(b", ").await.unwrap();
@@ -282,7 +282,7 @@ async fn test_multiple_writes() {
 #[tokio::test]
 async fn test_write_with_gzip() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::Gzip);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::Gzip);
 
     let data = b"Test data for compression";
     compression.write_all(data).await.unwrap();
@@ -299,7 +299,7 @@ async fn test_write_with_gzip() {
 #[tokio::test]
 async fn test_write_with_deflate() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::Deflate);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::Deflate);
 
     let data = b"Test data for compression";
     compression.write_all(data).await.unwrap();
@@ -315,7 +315,7 @@ async fn test_write_with_deflate() {
 #[tokio::test]
 async fn test_write_with_zlib() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::Zlib);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::Zlib);
 
     let data = b"Test data for compression";
     compression.write_all(data).await.unwrap();
@@ -332,7 +332,7 @@ async fn test_write_with_zlib() {
 #[tokio::test]
 async fn test_write_with_zstd() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::Zstd);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::Zstd);
 
     let data = b"Test data for compression";
     compression.write_all(data).await.unwrap();
@@ -349,7 +349,7 @@ async fn test_write_with_zstd() {
 #[tokio::test]
 async fn test_write_with_brotli() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::Brotli);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::Brotli);
 
     let data = b"Test data for compression";
     compression.write_all(data).await.unwrap();
@@ -370,7 +370,7 @@ async fn test_write_with_brotli() {
 async fn test_read_passthrough() {
     let data = b"Hello, World!";
     let stream = MockStream::with_read_data(data.to_vec());
-    let mut compression = CompressionStream::new(stream, Algorithm::None);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     let mut buf = vec![0u8; 32];
     let n = compression.read(&mut buf).await.unwrap();
@@ -382,7 +382,7 @@ async fn test_read_passthrough() {
 #[tokio::test]
 async fn test_read_empty() {
     let stream = MockStream::with_read_data(vec![]);
-    let mut compression = CompressionStream::new(stream, Algorithm::None);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     let mut buf = vec![0u8; 32];
     let n = compression.read(&mut buf).await.unwrap();
@@ -394,7 +394,7 @@ async fn test_read_empty() {
 async fn test_read_partial() {
     let data = b"Hello, World!";
     let stream = MockStream::with_read_data(data.to_vec());
-    let mut compression = CompressionStream::new(stream, Algorithm::None);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     let mut buf = vec![0u8; 5];
     let n = compression.read(&mut buf).await.unwrap();
@@ -407,7 +407,7 @@ async fn test_read_partial() {
 async fn test_read_multiple() {
     let data = b"Hello, World!";
     let stream = MockStream::with_read_data(data.to_vec());
-    let mut compression = CompressionStream::new(stream, Algorithm::None);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     let mut buf1 = vec![0u8; 5];
     let n1 = compression.read(&mut buf1).await.unwrap();
@@ -427,43 +427,52 @@ async fn test_read_multiple() {
 #[tokio::test]
 async fn test_switch_none_to_gzip() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::None);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
-    assert_eq!(compression.algorithm(), Algorithm::None);
-    compression.switch_algorithm(Algorithm::Gzip).await.unwrap();
-    assert_eq!(compression.algorithm(), Algorithm::Gzip);
+    assert_eq!(compression.algorithm(), CompressionAlgorithm::None);
+    compression
+        .switch_algorithm(CompressionAlgorithm::Gzip)
+        .await
+        .unwrap();
+    assert_eq!(compression.algorithm(), CompressionAlgorithm::Gzip);
 }
 
 #[tokio::test]
 async fn test_switch_gzip_to_deflate() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::Gzip);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::Gzip);
 
     compression
-        .switch_algorithm(Algorithm::Deflate)
+        .switch_algorithm(CompressionAlgorithm::Deflate)
         .await
         .unwrap();
-    assert_eq!(compression.algorithm(), Algorithm::Deflate);
+    assert_eq!(compression.algorithm(), CompressionAlgorithm::Deflate);
 }
 
 #[tokio::test]
 async fn test_switch_same_algorithm() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::Gzip);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::Gzip);
 
-    compression.switch_algorithm(Algorithm::Gzip).await.unwrap();
-    assert_eq!(compression.algorithm(), Algorithm::Gzip);
+    compression
+        .switch_algorithm(CompressionAlgorithm::Gzip)
+        .await
+        .unwrap();
+    assert_eq!(compression.algorithm(), CompressionAlgorithm::Gzip);
 }
 
 #[tokio::test]
 async fn test_switch_preserves_data() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::None);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     compression.write_all(b"before").await.unwrap();
     compression.flush().await.unwrap();
 
-    compression.switch_algorithm(Algorithm::Gzip).await.unwrap();
+    compression
+        .switch_algorithm(CompressionAlgorithm::Gzip)
+        .await
+        .unwrap();
 
     compression.write_all(b"after").await.unwrap();
     compression.shutdown().await.unwrap();
@@ -478,16 +487,16 @@ async fn test_switch_preserves_data() {
 #[tokio::test]
 async fn test_switch_all_algorithms() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::None);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     let algorithms = vec![
-        Algorithm::None,
-        Algorithm::Gzip,
-        Algorithm::Deflate,
-        Algorithm::Brotli,
-        Algorithm::Zlib,
-        Algorithm::Zstd,
-        Algorithm::None,
+        CompressionAlgorithm::None,
+        CompressionAlgorithm::Gzip,
+        CompressionAlgorithm::Deflate,
+        CompressionAlgorithm::Brotli,
+        CompressionAlgorithm::Zlib,
+        CompressionAlgorithm::Zstd,
+        CompressionAlgorithm::None,
     ];
 
     for algo in algorithms {
@@ -503,7 +512,7 @@ async fn test_switch_all_algorithms() {
 #[tokio::test]
 async fn test_get_ref() {
     let stream = MockStream::with_read_data(vec![1, 2, 3, 4]);
-    let compression = CompressionStream::new(stream, Algorithm::None);
+    let compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     let inner_ref = compression.get_ref();
     assert_eq!(inner_ref.read_buf, vec![1, 2, 3, 4]);
@@ -512,7 +521,7 @@ async fn test_get_ref() {
 #[tokio::test]
 async fn test_get_mut() {
     let stream = MockStream::with_read_data(vec![1, 2, 3, 4]);
-    let mut compression = CompressionStream::new(stream, Algorithm::None);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     let inner_mut = compression.get_mut();
     inner_mut.write_buf.push(5);
@@ -522,7 +531,7 @@ async fn test_get_mut() {
 #[tokio::test]
 async fn test_into_inner() {
     let stream = MockStream::with_read_data(vec![1, 2, 3, 4]);
-    let compression = CompressionStream::new(stream, Algorithm::None);
+    let compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     let inner = compression.into_inner();
     assert_eq!(inner.read_buf, vec![1, 2, 3, 4]);
@@ -535,7 +544,7 @@ async fn test_into_inner() {
 #[tokio::test]
 async fn test_large_data_compression() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::Gzip);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::Gzip);
 
     // 1MB of repetitive data
     let large_data = vec![b'A'; 1024 * 1024];
@@ -553,7 +562,7 @@ async fn test_large_data_compression() {
 #[tokio::test]
 async fn test_highly_compressible_data() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::Gzip);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::Gzip);
 
     let repetitive = b"AAAAAAAAAA".repeat(1000);
     compression.write_all(&repetitive).await.unwrap();
@@ -568,7 +577,7 @@ async fn test_highly_compressible_data() {
 #[tokio::test]
 async fn test_incompressible_data() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::Gzip);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::Gzip);
 
     // Random-like data (less compressible)
     let data: Vec<u8> = (0..1000).map(|i| (i * 7 + 13) as u8).collect();
@@ -589,7 +598,7 @@ async fn test_incompressible_data() {
 #[tokio::test]
 async fn test_shutdown_finalizes() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::Gzip);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::Gzip);
 
     compression.write_all(b"test data").await.unwrap();
     compression.shutdown().await.unwrap();
@@ -605,7 +614,7 @@ async fn test_shutdown_finalizes() {
 #[tokio::test]
 async fn test_flush_without_shutdown() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::None);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     compression.write_all(b"test").await.unwrap();
     compression.flush().await.unwrap();
@@ -621,7 +630,7 @@ async fn test_flush_without_shutdown() {
 #[tokio::test]
 async fn test_write_after_flush() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::None);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     compression.write_all(b"first").await.unwrap();
     compression.flush().await.unwrap();
@@ -635,7 +644,7 @@ async fn test_write_after_flush() {
 #[tokio::test]
 async fn test_multiple_flushes() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::None);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     compression.write_all(b"data").await.unwrap();
     compression.flush().await.unwrap();
@@ -649,7 +658,7 @@ async fn test_multiple_flushes() {
 #[tokio::test]
 async fn test_zero_byte_writes() {
     let stream = MockStream::new();
-    let mut compression = CompressionStream::new(stream, Algorithm::None);
+    let mut compression = CompressionStream::new(stream, CompressionAlgorithm::None);
 
     for _ in 0..10 {
         compression.write_all(b"").await.unwrap();

@@ -18,8 +18,7 @@
 
 use bytes::BytesMut;
 use termionix_telnetcodec::{
-    TelnetArgument, TelnetCodec, TelnetEvent, TelnetFrame, TelnetOption, TelnetSide, msdp, mssp,
-    naws, status,
+    TelnetArgument, TelnetCodec, TelnetEvent, TelnetFrame, TelnetOption, TelnetSide, naws,
 };
 use tokio_util::codec::{Decoder, Encoder};
 

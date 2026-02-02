@@ -20,11 +20,10 @@ use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use std::hint::black_box;
 use std::sync::Arc;
 use std::time::Duration;
-use termionix_service::{
+use termionix_server::{
     ConnectionId, ConnectionManager, ServerConfig, ServerHandler, ServerMetrics, TelnetConnection,
-    WorkerConfig,
+    TerminalCommand, WorkerConfig,
 };
-use termionix_terminal::TerminalCommand;
 use tokio::net::{TcpListener, TcpStream};
 
 // Simple test handler
@@ -43,16 +42,24 @@ async fn create_test_connection() -> (TcpStream, TcpStream) {
                 attempts += 1;
                 tokio::time::sleep(Duration::from_millis(100)).await;
             }
-            Err(e) => panic!("Failed to bind to ephemeral port after {} attempts: {}", attempts, e),
+            Err(e) => panic!(
+                "Failed to bind to ephemeral port after {} attempts: {}",
+                attempts, e
+            ),
         }
     };
     let addr = listener.local_addr().unwrap();
 
     let client_task = tokio::spawn(async move {
-        TcpStream::connect(addr).await.expect("Failed to connect to server")
+        TcpStream::connect(addr)
+            .await
+            .expect("Failed to connect to server")
     });
 
-    let (server, _) = listener.accept().await.expect("Failed to accept connection");
+    let (server, _) = listener
+        .accept()
+        .await
+        .expect("Failed to accept connection");
     let client = client_task.await.expect("Client task failed");
 
     (server, client)
@@ -61,28 +68,28 @@ async fn create_test_connection() -> (TcpStream, TcpStream) {
 // Benchmark connection creation
 fn bench_connection_creation(c: &mut Criterion) {
     let runtime = tokio::runtime::Runtime::new().unwrap();
-    
+
     // Configure benchmark to use fewer samples to avoid port exhaustion
     let mut group = c.benchmark_group("connection_creation");
     group.sample_size(50); // Reduce from default 100
     group.measurement_time(Duration::from_secs(10)); // Give more time per sample
-    
+
     group.bench_function("create", |b| {
         b.to_async(&runtime).iter(|| async {
             let (server, client) = create_test_connection().await;
             let id = ConnectionId::new(1);
             let connection = TelnetConnection::wrap(server, id).unwrap();
             black_box(&connection);
-            
+
             // Properly close connections
             drop(connection);
             drop(client);
-            
+
             // Small delay to allow port cleanup
             tokio::time::sleep(Duration::from_millis(1)).await;
         });
     });
-    
+
     group.finish();
 }
 
@@ -181,7 +188,7 @@ fn bench_broadcast_scaling(c: &mut Criterion) {
                     tokio::time::sleep(Duration::from_millis(100)).await;
 
                     // Benchmark broadcast
-                    let result = manager.broadcast(TerminalCommand::SendEraseLine).await;
+                    let result = manager.broadcast(TerminalCommand::EraseLine).await;
                     black_box(result);
 
                     // Give time for broadcast to complete
@@ -251,7 +258,7 @@ fn bench_concurrent_operations(c: &mut Criterion) {
 // Benchmark state transitions
 fn bench_state_transitions(c: &mut Criterion) {
     use std::sync::atomic::{AtomicU8, Ordering};
-    use termionix_service::ConnectionState;
+    use termionix_server::ConnectionState;
 
     let state = AtomicU8::new(ConnectionState::Connecting.as_u8());
 
@@ -310,7 +317,7 @@ fn bench_message_throughput(c: &mut Criterion) {
                     // Send multiple messages
                     for _ in 0..msg_count {
                         let _ = manager
-                            .send_to_connection(id, TerminalCommand::SendEraseLine)
+                            .send_to_connection(id, TerminalCommand::EraseLine)
                             .await;
                     }
 
@@ -427,9 +434,7 @@ fn bench_filtered_broadcast(c: &mut Criterion) {
 
             // Broadcast with filter (only even IDs)
             let result = manager
-                .broadcast_filtered(TerminalCommand::SendEraseLine, |info| {
-                    info.id.as_u64() % 2 == 0
-                })
+                .broadcast_filtered(TerminalCommand::EraseLine, |info| info.id.as_u64() % 2 == 0)
                 .await;
             black_box(result);
 
@@ -480,7 +485,7 @@ fn bench_broadcast_except(c: &mut Criterion) {
 
             // Broadcast except excluded IDs
             let result = manager
-                .broadcast_except(TerminalCommand::SendEraseLine, &exclude_ids)
+                .broadcast_except(TerminalCommand::EraseLine, &exclude_ids)
                 .await;
             black_box(result);
 

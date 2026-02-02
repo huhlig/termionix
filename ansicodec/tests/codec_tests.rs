@@ -153,7 +153,7 @@ fn test_encode_sequence_control() {
     let mut codec = create_codec();
     let mut buffer = BytesMut::new();
 
-    let seq = AnsiSequence::Control(AnsiControlCode::LF);
+    let seq = AnsiSequence::AnsiControlCode(AnsiControlCode::LF);
     codec.encode(seq, &mut buffer).unwrap();
 
     assert_eq!(&buffer[..], b"\n");
@@ -198,7 +198,7 @@ fn test_decode_with_control_codes() {
     assert_eq!(results.len(), 3);
     assert!(matches!(
         results[2],
-        AnsiSequence::Control(AnsiControlCode::LF)
+        AnsiSequence::AnsiControlCode(AnsiControlCode::LF)
     ));
 }
 
@@ -418,7 +418,10 @@ fn test_encode_sequence_types() {
         .encode(AnsiSequence::Unicode('€'), &mut buffer)
         .unwrap();
     codec
-        .encode(AnsiSequence::Control(AnsiControlCode::LF), &mut buffer)
+        .encode(
+            AnsiSequence::AnsiControlCode(AnsiControlCode::LF),
+            &mut buffer,
+        )
         .unwrap();
     codec.encode(AnsiSequence::AnsiEscape, &mut buffer).unwrap();
 

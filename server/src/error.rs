@@ -17,6 +17,7 @@
 //! Error types for the  Telnet server
 
 use crate::types::ConnectionId;
+use termionix_service::{TelnetCodecError, TerminalError};
 use thiserror::Error;
 
 /// Result type for operations
@@ -31,11 +32,11 @@ pub enum TelnetError {
 
     /// Protocol error from the codec layer
     #[error("Protocol error: {0}")]
-    Protocol(#[from] termionix_telnetcodec::CodecError),
+    Protocol(#[from] TelnetCodecError),
 
     /// Terminal error from the terminal layer
     #[error("Terminal error: {0}")]
-    Terminal(#[from] termionix_terminal::TerminalError),
+    Terminal(#[from] TerminalError),
 
     /// Connection with the given ID was not found
     #[error("Connection {0} not found")]

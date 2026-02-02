@@ -17,7 +17,7 @@
 //! TODO: Fix StyledString
 
 use crate::style::{AnsiSelectGraphicRendition, Blink, Color, Intensity, Underline};
-use crate::{AnsiConfig, AnsiResult, SegmentedString};
+use crate::{AnsiCodecResult, AnsiConfig, SegmentedString};
 use std::ops::Range;
 
 /// Represents a string with internal data for the ANSI escape sequences, so it
@@ -168,7 +168,7 @@ impl StyledString {
     /// assert!(len > 5); // Longer than just "Hello" due to ANSI codes
     /// ```
     ///
-    pub fn styled_len(&self, config: Option<&AnsiConfig>) -> AnsiResult<usize> {
+    pub fn styled_len(&self, config: Option<&AnsiConfig>) -> AnsiCodecResult<usize> {
         let mut total = 0;
 
         for segment in &self.segments {

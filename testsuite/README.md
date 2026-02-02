@@ -37,13 +37,13 @@ Validates that all sent messages are received correctly by comparing message cou
 
 ```bash
 # Run all benchmarks
-cargo bench --package termionix-suite
+cargo bench --package termionix-testsuite
 
 # Run specific benchmark
-cargo bench --package termionix-suite --bench benchmarks -- single_client_echo
+cargo bench --package termionix-testsuite --bench benchmarks -- single_client_echo
 
 # Generate HTML report
-cargo bench --package termionix-suite -- --save-baseline my-baseline
+cargo bench --package termionix-testsuite -- --save-baseline my-baseline
 ```
 
 ## Benchmark Results

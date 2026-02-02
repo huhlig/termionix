@@ -13,6 +13,8 @@
 - **ANSI Escape Sequence Handling** - Parse and generate ANSI codes for terminal control
 - **MUD Protocol Extensions** - Support for GMCP, MSDP, MSSP, MCCP, NAWS, and more
 - **Async-First Design** - Built on Tokio for high-performance async I/O
+- **Split Read/Write Architecture** - Independent read and write operations prevent blocking
+- **Configurable Flush Strategies** - Optimize for latency or throughput
 - **Connection Metadata** - Type-safe storage for per-connection data
 - **Observability** - Integrated tracing and metrics support
 - **Ergonomic API** - Easy-to-use high-level abstractions
@@ -32,7 +34,7 @@ Create a simple telnet server:
 
 ```rust
 use std::sync::Arc;
-use termionix_service::{
+use termionix_server::{
     ConnectionManager, TelnetConnection, TelnetHandler, 
     TelnetServer, TelnetServerConfig,
 };
@@ -183,18 +185,50 @@ PrometheusBuilder::new()
     .expect("failed to install Prometheus recorder");
 ```
 
+## Split Connection Architecture
+
+Termionix uses a split read/write architecture that solves the blocking issue where buffered writes would wait for read timeouts:
+
+```rust
+use termionix_server::{SplitConnection, FlushStrategy};
+
+// Create connection with independent read/write workers
+let conn = SplitConnection::from_stream(stream, codec_read, codec_write);
+
+// Configure flush strategy
+conn.set_flush_strategy(FlushStrategy::OnNewline).await;
+
+// Send data - doesn't block on reads!
+conn.send("Hello\n", false).await?;
+
+// Receive data - doesn't block on writes!
+if let Some(event) = conn.next().await? {
+    println!("Received: {:?}", event);
+}
+```
+
+**Benefits:**
+- ✅ Reads never block writes
+- ✅ Writes never block reads
+- ✅ Configurable flush strategies (Manual, Immediate, OnNewline, OnThreshold)
+- ✅ Independent background workers
+- ✅ Zero mutex contention
+
+See `examples/split_connection_demo.rs` for a complete demonstration.
+
 ## Examples
 
 See the `examples/` directory for complete examples:
 
 - `simple_server.rs` - Basic telnet echo server
 - `echo_server.rs` - Echo server with connection management
+- `split_connection_demo.rs` - **NEW:** Demonstrates split read/write architecture
 - `advanced_features.rs` - Demonstrates all advanced features
 - `ansi_demo.rs` - ANSI escape sequence handling
 
 Run an example:
 ```bash
-cargo run --example advanced_features
+cargo run --example split_connection_demo
 ```
 
 Then connect with a telnet client:
@@ -208,7 +242,9 @@ telnet localhost 4000
 * `ansicodec` - ANSI String Handling Library
 * `telnetcodec` - Telnet Framed Codec for Tokio
 * `terminal` - ANSI Enabled Telnet Terminal
-* `service` - High-Level Telnet Service Framework
+* `service` - **NEW:** Unified connection layer with split read/write architecture
+* `server` - High-Level Telnet Server Framework
+* `client` - High-Level Telnet Client Framework
 * `compress` - MCCP Compression Support
 * `doc` - Documentation, Specifications, and RFCs
 * `examples` - Usage Examples
@@ -217,7 +253,8 @@ telnet localhost 4000
 
 - [API Documentation][API Docs]
 - [CHANGELOG](CHANGELOG.md) - Version history and changes
-- [Integration Guide](../TERMIONIX_INTEGRATION_REFACTOR.md) - Downstream integration notes
+- [Connection Architecture Analysis](CONNECTION_ARCHITECTURE_ANALYSIS.md) - Split read/write architecture details
+- [Service Crate README](service/README.md) - Unified connection layer documentation
 
 ## Roadmap Items
 - Fix the myriad of Doctests

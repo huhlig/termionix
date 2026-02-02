@@ -28,7 +28,7 @@ use crate::{ConnectionId, ConnectionState, Result, ServerHandler, TelnetConnecti
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU8, Ordering};
 use std::time::{Duration, Instant};
-use termionix_terminal::TerminalCommand;
+use termionix_service::TerminalCommand;
 use tokio::select;
 use tokio::sync::mpsc;
 use tokio::time::timeout;
@@ -222,23 +222,10 @@ impl ConnectionWorker {
 
                             // Check if this event type can generate sidechannel responses
                             // Only telnet option negotiation events (TelnetOptionStatus) generate responses
-                            let needs_flush = matches!(event, termionix_terminal::TerminalEvent::TelnetOptionStatus(_));
-
                             self.handler.on_event(self.id, &self.connection, event).await;
 
-                            // Flush sidechannel responses only if negotiation occurred
-                            // This avoids expensive lock acquisition on every character/line event
-                            if needs_flush {
-                                if self.connection.has_pending_responses().await {
-                                    if let Err(e) = self.connection.flush_responses().await {
-                                        tracing::warn!(
-                                            connection_id = %self.id,
-                                            error = ?e,
-                                            "Failed to flush sidechannel responses"
-                                        );
-                                    }
-                                }
-                            }
+                            // Note: With SplitConnection, flushing is handled automatically
+                            // based on the flush strategy. No manual flushing needed here.
 
                             // Check for idle state transition periodically
                             if idle_check_counter % 60 == 0 && self.last_activity.elapsed() > Duration::from_secs(60) {
@@ -296,7 +283,7 @@ mod tests {
     use crate::ServerHandler;
     use async_trait::async_trait;
     use std::sync::atomic::{AtomicBool, AtomicUsize};
-    use termionix_terminal::TerminalEvent;
+    use termionix_service::TerminalEvent;
     use tokio::net::{TcpListener, TcpStream};
 
     struct TestHandler {
@@ -411,7 +398,7 @@ mod tests {
 
         // Send a command
         control_tx
-            .send(ControlMessage::SendCommand(TerminalCommand::SendEraseLine))
+            .send(ControlMessage::SendCommand(TerminalCommand::EraseLine))
             .await
             .unwrap();
 

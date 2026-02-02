@@ -1,5 +1,5 @@
 [package]
-name = "termionix-suite"
+name = "termionix-testsuite"
 version.workspace = true
 edition.workspace = true
 publish.workspace = true
@@ -16,7 +16,7 @@ categories.workspace = true
 [dependencies]
 async-trait.workspace = true
 termionix-client.workspace = true
-termionix-service.workspace = true
+termionix-server.workspace = true
 tokio.workspace = true
 
 [dev-dependencies]

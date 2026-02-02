@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::AnsiResult;
+use crate::AnsiCodecResult;
 use crate::ansi::{
     AnsiApplicationProgramCommand, AnsiControlCode, AnsiControlSequenceIntroducer,
     AnsiDeviceControlString, AnsiOperatingSystemCommand, AnsiPrivacyMessage, AnsiStartOfString,
@@ -202,110 +202,6 @@ impl SegmentedString {
         self.0.is_empty()
     }
 
-    /// Appends an ANSI sequence (text content) to the segmented string.
-    ///
-    /// This method intelligently handles both ASCII and Unicode sequences, merging them
-    /// with the last segment when possible according to the following rules:
-    ///
-    /// - If the last segment is ASCII and an ASCII sequence is added, concatenate them
-    /// - If the last segment is Unicode, and Unicode or ASCII is added, concatenate them
-    /// - If the last segment is ASCII and Unicode is added, convert the last segment to Unicode and concatenate
-    /// - Otherwise, simply push the sequence as a new segment
-    ///
-    /// # Arguments
-    ///
-    /// * `sequence` - The string sequence to append
-    ///
-    /// # Examples
-    ///
-    /// ASCII appended to ASCII:
-    ///
-    /// ```rust
-    /// use termionix_ansicodec::SegmentedString;
-    ///
-    /// let mut segmented = SegmentedString::empty();
-    /// segmented.push("Hello");
-    /// segmented.push("World");
-    /// assert_eq!(segmented.segment_count(), 1); // Merged into one segment
-    /// ```
-    ///
-    /// Unicode appended to ASCII (promotion):
-    ///
-    /// ```rust
-    /// use termionix_ansicodec::SegmentedString;
-    ///
-    /// let mut segmented = SegmentedString::empty();
-    /// segmented.push("Hello");
-    /// segmented.push("世界");
-    /// assert_eq!(segmented.segment_count(), 1); // Promoted to Unicode, merged
-    /// ```
-    ///
-    /// Unicode appended to Unicode:
-    ///
-    /// ```rust
-    /// use termionix_ansicodec::SegmentedString;
-    ///
-    /// let mut segmented = SegmentedString::empty();
-    /// segmented.push("世界");
-    /// segmented.push("こんにちは");
-    /// assert_eq!(segmented.segment_count(), 1); // Merged
-    /// ```
-    ///
-    /// After non-text segment:
-    ///
-    /// ```rust
-    /// use termionix_ansicodec::{SegmentedString, ControlCode};
-    ///
-    /// let mut segmented = SegmentedString::empty();
-    /// segmented.push_ansi_control(ControlCode::LF);
-    /// segmented.push("New");
-    /// assert_eq!(segmented.segment_count(), 2); // New segment created
-    /// ```
-    pub fn push(&mut self, sequence: &str) {
-        if sequence.is_empty() {
-            return;
-        }
-
-        // Check if the entire sequence is ASCII
-        let is_ascii = sequence.is_ascii();
-
-        if let Some(last_segment) = self.0.last_mut() {
-            match last_segment {
-                Segment::ASCII(s) if is_ascii => {
-                    // Rule 1: ASCII segment + ASCII sequence → concatenate
-                    s.push_str(sequence);
-                }
-                Segment::ASCII(s) if !is_ascii => {
-                    // Rule 3: ASCII segment + Unicode sequence → convert to Unicode and concatenate
-                    let converted = std::mem::take(s);
-                    *last_segment = Segment::Unicode(converted);
-                    if let Segment::Unicode(unicode_str) = last_segment {
-                        unicode_str.push_str(sequence);
-                    }
-                }
-                Segment::Unicode(s) => {
-                    // Rule 2: Unicode segment + (Unicode or ASCII) sequence → concatenate
-                    s.push_str(sequence);
-                }
-                _ => {
-                    // Rule 4: Otherwise → push as new segment
-                    if is_ascii {
-                        self.0.push(Segment::ASCII(sequence.to_string()));
-                    } else {
-                        self.0.push(Segment::Unicode(sequence.to_string()));
-                    }
-                }
-            }
-        } else {
-            // No segments exist, create a new one
-            if is_ascii {
-                self.0.push(Segment::ASCII(sequence.to_string()));
-            } else {
-                self.0.push(Segment::Unicode(sequence.to_string()));
-            }
-        }
-    }
-
     /// Appends a single character to the segmented string.
     ///
     /// This method intelligently handles both ASCII and Unicode characters, merging
@@ -360,7 +256,7 @@ impl SegmentedString {
     /// segmented.push_char('世');  // Promoted to Unicode segment
     /// assert_eq!(segmented.segment_count(), 1); // Merged into one Unicode segment
     /// ```
-    pub fn push_char(&mut self, ch: char) {
+    pub fn push_char(&mut self, ch: char) -> &mut Self {
         // Check if character is ASCII (0x00-0x7F)
         let is_ascii = ch.is_ascii() && ch != '\x1b' && !ch.is_control();
 
@@ -399,6 +295,7 @@ impl SegmentedString {
                 self.0.push(Segment::Unicode(ch.to_string()));
             }
         }
+        self
     }
 
     /// Appends a string slice to the segmented string.
@@ -463,9 +360,9 @@ impl SegmentedString {
     /// segmented.push_str("");
     /// assert!(segmented.is_empty());
     /// ```
-    pub fn push_str(&mut self, str: &str) {
+    pub fn push_str(&mut self, str: &str) -> &mut Self {
         if str.is_empty() {
-            return;
+            return self;
         }
 
         // Check if the entire string is ASCII
@@ -506,6 +403,7 @@ impl SegmentedString {
                 self.0.push(Segment::Unicode(str.to_string()));
             }
         }
+        self
     }
 
     /// Appends a control code segment to the segmented string.
@@ -540,54 +438,339 @@ impl SegmentedString {
     /// segmented.push_ansi_control(ControlCode::LF);
     /// assert_eq!(segmented.segment_count(), 2); // Each control is a separate segment
     /// ```
-    pub fn push_ansi_control(&mut self, control: AnsiControlCode) {
+    pub fn push_ansi_control(&mut self, control: AnsiControlCode) -> &mut Self {
         self.0.push(Segment::Control(control));
+        self
     }
 
-    pub fn push_ansi_escape(&mut self) {
+    /// Appends a standalone ANSI Escape character (ESC, 0x1B) to the segmented string.
+    ///
+    /// This pushes a raw ESC character without any following sequence. This is rarely
+    /// used directly as most ANSI sequences include ESC as part of a larger sequence
+    /// (CSI, OSC, etc.).
+    ///
+    /// # Returns
+    ///
+    /// Returns `&mut Self` to allow method chaining.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::SegmentedString;
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_str("Text")
+    ///    .push_ansi_escape()
+    ///    .push_str("More text");
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`push_ansi_csi()`](Self::push_ansi_csi) - For CSI sequences (ESC [)
+    /// - [`Segment::Escape`] - The segment type this creates
+    pub fn push_ansi_escape(&mut self) -> &mut Self {
         self.0.push(Segment::Escape);
+        self
     }
 
-    pub fn push_ansi_csi(&mut self, csi: AnsiControlSequenceIntroducer) {
+    /// Appends an ANSI Control Sequence Introducer (CSI) to the segmented string.
+    ///
+    /// CSI sequences control cursor movement, erasing, scrolling, and other terminal
+    /// operations. They begin with ESC [ and end with a command letter.
+    ///
+    /// # Arguments
+    ///
+    /// * `csi` - The CSI command to append
+    ///
+    /// # Returns
+    ///
+    /// Returns `&mut Self` to allow method chaining.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::{SegmentedString, AnsiControlSequenceIntroducer};
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_str("Line 1")
+    ///    .push_ansi_csi(AnsiControlSequenceIntroducer::CursorDown(2))
+    ///    .push_str("Line 3");
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`AnsiControlSequenceIntroducer`] - Available CSI commands
+    /// - [`Segment::CSI`] - The segment type this creates
+    pub fn push_ansi_csi(&mut self, csi: AnsiControlSequenceIntroducer) -> &mut Self {
         self.0.push(Segment::CSI(csi));
+        self
     }
 
-    pub fn push_ansi_sgr(&mut self, sgr: AnsiSelectGraphicRendition) {
+    /// Appends a raw ANSI Select Graphic Rendition (SGR) sequence to the segmented string.
+    ///
+    /// This is a low-level method that directly pushes an SGR sequence. For most use cases,
+    /// prefer [`push_style()`](Self::push_style) which is a more ergonomic convenience wrapper.
+    ///
+    /// SGR sequences control text styling including colors, bold, underline, italic, etc.
+    ///
+    /// # Arguments
+    ///
+    /// * `sgr` - The SGR styling to append
+    ///
+    /// # Returns
+    ///
+    /// Returns `&mut Self` to allow method chaining.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::{SegmentedString, Style, Color};
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_ansi_sgr(Style {
+    ///        foreground: Some(Color::Red),
+    ///        ..Default::default()
+    ///    })
+    ///    .push_str("Red text");
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`push_style()`](Self::push_style) - Convenience wrapper (recommended)
+    /// - [`AnsiSelectGraphicRendition`] - Style configuration
+    /// - [`Segment::SGR`] - The segment type this creates
+    pub fn push_ansi_sgr(&mut self, sgr: AnsiSelectGraphicRendition) -> &mut Self {
         self.0.push(Segment::SGR(sgr));
+        self
     }
 
-    pub fn push_ansi_osc(&mut self, osc: AnsiOperatingSystemCommand) {
+    /// Appends an ANSI Operating System Command (OSC) to the segmented string.
+    ///
+    /// OSC sequences communicate with the terminal's operating system layer,
+    /// typically for setting window titles, changing color palettes, or other
+    /// system-level operations. They begin with ESC ] and end with ST or BEL.
+    ///
+    /// # Arguments
+    ///
+    /// * `osc` - The OSC command to append
+    ///
+    /// # Returns
+    ///
+    /// Returns `&mut Self` to allow method chaining.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::{SegmentedString, AnsiOperatingSystemCommand};
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_ansi_osc(AnsiOperatingSystemCommand::SetWindowTitle("My App".to_string()))
+    ///    .push_str("Content");
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`AnsiOperatingSystemCommand`] - Available OSC commands
+    /// - [`Segment::OSC`] - The segment type this creates
+    pub fn push_ansi_osc(&mut self, osc: AnsiOperatingSystemCommand) -> &mut Self {
         self.0.push(Segment::OSC(osc));
+        self
     }
 
-    pub fn push_ansi_dcs(&mut self, dcs: AnsiDeviceControlString) {
+    /// Appends an ANSI Device Control String (DCS) to the segmented string.
+    ///
+    /// DCS sequences are used for device-specific control operations. They begin
+    /// with ESC P and end with ST (String Terminator).
+    ///
+    /// # Arguments
+    ///
+    /// * `dcs` - The DCS command to append
+    ///
+    /// # Returns
+    ///
+    /// Returns `&mut Self` to allow method chaining.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::{SegmentedString, AnsiDeviceControlString};
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_ansi_dcs(AnsiDeviceControlString::new(vec![]))
+    ///    .push_str("Text");
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`AnsiDeviceControlString`] - DCS command structure
+    /// - [`Segment::DCS`] - The segment type this creates
+    pub fn push_ansi_dcs(&mut self, dcs: AnsiDeviceControlString) -> &mut Self {
         self.0.push(Segment::DCS(dcs));
+        self
     }
 
-    pub fn push_ansi_sos(&mut self, sos: AnsiStartOfString) {
+    /// Appends an ANSI Start of String (SOS) sequence to the segmented string.
+    ///
+    /// SOS sequences mark the beginning of a control string. They begin with ESC X
+    /// and end with ST (String Terminator).
+    ///
+    /// # Arguments
+    ///
+    /// * `sos` - The SOS sequence to append
+    ///
+    /// # Returns
+    ///
+    /// Returns `&mut Self` to allow method chaining.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::{SegmentedString, AnsiStartOfString};
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_ansi_sos(AnsiStartOfString::new(vec![]))
+    ///    .push_str("Text");
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`AnsiStartOfString`] - SOS sequence structure
+    /// - [`Segment::SOS`] - The segment type this creates
+    pub fn push_ansi_sos(&mut self, sos: AnsiStartOfString) -> &mut Self {
         self.0.push(Segment::SOS(sos));
+        self
     }
 
-    pub fn push_ansi_st(&mut self) {
+    /// Appends an ANSI String Terminator (ST) to the segmented string.
+    ///
+    /// ST sequences mark the end of control strings started by DCS, SOS, OSC, PM,
+    /// or APC. The sequence is ESC \.
+    ///
+    /// # Returns
+    ///
+    /// Returns `&mut Self` to allow method chaining.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::SegmentedString;
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_str("Text")
+    ///    .push_ansi_st();
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`Segment::ST`] - The segment type this creates
+    pub fn push_ansi_st(&mut self) -> &mut Self {
         self.0.push(Segment::ST);
+        self
     }
 
-    pub fn push_ansi_pm(&mut self, pm: AnsiPrivacyMessage) {
+    /// Appends an ANSI Privacy Message (PM) to the segmented string.
+    ///
+    /// PM sequences are used for privacy-related terminal operations. They begin
+    /// with ESC ^ and end with ST (String Terminator).
+    ///
+    /// # Arguments
+    ///
+    /// * `pm` - The PM sequence to append
+    ///
+    /// # Returns
+    ///
+    /// Returns `&mut Self` to allow method chaining.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::{SegmentedString, AnsiPrivacyMessage};
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_ansi_pm(AnsiPrivacyMessage::new(vec![]))
+    ///    .push_str("Text");
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`AnsiPrivacyMessage`] - PM sequence structure
+    /// - [`Segment::PM`] - The segment type this creates
+    pub fn push_ansi_pm(&mut self, pm: AnsiPrivacyMessage) -> &mut Self {
         self.0.push(Segment::PM(pm));
+        self
     }
 
-    pub fn push_ansi_apc(&mut self, apc: AnsiApplicationProgramCommand) {
+    /// Appends an ANSI Application Program Command (APC) to the segmented string.
+    ///
+    /// APC sequences are used for application-specific commands. They begin with
+    /// ESC _ and end with ST (String Terminator).
+    ///
+    /// # Arguments
+    ///
+    /// * `apc` - The APC command to append
+    ///
+    /// # Returns
+    ///
+    /// Returns `&mut Self` to allow method chaining.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::{SegmentedString, AnsiApplicationProgramCommand};
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_ansi_apc(AnsiApplicationProgramCommand::new(vec![]))
+    ///    .push_str("Text");
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`AnsiApplicationProgramCommand`] - APC command structure
+    /// - [`Segment::APC`] - The segment type this creates
+    pub fn push_ansi_apc(&mut self, apc: AnsiApplicationProgramCommand) -> &mut Self {
         self.0.push(Segment::APC(apc));
+        self
     }
-    pub fn push_telnet_command(&mut self, tc: TelnetCommand) {
+
+    /// Appends a Telnet protocol command to the segmented string.
+    ///
+    /// Telnet commands are part of the Telnet protocol (RFC 854) and handle
+    /// protocol negotiation, options, and control. These are distinct from
+    /// ANSI escape sequences and are used in network communication.
+    ///
+    /// # Arguments
+    ///
+    /// * `tc` - The Telnet command to append
+    ///
+    /// # Returns
+    ///
+    /// Returns `&mut Self` to allow method chaining.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::{SegmentedString, TelnetCommand};
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_str("Hello")
+    ///    .push_telnet_command(TelnetCommand::IAC)
+    ///    .push_str("World");
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`TelnetCommand`] - Available Telnet commands
+    /// - [`Segment::TelnetCommand`] - The segment type this creates
+    pub fn push_telnet_command(&mut self, tc: TelnetCommand) -> &mut Self {
         self.0.push(Segment::TelnetCommand(tc));
+        self
     }
 
     /// Appends a style (SGR - Select Graphic Rendition) segment to the segmented string.
     ///
-    /// This adds an ANSI SGR sequence that changes text styling attributes such as colors,
-    /// bold, underline, italic, etc. The style segment does not merge with adjacent segments
-    /// and serves as a formatting delimiter between text segments.
+    /// This is a convienence method and adds an ANSI SGR sequence that changes text styling
+    /// attributes such as colors, bold, underline, italic, etc. The style segment does not merge
+    /// with adjacent segments and serves as a formatting delimiter between text segments.
     ///
     /// # Arguments
     ///
@@ -631,8 +814,9 @@ impl SegmentedString {
     /// });
     /// segmented.push_str("Blue");
     /// ```
-    pub fn push_style(&mut self, style: AnsiSelectGraphicRendition) {
-        self.0.push(Segment::SGR(style.into()))
+    pub fn push_style(&mut self, style: AnsiSelectGraphicRendition) -> &mut Self {
+        self.0.push(Segment::SGR(style.into()));
+        self
     }
 
     /// Appends an arbitrary segment to the segmented string.
@@ -697,8 +881,9 @@ impl SegmentedString {
     /// Unicode segments using this method, they will remain as separate segments. For
     /// automatic merging behavior, use [`push_char`](SegmentedString::push_char) or
     /// [`push_str`](SegmentedString::push_str) instead.
-    pub fn push_segment(&mut self, segment: Segment) {
-        self.0.push(segment)
+    pub fn push_segment(&mut self, segment: Segment) -> &mut Self {
+        self.0.push(segment);
+        self
     }
 
     /// Returns an iterator over the segments in this segmented string.
@@ -762,6 +947,266 @@ impl SegmentedString {
     /// ```
     pub fn segments(&self) -> std::slice::Iter<'_, Segment> {
         self.0.iter()
+    }
+
+    /// Returns a reference to the segment at the given index, or `None` if out of bounds.
+    ///
+    /// This provides safe, bounds-checked access to individual segments without panicking.
+    ///
+    /// # Arguments
+    ///
+    /// * `index` - The zero-based index of the segment to retrieve
+    ///
+    /// # Returns
+    ///
+    /// Returns `Some(&Segment)` if the index is valid, or `None` if out of bounds.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::SegmentedString;
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_str("Hello");
+    /// seg.push_str(" World");
+    ///
+    /// assert!(seg.get(0).is_some());
+    /// assert!(seg.get(10).is_none());
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`get_mut()`](Self::get_mut) - For mutable access
+    /// - [`Index`](std::ops::Index) - For panicking access via `seg[index]`
+    pub fn get(&self, index: usize) -> Option<&Segment> {
+        self.0.get(index)
+    }
+
+    /// Returns a mutable reference to the segment at the given index, or `None` if out of bounds.
+    ///
+    /// This provides safe, bounds-checked mutable access to individual segments.
+    ///
+    /// # Arguments
+    ///
+    /// * `index` - The zero-based index of the segment to retrieve
+    ///
+    /// # Returns
+    ///
+    /// Returns `Some(&mut Segment)` if the index is valid, or `None` if out of bounds.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::{SegmentedString, Segment};
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_str("Hello");
+    ///
+    /// if let Some(Segment::ASCII(text)) = seg.get_mut(0) {
+    ///     text.push_str(" World");
+    /// }
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`get()`](Self::get) - For immutable access
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut Segment> {
+        self.0.get_mut(index)
+    }
+
+    /// Returns a reference to the first segment, or `None` if empty.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::{SegmentedString, Segment};
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// assert!(seg.first().is_none());
+    ///
+    /// seg.push_str("Hello");
+    /// assert!(matches!(seg.first(), Some(Segment::ASCII(_))));
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`last()`](Self::last) - Get the last segment
+    /// - [`first_mut()`](Self::first_mut) - For mutable access
+    pub fn first(&self) -> Option<&Segment> {
+        self.0.first()
+    }
+
+    /// Returns a mutable reference to the first segment, or `None` if empty.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::{SegmentedString, Segment};
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_str("Hello");
+    ///
+    /// if let Some(Segment::ASCII(text)) = seg.first_mut() {
+    ///     *text = "Goodbye".to_string();
+    /// }
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`first()`](Self::first) - For immutable access
+    pub fn first_mut(&mut self) -> Option<&mut Segment> {
+        self.0.first_mut()
+    }
+
+    /// Returns a reference to the last segment, or `None` if empty.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::{SegmentedString, Segment};
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_str("Hello");
+    /// seg.push_str(" World");
+    ///
+    /// assert!(matches!(seg.last(), Some(Segment::ASCII(_))));
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`first()`](Self::first) - Get the first segment
+    /// - [`last_mut()`](Self::last_mut) - For mutable access
+    pub fn last(&self) -> Option<&Segment> {
+        self.0.last()
+    }
+
+    /// Returns a mutable reference to the last segment, or `None` if empty.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::{SegmentedString, Segment};
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_str("Hello");
+    ///
+    /// if let Some(Segment::ASCII(text)) = seg.last_mut() {
+    ///     text.push_str(" World");
+    /// }
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`last()`](Self::last) - For immutable access
+    pub fn last_mut(&mut self) -> Option<&mut Segment> {
+        self.0.last_mut()
+    }
+
+    /// Returns an iterator over text content only (ASCII and Unicode segments).
+    ///
+    /// This iterator skips all control codes, ANSI sequences, and other non-text segments,
+    /// yielding only the visible text content as string slices.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::{SegmentedString, Style, Color};
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_style(Style { foreground: Some(Color::Red), ..Default::default() });
+    /// seg.push_str("Hello");
+    /// seg.push_str(" World");
+    ///
+    /// let text: Vec<&str> = seg.text_segments().collect();
+    /// assert_eq!(text, vec!["Hello World"]);
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`segments()`](Self::segments) - Iterate over all segments
+    /// - [`stripped()`](Self::stripped) - Get all text as a single String
+    pub fn text_segments(&self) -> impl Iterator<Item = &str> {
+        self.0.iter().filter_map(|seg| match seg {
+            Segment::ASCII(s) | Segment::Unicode(s) => Some(s.as_str()),
+            _ => None,
+        })
+    }
+
+    /// Returns an iterator over segments with their indices.
+    ///
+    /// Each item is a tuple of `(index, &Segment)` where index is the position
+    /// in the internal segment vector.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::SegmentedString;
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_str("Hello");
+    /// seg.push_str(" World");
+    ///
+    /// for (i, segment) in seg.indexed_segments() {
+    ///     println!("Segment {}: {:?}", i, segment);
+    /// }
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`segments()`](Self::segments) - Iterate without indices
+    pub fn indexed_segments(&self) -> impl Iterator<Item = (usize, &Segment)> {
+        self.0.iter().enumerate()
+    }
+
+    /// Consumes the `SegmentedString` and returns the underlying vector of segments.
+    ///
+    /// This is useful when you need to take ownership of the segments or pass them
+    /// to another function that expects a `Vec<Segment>`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::SegmentedString;
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_str("Hello");
+    /// seg.push_str(" World");
+    ///
+    /// let segments = seg.into_vec();
+    /// assert_eq!(segments.len(), 1);
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`as_slice()`](Self::as_slice) - For borrowing without consuming
+    /// - [`segments()`](Self::segments) - For iterating without consuming
+    pub fn into_vec(self) -> Vec<Segment> {
+        self.0
+    }
+
+    /// Returns a slice view of the internal segments.
+    ///
+    /// This provides direct access to the underlying segment storage without
+    /// copying or consuming the `SegmentedString`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::SegmentedString;
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_str("Hello");
+    ///
+    /// let slice = seg.as_slice();
+    /// assert_eq!(slice.len(), 1);
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`into_vec()`](Self::into_vec) - For taking ownership
+    /// - [`segments()`](Self::segments) - For iterating
+    pub fn as_slice(&self) -> &[Segment] {
+        &self.0
     }
 
     /// Returns the plain text content without any ANSI escape sequences or control codes.
@@ -1227,7 +1672,7 @@ impl SegmentedString {
     /// let config = AnsiConfig::strip_all();
     /// assert_eq!(segmented.len(Some(&config)).unwrap(), 10); // Only counts "HelloWorld"
     /// ```
-    pub fn len(&self, config: Option<&AnsiConfig>) -> AnsiResult<usize> {
+    pub fn len(&self, config: Option<&AnsiConfig>) -> AnsiCodecResult<usize> {
         let mut total_len = 0;
 
         for segment in &self.0 {
@@ -1347,7 +1792,45 @@ impl SegmentedString {
         Ok(total_len)
     }
 
-    pub fn encode<T: BufMut>(&self, dst: &mut T, config: Option<&AnsiConfig>) -> AnsiResult<usize> {
+    /// Encodes the segmented string into a buffer using the specified ANSI configuration.
+    ///
+    /// This method writes the segmented string to a `BufMut` buffer, applying the
+    /// color mode and other settings from the provided configuration. This is useful
+    /// when working with byte buffers in network protocols or file I/O.
+    ///
+    /// # Arguments
+    ///
+    /// * `dst` - The buffer to write to (must implement `BufMut`)
+    /// * `config` - Optional ANSI configuration controlling color mode and output format
+    ///
+    /// # Returns
+    ///
+    /// Returns `Ok(bytes_written)` on success, or an error if encoding fails.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::{SegmentedString, AnsiConfig, ColorMode};
+    /// use bytes::BytesMut;
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_str("Hello World");
+    ///
+    /// let mut buf = BytesMut::new();
+    /// let config = AnsiConfig::new(ColorMode::TrueColor);
+    /// let bytes_written = seg.encode(&mut buf, Some(&config))?;
+    /// # Ok::<(), termionix_ansicodec::AnsiError>(())
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`write()`](Self::write) - Write to any `std::io::Write` implementation
+    /// - [`AnsiConfig`] - Configuration options
+    pub fn encode<T: BufMut>(
+        &self,
+        dst: &mut T,
+        config: Option<&AnsiConfig>,
+    ) -> AnsiCodecResult<usize> {
         Ok(self.write(&mut dst.writer(), config)?)
     }
 
@@ -1868,6 +2351,83 @@ impl std::ops::Index<usize> for SegmentedString {
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.0[index]
+    }
+}
+
+impl IntoIterator for SegmentedString {
+    type Item = Segment;
+    type IntoIter = std::vec::IntoIter<Segment>;
+
+    /// Consumes the `SegmentedString` and returns an iterator over owned segments.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::SegmentedString;
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_str("Hello");
+    /// seg.push_str(" World");
+    ///
+    /// for segment in seg {
+    ///     // Process owned segments
+    /// }
+    /// ```
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a SegmentedString {
+    type Item = &'a Segment;
+    type IntoIter = std::slice::Iter<'a, Segment>;
+
+    /// Returns an iterator over segment references.
+    ///
+    /// This allows using `for segment in &segmented_string` syntax.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::SegmentedString;
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_str("Hello");
+    ///
+    /// for segment in &seg {
+    ///     // Process segment references
+    /// }
+    /// ```
+    fn into_iter(self) -> Self::IntoIter {
+        self.segments()
+    }
+}
+
+impl<'a> IntoIterator for &'a mut SegmentedString {
+    type Item = &'a mut Segment;
+    type IntoIter = std::slice::IterMut<'a, Segment>;
+
+    /// Returns an iterator over mutable segment references.
+    ///
+    /// This allows using `for segment in &mut segmented_string` syntax.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use termionix_ansicodec::{SegmentedString, Segment};
+    ///
+    /// let mut seg = SegmentedString::empty();
+    /// seg.push_str("Hello");
+    ///
+    /// for segment in &mut seg {
+    ///     // Modify segments in place
+    ///     if let Segment::ASCII(text) = segment {
+    ///         *text = text.to_uppercase();
+    ///     }
+    /// }
+    /// ```
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.iter_mut()
     }
 }
 

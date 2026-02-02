@@ -35,10 +35,10 @@
 //! ```
 
 use std::sync::Arc;
-use termionix_ansicodec::SegmentedString;
-use termionix_ansicodec::ansi::{AnsiSelectGraphicRendition, Color, Intensity};
-use termionix_service::{ServerConfig, ServerHandler, TelnetConnection, TelnetError, TelnetServer};
-use termionix_terminal::TerminalEvent;
+use termionix_server::{
+    AnsiSelectGraphicRendition, Color, Intensity, SegmentedString, ServerConfig, ServerHandler,
+    TelnetConnection, TelnetError, TelnetServer, TerminalEvent,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -114,25 +114,25 @@ impl EchoHandler {
 
 #[async_trait::async_trait]
 impl ServerHandler for EchoHandler {
-    async fn on_connect(&self, id: termionix_service::ConnectionId, conn: &TelnetConnection) {
+    async fn on_connect(&self, id: termionix_server::ConnectionId, conn: &TelnetConnection) {
         tracing::info!("Client {} connected", id);
 
         // Send welcome message
-        if let Err(e) = conn.send(self.welcome_message.as_str()).await {
+        if let Err(e) = conn.send(self.welcome_message.as_str(), true).await {
             tracing::error!("Failed to send welcome message to {}: {}", id, e);
         }
     }
 
     async fn on_event(
         &self,
-        id: termionix_service::ConnectionId,
+        id: termionix_server::ConnectionId,
         conn: &TelnetConnection,
         event: TerminalEvent,
     ) {
         match event {
             TerminalEvent::CharacterData { character, .. } => {
                 // Echo the character back
-                if let Err(e) = conn.send_char(character).await {
+                if let Err(e) = conn.send_char(character, true).await {
                     tracing::error!("Failed to echo character to {}: {}", id, e);
                 }
             }
@@ -153,7 +153,7 @@ impl ServerHandler for EchoHandler {
                     goodbye.push_style(AnsiSelectGraphicRendition::default());
 
                     let goodbye_str = goodbye.to_string();
-                    let _ = conn.send(goodbye_str.as_str()).await;
+                    let _ = conn.send(goodbye_str.as_str(), true).await;
                     // Connection will be closed by the client
                     return;
                 }
@@ -178,7 +178,7 @@ impl ServerHandler for EchoHandler {
                 response.push_str("\r\n> ");
 
                 let response_str = response.to_string();
-                if let Err(e) = conn.send(response_str.as_str()).await {
+                if let Err(e) = conn.send(response_str.as_str(), true).await {
                     tracing::error!("Failed to send echo to {}: {}", id, e);
                 }
             }
@@ -190,22 +190,22 @@ impl ServerHandler for EchoHandler {
 
     async fn on_error(
         &self,
-        id: termionix_service::ConnectionId,
+        id: termionix_server::ConnectionId,
         _conn: &TelnetConnection,
         error: TelnetError,
     ) {
         tracing::error!("Error for client {}: {}", id, error);
     }
 
-    async fn on_timeout(&self, id: termionix_service::ConnectionId, _conn: &TelnetConnection) {
+    async fn on_timeout(&self, id: termionix_server::ConnectionId, _conn: &TelnetConnection) {
         tracing::warn!("Client {} timed out", id);
     }
 
-    async fn on_idle_timeout(&self, id: termionix_service::ConnectionId, _conn: &TelnetConnection) {
+    async fn on_idle_timeout(&self, id: termionix_server::ConnectionId, _conn: &TelnetConnection) {
         tracing::info!("Client {} idle timeout", id);
     }
 
-    async fn on_disconnect(&self, id: termionix_service::ConnectionId, _conn: &TelnetConnection) {
+    async fn on_disconnect(&self, id: termionix_server::ConnectionId, _conn: &TelnetConnection) {
         tracing::info!("Client {} disconnected", id);
     }
 }

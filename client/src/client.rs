@@ -16,17 +16,31 @@
 
 //! Terminal-aware Telnet client implementation
 
-use crate::{ClientConfig, ClientError, ConnectionState, Result};
-use futures::{SinkExt, StreamExt};
+use crate::{ClientConfig, ClientError, Result};
 use std::sync::Arc;
-use termionix_ansicodec::{AnsiCodec, AnsiConfig};
-use termionix_telnetcodec::TelnetCodec;
-use termionix_terminal::{TerminalCodec, TerminalEvent};
+use termionix_service::{
+    AnsiCodec, AnsiConfig, CompressionAlgorithm, SplitTerminalConnection, TelnetArgument,
+    TelnetCodec, TelnetOption, TerminalCodec, TerminalCommand, TerminalEvent,
+};
 use tokio::net::TcpStream;
-use tokio::sync::{mpsc, RwLock};
+use tokio::sync::RwLock;
 use tokio::time::timeout;
-use tokio_util::codec::Framed;
 use tracing::{error, info};
+
+/// Connection state
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ConnectionState {
+    /// Not connected
+    Disconnected,
+    /// Connecting to server
+    Connecting,
+    /// Connected and active
+    Connected,
+    /// Reconnecting after disconnect
+    Reconnecting,
+    /// Shutting down
+    ShuttingDown,
+}
 
 /// Terminal client handler trait
 #[async_trait::async_trait]
@@ -38,14 +52,22 @@ pub trait TerminalHandler: Send + Sync + 'static {
     async fn on_bell(&self, _conn: &TerminalConnection) {}
     async fn on_resize(&self, _conn: &TerminalConnection, _width: usize, _height: usize) {}
 
-    /// Called when a Telnet option is enabled
+    /// Called when a Telnet option state changes
     ///
-    /// This is called when a Telnet option negotiation completes successfully
-    /// and the option is enabled for either the local or remote side.
-    async fn on_option_enabled(
+    /// This is called when an option negotiation completes successfully,
+    /// whether the option is being enabled or disabled.
+    ///
+    /// # Arguments
+    ///
+    /// * `conn` - The connection handle
+    /// * `option` - The Telnet option that changed
+    /// * `enabled` - `true` if the option was enabled, `false` if disabled
+    /// * `local` - `true` if the option changed locally, `false` if remotely
+    async fn on_option_changed(
         &self,
         _conn: &TerminalConnection,
-        _option: termionix_telnetcodec::TelnetOption,
+        _option: TelnetOption,
+        _enabled: bool,
         _local: bool,
     ) {
     }
@@ -55,12 +77,7 @@ pub trait TerminalHandler: Send + Sync + 'static {
     /// This is called when a complete subnegotiation sequence is received
     /// from the server. Subnegotiations provide additional parameters for
     /// negotiated options.
-    async fn on_subnegotiation(
-        &self,
-        _conn: &TerminalConnection,
-        _subneg: termionix_telnetcodec::TelnetArgument,
-    ) {
-    }
+    async fn on_subnegotiation(&self, _conn: &TerminalConnection, _subneg: TelnetArgument) {}
 
     async fn on_error(&self, _conn: &TerminalConnection, _error: ClientError) {}
     async fn on_reconnect_attempt(&self, _conn: &TerminalConnection, _attempt: u32) -> bool {
@@ -75,26 +92,25 @@ pub struct TerminalConnection {
     inner: Arc<TerminalConnectionInner>,
 }
 
+type ClientSplitConnection = SplitTerminalConnection<
+    tokio::io::ReadHalf<TcpStream>,
+    tokio::io::WriteHalf<TcpStream>,
+    TerminalCodec<AnsiCodec<TelnetCodec>>,
+>;
+
 struct TerminalConnectionInner {
     config: ClientConfig,
     state: RwLock<ConnectionState>,
-    tx: mpsc::UnboundedSender<TerminalCommand>,
-}
-
-#[derive(Debug)]
-enum TerminalCommand {
-    SendText(String),
-    SendLine(String),
-    Disconnect,
+    split: ClientSplitConnection,
 }
 
 impl TerminalConnection {
-    fn new(config: ClientConfig, tx: mpsc::UnboundedSender<TerminalCommand>) -> Self {
+    fn new(config: ClientConfig, split: ClientSplitConnection) -> Self {
         Self {
             inner: Arc::new(TerminalConnectionInner {
                 config,
                 state: RwLock::new(ConnectionState::Disconnected),
-                tx,
+                split,
             }),
         }
     }
@@ -107,28 +123,53 @@ impl TerminalConnection {
         *self.inner.state.read().await == ConnectionState::Connected
     }
 
-    pub async fn send(&self, text: &str) -> Result<()> {
+    /// Send any message type that can be encoded by the terminal codec
+    ///
+    /// This generic method can handle:
+    /// - Text strings (`&str`, `String`)
+    /// - Characters (`char`)
+    /// - Terminal commands (`TerminalCommand`)
+    /// - ANSI codes and sequences
+    /// - Raw bytes (`Vec<u8>`)
+    ///
+    /// The `flush` parameter controls whether to flush immediately after sending.
+    pub async fn send<M>(&self, msg: M, flush: bool) -> Result<()>
+    where
+        M: Into<TerminalCommand> + Send,
+    {
         self.inner
-            .tx
-            .send(TerminalCommand::SendText(text.to_string()))
-            .map_err(|_| ClientError::NotConnected)?;
+            .split
+            .send(msg.into(), flush)
+            .await
+            .map_err(|e| ClientError::Io(e.to_string()))?;
         Ok(())
     }
 
+    /// Send a line of text (automatically adds line ending and flushes)
     pub async fn send_line(&self, text: &str) -> Result<()> {
-        self.inner
-            .tx
-            .send(TerminalCommand::SendLine(text.to_string()))
-            .map_err(|_| ClientError::NotConnected)?;
-        Ok(())
+        let line = if text.ends_with("\r\n") {
+            text.to_string()
+        } else if text.ends_with('\n') {
+            format!("{}\r", text.trim_end_matches('\n'))
+        } else {
+            format!("{}\r\n", text)
+        };
+
+        self.send(line, true).await
+    }
+
+    /// Send a terminal command (always flushes)
+    pub async fn send_command(&self, cmd: TerminalCommand) -> Result<()> {
+        self.send(cmd, true).await
     }
 
     pub async fn disconnect(&self) -> Result<()> {
-        self.inner
-            .tx
-            .send(TerminalCommand::Disconnect)
-            .map_err(|_| ClientError::NotConnected)?;
         *self.inner.state.write().await = ConnectionState::ShuttingDown;
+        self.inner
+            .split
+            .close()
+            .await
+            .map_err(|e| ClientError::Io(e.to_string()))?;
         Ok(())
     }
 
@@ -136,8 +177,49 @@ impl TerminalConnection {
         &self.inner.config
     }
 
+    /// Set the compression algorithm for the connection
+    ///
+    /// This dynamically switches the compression algorithm used for both
+    /// reading and writing. Typically called in response to Telnet MCCP
+    /// (Mud Client Compression Protocol) negotiation.
+    ///
+    /// # Parameters
+    ///
+    /// - `algorithm`: The compression algorithm to use
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # use termionix_client::TerminalConnection;
+    /// # use termionix_compress::CompressionAlgorithm;
+    /// # async fn example(conn: &TerminalConnection) -> Result<(), Box<dyn std::error::Error>> {
+    /// // Enable Gzip compression (MCCP2)
+    /// conn.set_compression_algorithm(CompressionAlgorithm::Gzip).await?;
+    ///
+    /// // Disable compression
+    /// conn.set_compression_algorithm(CompressionAlgorithm::None).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn set_compression_algorithm(&self, algorithm: CompressionAlgorithm) -> Result<()> {
+        self.inner
+            .split
+            .set_compression_algorithm(algorithm)
+            .await
+            .map_err(|e| ClientError::Io(e.to_string()))?;
+        Ok(())
+    }
+
     async fn set_state(&self, state: ConnectionState) {
         *self.inner.state.write().await = state;
+    }
+
+    async fn next(&self) -> Result<Option<TerminalEvent>> {
+        self.inner
+            .split
+            .next()
+            .await
+            .map_err(|e| ClientError::Io(e.to_string()))
     }
 }
 
@@ -204,10 +286,6 @@ impl TerminalClient {
     }
 
     async fn connect_once<H: TerminalHandler>(&mut self, handler: Arc<H>) -> Result<()> {
-        let (tx, rx) = mpsc::unbounded_channel();
-        let connection = TerminalConnection::new(self.config.clone(), tx);
-        connection.set_state(ConnectionState::Connecting).await;
-
         let addr = self.config.address();
         info!("Connecting to {}...", addr);
 
@@ -223,49 +301,46 @@ impl TerminalClient {
         let telnet_codec = TelnetCodec::new();
         let ansi_codec = AnsiCodec::new(AnsiConfig::default(), telnet_codec);
         let terminal_codec = TerminalCodec::new(ansi_codec);
-        let framed = Framed::new(stream, terminal_codec);
 
+        // Create split connection with turbofish to help type inference
+        let split = SplitTerminalConnection::<
+            tokio::io::ReadHalf<TcpStream>,
+            tokio::io::WriteHalf<TcpStream>,
+            TerminalCodec<AnsiCodec<TelnetCodec>>,
+        >::from_stream(stream, terminal_codec.clone(), terminal_codec);
+
+        let connection = TerminalConnection::new(self.config.clone(), split);
         connection.set_state(ConnectionState::Connected).await;
         self.connection = Some(connection.clone());
 
         handler.on_connect(&connection).await;
 
-        self.run_connection(connection, framed, rx, handler).await
+        self.run_connection(connection, handler).await
     }
 
     async fn run_connection<H: TerminalHandler>(
         &self,
         connection: TerminalConnection,
-        mut framed: Framed<TcpStream, TerminalCodec<AnsiCodec<TelnetCodec>>>,
-        mut rx: mpsc::UnboundedReceiver<TerminalCommand>,
         handler: Arc<H>,
     ) -> Result<()> {
         loop {
-            tokio::select! {
-                result = framed.next() => {
-                    match result {
-                        Some(Ok(event)) => {
-                            if !self.handle_terminal_event(&connection, event, &handler).await? {
-                                break;
-                            }
-                        }
-                        Some(Err(e)) => {
-                            error!("Terminal error: {}", e);
-                            let err = ClientError::Io(e.to_string());
-                            handler.on_error(&connection, err).await;
-                            return Err(ClientError::Io(format!("Terminal error")));
-                        }
-                        None => {
-                            info!("Server closed connection");
-                            break;
-                        }
-                    }
-                }
-
-                Some(cmd) = rx.recv() => {
-                    if !self.handle_command(&mut framed, cmd).await? {
+            match connection.next().await {
+                Ok(Some(event)) => {
+                    if !self
+                        .handle_terminal_event(&connection, event, &handler)
+                        .await?
+                    {
                         break;
                     }
+                }
+                Ok(None) => {
+                    info!("Server closed connection");
+                    break;
+                }
+                Err(e) => {
+                    error!("Terminal error: {}", e);
+                    handler.on_error(&connection, e).await;
+                    return Err(ClientError::Io("Terminal error".to_string()));
                 }
             }
         }
@@ -302,29 +377,9 @@ impl TerminalClient {
         Ok(true)
     }
 
-    async fn handle_command(
-        &self,
-        framed: &mut Framed<TcpStream, TerminalCodec<AnsiCodec<TelnetCodec>>>,
-        cmd: TerminalCommand,
-    ) -> Result<bool> {
-        match cmd {
-            TerminalCommand::SendText(text) => {
-                framed.send(&text).await?;
-            }
-            TerminalCommand::SendLine(text) => {
-                let mut line = text;
-                line.push_str("\r\n");
-                framed.send(&line).await?;
-            }
-            TerminalCommand::Disconnect => {
-                return Ok(false);
-            }
-        }
-
-        Ok(true)
-    }
-
     pub fn connection(&self) -> Option<&TerminalConnection> {
         self.connection.as_ref()
     }
 }
+
+

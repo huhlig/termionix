@@ -19,7 +19,7 @@ use crate::ansi::{
     AnsiDeviceControlString, AnsiOperatingSystemCommand, AnsiPrivacyMessage,
     AnsiSelectGraphicRendition, AnsiSequence, AnsiStartOfString, TelnetCommand,
 };
-use crate::{AnsiConfig, AnsiError, AnsiParser, AnsiResult};
+use crate::{AnsiCodecError, AnsiCodecResult, AnsiConfig, AnsiParser};
 use termionix_telnetcodec::TelnetEvent;
 use tokio_util::bytes::BytesMut;
 use tokio_util::codec::{Decoder, Encoder};
@@ -30,6 +30,7 @@ use tracing::instrument;
 /// This codec wraps a `TelnetCodec` and uses an `AnsiMapper` to parse ANSI escape
 /// sequences from the byte stream. It implements both `Decoder` and `Encoder` traits
 /// from tokio_util for use with tokio's framed I/O.
+#[derive(Clone, Debug)]
 pub struct AnsiCodec<I> {
     config: AnsiConfig,
     parser: AnsiParser,
@@ -60,13 +61,13 @@ impl<I> AnsiCodec<I> {
 impl<I> Decoder for AnsiCodec<I>
 where
     I: Decoder<Item = TelnetEvent>,
-    AnsiError: From<I::Error>,
+    AnsiCodecError: From<I::Error>,
 {
     type Item = AnsiSequence;
-    type Error = AnsiError;
+    type Error = AnsiCodecError;
 
     #[instrument(skip_all)]
-    fn decode(&mut self, src: &mut BytesMut) -> AnsiResult<Option<Self::Item>> {
+    fn decode(&mut self, src: &mut BytesMut) -> AnsiCodecResult<Option<Self::Item>> {
         if let Some(event) = self.inner.decode(src)? {
             match event {
                 TelnetEvent::Data(byte) => {
@@ -121,11 +122,11 @@ where
 impl<I> Encoder<char> for AnsiCodec<I>
 where
     I: Encoder<char>,
-    AnsiError: From<I::Error>,
+    AnsiCodecError: From<I::Error>,
 {
-    type Error = AnsiError;
+    type Error = AnsiCodecError;
 
-    fn encode(&mut self, item: char, dst: &mut BytesMut) -> AnsiResult<()> {
+    fn encode(&mut self, item: char, dst: &mut BytesMut) -> AnsiCodecResult<()> {
         // Encode plain text as telnet data
         self.inner.encode(item, dst)?;
         Ok(())
@@ -135,11 +136,11 @@ where
 impl<I> Encoder<&str> for AnsiCodec<I>
 where
     I: Encoder<u8>,
-    AnsiError: From<I::Error>,
+    AnsiCodecError: From<I::Error>,
 {
-    type Error = AnsiError;
+    type Error = AnsiCodecError;
 
-    fn encode(&mut self, item: &str, dst: &mut BytesMut) -> AnsiResult<()> {
+    fn encode(&mut self, item: &str, dst: &mut BytesMut) -> AnsiCodecResult<()> {
         for byte in item.as_bytes() {
             self.inner.encode(*byte, dst)?;
         }
@@ -150,11 +151,11 @@ where
 impl<I> Encoder<&[u8]> for AnsiCodec<I>
 where
     I: Encoder<u8>,
-    AnsiError: From<I::Error>,
+    AnsiCodecError: From<I::Error>,
 {
-    type Error = AnsiError;
+    type Error = AnsiCodecError;
 
-    fn encode(&mut self, item: &[u8], dst: &mut BytesMut) -> AnsiResult<()> {
+    fn encode(&mut self, item: &[u8], dst: &mut BytesMut) -> AnsiCodecResult<()> {
         // Encode plain text as telnet data
         for byte in item {
             self.inner.encode(*byte, dst)?;
@@ -166,9 +167,9 @@ where
 impl<I> Encoder<AnsiControlCode> for AnsiCodec<I>
 where
     I: Encoder<u8>,
-    AnsiError: From<I::Error>,
+    AnsiCodecError: From<I::Error>,
 {
-    type Error = AnsiError;
+    type Error = AnsiCodecError;
 
     fn encode(&mut self, item: AnsiControlCode, dst: &mut BytesMut) -> Result<(), Self::Error> {
         // Encode control code as a single byte
@@ -180,15 +181,15 @@ where
 impl<I> Encoder<AnsiControlSequenceIntroducer> for AnsiCodec<I>
 where
     I: Encoder<u8>,
-    AnsiError: From<I::Error>,
+    AnsiCodecError: From<I::Error>,
 {
-    type Error = AnsiError;
+    type Error = AnsiCodecError;
 
     fn encode(
         &mut self,
         item: AnsiControlSequenceIntroducer,
         dst: &mut BytesMut,
-    ) -> AnsiResult<()> {
+    ) -> AnsiCodecResult<()> {
         let mut buf = BytesMut::new();
         item.encode(&mut buf)?;
         for byte in buf.iter() {
@@ -201,11 +202,15 @@ where
 impl<I> Encoder<AnsiSelectGraphicRendition> for AnsiCodec<I>
 where
     I: Encoder<u8>,
-    AnsiError: From<I::Error>,
+    AnsiCodecError: From<I::Error>,
 {
-    type Error = AnsiError;
+    type Error = AnsiCodecError;
 
-    fn encode(&mut self, item: AnsiSelectGraphicRendition, dst: &mut BytesMut) -> AnsiResult<()> {
+    fn encode(
+        &mut self,
+        item: AnsiSelectGraphicRendition,
+        dst: &mut BytesMut,
+    ) -> AnsiCodecResult<()> {
         let mut buf = BytesMut::new();
         item.encode(&mut buf, Some(self.config.color_mode))?;
         for byte in buf.iter() {
@@ -218,11 +223,15 @@ where
 impl<I> Encoder<AnsiOperatingSystemCommand> for AnsiCodec<I>
 where
     I: Encoder<u8>,
-    AnsiError: From<I::Error>,
+    AnsiCodecError: From<I::Error>,
 {
-    type Error = AnsiError;
+    type Error = AnsiCodecError;
 
-    fn encode(&mut self, item: AnsiOperatingSystemCommand, dst: &mut BytesMut) -> AnsiResult<()> {
+    fn encode(
+        &mut self,
+        item: AnsiOperatingSystemCommand,
+        dst: &mut BytesMut,
+    ) -> AnsiCodecResult<()> {
         let mut buf = BytesMut::new();
         item.encode(&mut buf)?;
         for byte in buf.iter() {
@@ -235,11 +244,11 @@ where
 impl<I> Encoder<AnsiDeviceControlString> for AnsiCodec<I>
 where
     I: Encoder<u8>,
-    AnsiError: From<I::Error>,
+    AnsiCodecError: From<I::Error>,
 {
-    type Error = AnsiError;
+    type Error = AnsiCodecError;
 
-    fn encode(&mut self, item: AnsiDeviceControlString, dst: &mut BytesMut) -> AnsiResult<()> {
+    fn encode(&mut self, item: AnsiDeviceControlString, dst: &mut BytesMut) -> AnsiCodecResult<()> {
         let mut buf = BytesMut::new();
         item.encode(&mut buf)?;
         for byte in buf.iter() {
@@ -252,11 +261,11 @@ where
 impl<I> Encoder<AnsiStartOfString> for AnsiCodec<I>
 where
     I: Encoder<u8>,
-    AnsiError: From<I::Error>,
+    AnsiCodecError: From<I::Error>,
 {
-    type Error = AnsiError;
+    type Error = AnsiCodecError;
 
-    fn encode(&mut self, item: AnsiStartOfString, dst: &mut BytesMut) -> AnsiResult<()> {
+    fn encode(&mut self, item: AnsiStartOfString, dst: &mut BytesMut) -> AnsiCodecResult<()> {
         let mut buf = BytesMut::new();
         item.encode(&mut buf)?;
         for byte in buf.iter() {
@@ -269,11 +278,11 @@ where
 impl<I> Encoder<AnsiPrivacyMessage> for AnsiCodec<I>
 where
     I: Encoder<u8>,
-    AnsiError: From<I::Error>,
+    AnsiCodecError: From<I::Error>,
 {
-    type Error = AnsiError;
+    type Error = AnsiCodecError;
 
-    fn encode(&mut self, item: AnsiPrivacyMessage, dst: &mut BytesMut) -> AnsiResult<()> {
+    fn encode(&mut self, item: AnsiPrivacyMessage, dst: &mut BytesMut) -> AnsiCodecResult<()> {
         let mut buf = BytesMut::new();
         item.encode(&mut buf)?;
         for byte in buf.iter() {
@@ -286,15 +295,15 @@ where
 impl<I> Encoder<AnsiApplicationProgramCommand> for AnsiCodec<I>
 where
     I: Encoder<u8>,
-    AnsiError: From<I::Error>,
+    AnsiCodecError: From<I::Error>,
 {
-    type Error = AnsiError;
+    type Error = AnsiCodecError;
 
     fn encode(
         &mut self,
         item: AnsiApplicationProgramCommand,
         dst: &mut BytesMut,
-    ) -> AnsiResult<()> {
+    ) -> AnsiCodecResult<()> {
         let mut buf = BytesMut::new();
         item.encode(&mut buf)?;
         for byte in buf.iter() {
@@ -307,11 +316,11 @@ where
 impl<I> Encoder<TelnetCommand> for AnsiCodec<I>
 where
     I: Encoder<u8>,
-    AnsiError: From<I::Error>,
+    AnsiCodecError: From<I::Error>,
 {
-    type Error = AnsiError;
+    type Error = AnsiCodecError;
 
-    fn encode(&mut self, item: TelnetCommand, dst: &mut BytesMut) -> AnsiResult<()> {
+    fn encode(&mut self, item: TelnetCommand, dst: &mut BytesMut) -> AnsiCodecResult<()> {
         let mut buf = BytesMut::new();
         item.encode(&mut buf)?;
         for byte in buf.iter() {
@@ -324,9 +333,9 @@ where
 impl<I> Encoder<AnsiSequence> for AnsiCodec<I>
 where
     I: Encoder<u8>,
-    AnsiError: From<I::Error>,
+    AnsiCodecError: From<I::Error>,
 {
-    type Error = AnsiError;
+    type Error = AnsiCodecError;
 
     fn encode(&mut self, item: AnsiSequence, dst: &mut BytesMut) -> Result<(), Self::Error> {
         match item {
@@ -344,7 +353,7 @@ where
                     self.inner.encode(*byte, dst)?;
                 }
             }
-            AnsiSequence::Control(code) => {
+            AnsiSequence::AnsiControlCode(code) => {
                 self.inner.encode(code.to_byte(), dst)?;
             }
             AnsiSequence::AnsiEscape => {

@@ -24,7 +24,7 @@
 //! data sender. The data is sent in a single byte.
 //!
 
-use crate::{CodecError, consts, result::CodecResult};
+use crate::{TelnetCodecError, consts, result::TelnetCodecResult};
 use byteorder::WriteBytesExt;
 use bytes::{Buf, BufMut};
 
@@ -115,7 +115,7 @@ impl NAOCRD {
     /// let bytes_written = naocrd.encode(&mut buf)?;
     /// assert_eq!(bytes_written, 2);
     /// ```
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> CodecResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> TelnetCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -200,9 +200,9 @@ impl NAOCRD {
     ///     _ => {}
     /// }
     /// ```
-    pub fn decode<T: Buf>(src: &mut T) -> CodecResult<NAOCRD> {
+    pub fn decode<T: Buf>(src: &mut T) -> TelnetCodecResult<NAOCRD> {
         if src.remaining() < 2 {
-            return Err(CodecError::SubnegotiationError {
+            return Err(TelnetCodecError::SubnegotiationError {
                 option: Some(crate::consts::option::NAOCRD),
                 reason: crate::SubnegotiationErrorKind::InsufficientData {
                     required: 2,
@@ -318,7 +318,7 @@ mod tests {
 
         assert!(result.is_err());
         match result {
-            Err(CodecError::SubnegotiationError { option, reason }) => {
+            Err(TelnetCodecError::SubnegotiationError { option, reason }) => {
                 assert_eq!(option, Some(consts::option::NAOCRD));
                 assert!(matches!(
                     reason,
@@ -337,7 +337,7 @@ mod tests {
 
         assert!(result.is_err());
         match result {
-            Err(CodecError::SubnegotiationError { option, reason }) => {
+            Err(TelnetCodecError::SubnegotiationError { option, reason }) => {
                 assert_eq!(option, Some(consts::option::NAOCRD));
                 assert!(matches!(
                     reason,

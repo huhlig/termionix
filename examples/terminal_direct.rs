@@ -17,17 +17,15 @@
 //! Terminal Codec Direct Usage Example
 //!
 //! Demonstrates using the TerminalCodec directly with a TCP stream.
-//! This shows the low-level codec API without the service layer.
+//! This shows the low-level codec API without the server layer.
 //!
-//! For most applications, using the service layer (see echo_server.rs) is recommended.
+//! For most applications, using the server layer (see echo_server.rs) is recommended.
 //! This example is useful for understanding the codec internals or building custom solutions.
 
 use futures::{SinkExt, StreamExt};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use termionix_ansicodec::{AnsiCodec, AnsiConfig};
-use termionix_telnetcodec::TelnetCodec;
-use termionix_terminal::{TerminalCodec, TerminalEvent};
+use termionix_service::{AnsiCodec, AnsiConfig, TelnetCodec, TerminalCodec, TerminalEvent};
 use tokio::net::TcpListener;
 use tokio_util::codec::Framed;
 

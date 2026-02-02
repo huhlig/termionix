@@ -28,30 +28,43 @@
 use async_trait::async_trait;
 use std::io::{self, Write};
 use std::sync::Arc;
-use termionix_client::{ClientConfig, ClientConnection, ClientHandler, TelnetClient};
+use termionix_client::{ClientConfig, TerminalClient, TerminalConnection, TerminalHandler};
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::sync::mpsc;
 
 /// Simple handler that prints server output and sends user input
 struct SimpleHandler {
-    input_tx: mpsc::UnboundedSender<String>,
+    input_rx: Arc<tokio::sync::Mutex<mpsc::UnboundedReceiver<String>>>,
 }
 
 #[async_trait]
-impl ClientHandler for SimpleHandler {
-    async fn on_connect(&self, _conn: &ClientConnection) {
+impl TerminalHandler for SimpleHandler {
+    async fn on_connect(&self, conn: &TerminalConnection) {
         println!("\n=== Connected to server ===");
         println!("Type your commands and press Enter.");
-        println!("Press Ctrl+C to logout.txt.\n");
+        println!("Press Ctrl+C to disconnect.\n");
+
+        // Start input handler
+        let conn = conn.clone();
+        let input_rx = self.input_rx.clone();
+        tokio::spawn(async move {
+            let mut rx = input_rx.lock().await;
+            while let Some(line) = rx.recv().await {
+                if let Err(e) = conn.send_line(&line).await {
+                    eprintln!("Error sending: {}", e);
+                    break;
+                }
+            }
+        });
     }
     
-    async fn on_data(&self, _conn: &ClientConnection, data: &[u8]) {
-        // Print server data directly to stdout
-        print!("{}", String::from_utf8_lossy(data));
+    async fn on_character(&self, _conn: &TerminalConnection, ch: char) {
+        // Print characters as they arrive
+        print!("{}", ch);
         io::stdout().flush().ok();
     }
     
-    async fn on_disconnect(&self, _conn: &ClientConnection) {
+    async fn on_disconnect(&self, _conn: &TerminalConnection) {
         println!("\n=== Disconnected from server ===");
     }
 }
@@ -84,54 +97,52 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with_terminal_type("xterm-256color")
         .with_terminal_size(80, 24);
     
-    // Create client
-    let mut client = TelnetClient::new(config);
-    
     // Create channel for user input
-    let (input_tx, mut input_rx) = mpsc::unbounded_channel::<String>();
+    let (input_tx, input_rx) = mpsc::unbounded_channel::<String>();
     
     // Spawn task to read user input
-    let input_tx_clone = input_tx.clone();
     tokio::spawn(async move {
         let stdin = tokio::io::stdin();
         let reader = BufReader::new(stdin);
         let mut lines = reader.lines();
         
         while let Ok(Some(line)) = lines.next_line().await {
-            if input_tx_clone.send(line).is_err() {
+            if input_tx.send(line).is_err() {
                 break;
             }
         }
     });
     
     // Create handler
-    let handler = Arc::new(SimpleHandler { input_tx });
+    let handler = Arc::new(SimpleHandler {
+        input_rx: Arc::new(tokio::sync::Mutex::new(input_rx)),
+    });
     
-    // Spawn connection task
-    let client_handle = {
-        let handler = handler.clone();
-        tokio::spawn(async move {
-            client.connect(handler).await
-        })
+    // Create and run client
+    let mut client = TerminalClient::new(config);
+    
+    // Handle Ctrl+C gracefully
+    let result = tokio::select! {
+        result = client.connect(handler) => result,
+        _ = tokio::signal::ctrl_c() => {
+            println!("\n\nReceived Ctrl+C, disconnecting...");
+            if let Some(conn) = client.connection() {
+                conn.disconnect().await.ok();
+            }
+            Ok(())
+        }
     };
     
-    // Handle user input in main task
-    while let Some(line) = input_rx.recv().await {
-        if let Some(conn) = client_handle.is_finished().then(|| ()).and(None) {
-            break;
+    match result {
+        Ok(()) => {
+            println!("Disconnected.");
+            Ok(())
         }
-        
-        // Get connection from client (this is a simplified approach)
-        // In a real implementation, you'd want better connection access
-        // For now, we'll just print that we can't send yet
-        println!("Note: Sending not yet implemented in this simple example");
-        println!("You typed: {}", line);
+        Err(e) => {
+            eprintln!("Client error: {}", e);
+            Err(e.into())
+        }
     }
-    
-    // Wait for client to finish
-    client_handle.await??;
-    
-    Ok(())
 }
 
 

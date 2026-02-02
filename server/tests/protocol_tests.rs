@@ -19,10 +19,7 @@
 use async_trait::async_trait;
 use std::sync::Arc;
 use std::time::Duration;
-use termionix_service::{
-    ConnectionId, ServerConfig, ServerHandler, TelnetConnection, TelnetServer,
-};
-use termionix_terminal::TerminalEvent;
+use termionix_server::{ServerConfig, ServerHandler, TelnetServer};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 

@@ -18,7 +18,7 @@
 
 use crate::{ConnectionId, TelnetConnection, TelnetError};
 use async_trait::async_trait;
-use termionix_terminal::TerminalEvent;
+use termionix_service::{TelnetArgument, TelnetOption, TerminalEvent};
 
 /// Server event handler trait
 ///
@@ -28,7 +28,7 @@ use termionix_terminal::TerminalEvent;
 /// # Example
 ///
 /// ```no_run
-/// use termionix_service::{ServerHandler, ConnectionId, TelnetConnection};
+/// use termionix_server::{ServerHandler, ConnectionId, TelnetConnection};
 /// use termionix_terminal::TerminalEvent;
 /// use async_trait::async_trait;
 ///
@@ -60,22 +60,24 @@ pub trait ServerHandler: Send + Sync + 'static {
     /// event received from the client.
     async fn on_event(&self, _id: ConnectionId, _conn: &TelnetConnection, _event: TerminalEvent) {}
 
-    /// Called when a Telnet option is enabled
+    /// Called when a Telnet option state changes
     ///
-    /// This is called when a Telnet option negotiation completes successfully
-    /// and the option is enabled for either the local or remote side.
+    /// This is called when an option negotiation completes successfully,
+    /// whether the option is being enabled or disabled.
     ///
     /// # Arguments
     ///
     /// * `id` - The connection ID
     /// * `conn` - The connection handle
-    /// * `option` - The Telnet option that was enabled
-    /// * `local` - `true` if the option was enabled locally, `false` if remotely
-    async fn on_option_enabled(
+    /// * `option` - The Telnet option that changed
+    /// * `enabled` - `true` if the option was enabled, `false` if disabled
+    /// * `local` - `true` if the option changed locally, `false` if remotely
+    async fn on_option_changed(
         &self,
         _id: ConnectionId,
         _conn: &TelnetConnection,
-        _option: termionix_telnetcodec::TelnetOption,
+        _option: TelnetOption,
+        _enabled: bool,
         _local: bool,
     ) {
     }
@@ -95,7 +97,7 @@ pub trait ServerHandler: Send + Sync + 'static {
         &self,
         _id: ConnectionId,
         _conn: &TelnetConnection,
-        _subneg: termionix_telnetcodec::TelnetArgument,
+        _subneg: TelnetArgument,
     ) {
     }
 
@@ -155,7 +157,7 @@ pub enum EventHandler {
 /// # Example
 ///
 /// ```no_run
-/// use termionix_service::{CallbackHandler, EventHandler};
+/// use termionix_server::{CallbackHandler, EventHandler};
 /// use std::sync::Arc;
 ///
 /// let handler = Arc::new(CallbackHandler {
@@ -178,6 +180,15 @@ pub struct CallbackHandler {
     pub on_connect: Option<Box<dyn Fn(ConnectionId, &TelnetConnection) + Send + Sync + 'static>>,
     /// Event handling strategy
     pub on_event: EventHandler,
+    /// Called on option changed
+    pub on_option_changed: Option<
+        Box<
+            dyn Fn(ConnectionId, &TelnetConnection, TelnetOption, bool, bool)
+                + Send
+                + Sync
+                + 'static,
+        >,
+    >,
     /// Called on error
     pub on_error:
         Option<Box<dyn Fn(ConnectionId, &TelnetConnection, TelnetError) + Send + Sync + 'static>>,
@@ -195,6 +206,7 @@ impl Default for CallbackHandler {
         Self {
             on_connect: None,
             on_event: EventHandler::None,
+            on_option_changed: None,
             on_error: None,
             on_timeout: None,
             on_idle_timeout: None,
@@ -233,6 +245,19 @@ impl ServerHandler for CallbackHandler {
                 }
                 _ => {}
             },
+        }
+    }
+
+    async fn on_option_changed(
+        &self,
+        id: ConnectionId,
+        conn: &TelnetConnection,
+        option: TelnetOption,
+        enabled: bool,
+        local: bool,
+    ) {
+        if let Some(ref f) = self.on_option_changed {
+            f(id, conn, option, enabled, local);
         }
     }
 

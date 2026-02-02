@@ -31,7 +31,7 @@
 //! ```
 
 use std::sync::Arc;
-use termionix_service::{CallbackHandler, ServerConfig, TelnetServer};
+use termionix_server::{CallbackHandler, ServerConfig, TelnetServer};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

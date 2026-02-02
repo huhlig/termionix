@@ -25,7 +25,7 @@
 //!
 //! The key is a string, and the value is a string, an array of strings, or a
 
-use crate::{consts, result::CodecResult};
+use crate::{consts, result::TelnetCodecResult};
 use byteorder::WriteBytesExt;
 use bytes::{Buf, BufMut};
 use std::collections::HashMap;
@@ -42,7 +42,7 @@ use std::collections::HashMap;
 /// let mut msd = MudServerData::new();
 /// msd.set("name", MudServerDataValue::string("My MUD"));
 /// ```
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MudServerData(MudServerDataTable);
 
 impl MudServerData {
@@ -166,7 +166,7 @@ impl MudServerData {
     ///     Err(e) => eprintln!("Encoding error: {}", e),
     /// }
     /// ```
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> CodecResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> TelnetCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -212,7 +212,7 @@ impl MudServerData {
     ///     Err(e) => eprintln!("Decoding error: {}", e),
     /// }
     /// ```
-    pub fn decode<T: Buf>(src: &mut T) -> CodecResult<MudServerData> {
+    pub fn decode<T: Buf>(src: &mut T) -> TelnetCodecResult<MudServerData> {
         Ok(MudServerData(MudServerDataTable::decode(src)?))
     }
 }
@@ -234,7 +234,7 @@ impl std::fmt::Display for MudServerData {
 /// * `String(String)` - A simple string value
 /// * `Array(MudServerDataArray)` - An array of MSDP values
 /// * `Table(MudServerDataTable)` - A nested table of key-value pairs
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum MudServerDataValue {
     /// String Value
     String(String),
@@ -325,7 +325,7 @@ impl MudServerDataValue {
     ///
     /// * `Ok(usize)` - The number of bytes written
     /// * `Err(CodecResult)` - If encoding fails
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> CodecResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> TelnetCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -376,7 +376,7 @@ impl MudServerDataValue {
     /// # Notes
     ///
     /// Returns an empty string if the buffer is empty.
-    pub fn decode<T: Buf>(src: &mut T) -> CodecResult<MudServerDataValue> {
+    pub fn decode<T: Buf>(src: &mut T) -> TelnetCodecResult<MudServerDataValue> {
         if !src.has_remaining() {
             return Ok(MudServerDataValue::String(String::new()));
         }
@@ -435,7 +435,7 @@ impl std::fmt::Display for MudServerDataValue {
 /// array.push(MudServerDataValue::string("item1"));
 /// array.push(MudServerDataValue::string("item2"));
 /// ```
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct MudServerDataArray(Vec<MudServerDataValue>);
 
 impl MudServerDataArray {
@@ -538,7 +538,7 @@ impl MudServerDataArray {
     ///
     /// * `Ok(usize)` - The number of bytes written
     /// * `Err(CodecResult)` - If encoding fails
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> CodecResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> TelnetCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -583,7 +583,7 @@ impl MudServerDataArray {
     ///
     /// * `Ok(MudServerDataArray)` - The decoded array
     /// * `Err(CodecResult)` - If decoding fails
-    pub fn decode<T: Buf>(src: &mut T) -> CodecResult<MudServerDataArray> {
+    pub fn decode<T: Buf>(src: &mut T) -> TelnetCodecResult<MudServerDataArray> {
         let mut array = MudServerDataArray::new();
 
         // Consume ARRAY_OPEN
@@ -633,7 +633,7 @@ impl std::fmt::Display for MudServerDataArray {
 /// table.set("name", MudServerDataValue::string("MUD Name"));
 /// table.set("version", MudServerDataValue::string("1.0"));
 /// ```
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct MudServerDataTable(HashMap<String, MudServerDataValue>);
 
 impl MudServerDataTable {
@@ -744,7 +744,7 @@ impl MudServerDataTable {
     ///
     /// * `Ok(usize)` - The number of bytes written
     /// * `Err(CodecResult)` - If encoding fails
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> CodecResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> TelnetCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -796,7 +796,7 @@ impl MudServerDataTable {
     ///
     /// This method automatically detects whether the table has explicit
     /// `TABLE_OPEN`/`TABLE_CLOSE` markers and handles both cases appropriately.
-    pub fn decode<T: Buf>(src: &mut T) -> CodecResult<MudServerDataTable> {
+    pub fn decode<T: Buf>(src: &mut T) -> TelnetCodecResult<MudServerDataTable> {
         let mut table = MudServerDataTable::new();
 
         // Check if this is a nested table (starts with TABLE_OPEN)

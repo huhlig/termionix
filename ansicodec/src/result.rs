@@ -19,12 +19,12 @@
 //! This module provides comprehensive error handling for ANSI string operations,
 //! including parsing errors, validation errors, and buffer management errors.
 
-/// Result type alias for operations that may fail with an [`AnsiError`].
-pub type AnsiResult<T> = Result<T, AnsiError>;
+/// Result type alias for operations that may fail with an [`AnsiCodecError`].
+pub type AnsiCodecResult<T> = Result<T, AnsiCodecError>;
 
 /// Errors that can occur when working with ANSI strings.
 #[derive(Debug)]
-pub enum AnsiError {
+pub enum AnsiCodecError {
     /// IO Error
     IoError(std::io::Error),
     /// Invalid UTF-8 sequence encountered at the specified position.
@@ -98,16 +98,16 @@ pub enum AnsiError {
     },
 }
 
-impl std::fmt::Display for AnsiError {
+impl std::fmt::Display for AnsiCodecError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnsiError::IoError(err) => {
+            AnsiCodecError::IoError(err) => {
                 write!(f, "IOError {}", err)
             }
-            AnsiError::InvalidUtf8 { position } => {
+            AnsiCodecError::InvalidUtf8 { position } => {
                 write!(f, "Invalid UTF-8 sequence at position {}", position)
             }
-            AnsiError::MalformedAnsi {
+            AnsiCodecError::MalformedAnsi {
                 position,
                 description,
             } => {
@@ -117,28 +117,28 @@ impl std::fmt::Display for AnsiError {
                     position, description
                 )
             }
-            AnsiError::IncompleteSequence { position } => {
+            AnsiCodecError::IncompleteSequence { position } => {
                 write!(
                     f,
                     "Incomplete ANSI sequence at end of input (started at position {})",
                     position
                 )
             }
-            AnsiError::RangeOutOfBounds { range, max } => {
+            AnsiCodecError::RangeOutOfBounds { range, max } => {
                 write!(
                     f,
                     "Range out of bounds: {:?} (maximum valid position: {})",
                     range, max
                 )
             }
-            AnsiError::SequenceTooLong { length, max } => {
+            AnsiCodecError::SequenceTooLong { length, max } => {
                 write!(
                     f,
                     "Sequence too long: {} bytes (maximum allowed: {})",
                     length, max
                 )
             }
-            AnsiError::BufferOverflow {
+            AnsiCodecError::BufferOverflow {
                 attempted,
                 capacity,
             } => {
@@ -148,7 +148,7 @@ impl std::fmt::Display for AnsiError {
                     attempted, capacity
                 )
             }
-            AnsiError::InvalidParameter {
+            AnsiCodecError::InvalidParameter {
                 name,
                 value,
                 reason,
@@ -163,17 +163,17 @@ impl std::fmt::Display for AnsiError {
     }
 }
 
-impl std::error::Error for AnsiError {}
+impl std::error::Error for AnsiCodecError {}
 
-impl From<std::io::Error> for AnsiError {
+impl From<std::io::Error> for AnsiCodecError {
     fn from(error: std::io::Error) -> Self {
-        AnsiError::IoError(error)
+        AnsiCodecError::IoError(error)
     }
 }
 
-impl From<termionix_telnetcodec::CodecError> for AnsiError {
-    fn from(error: termionix_telnetcodec::CodecError) -> Self {
-        AnsiError::IoError(std::io::Error::new(
+impl From<termionix_telnetcodec::TelnetCodecError> for AnsiCodecError {
+    fn from(error: termionix_telnetcodec::TelnetCodecError) -> Self {
+        AnsiCodecError::IoError(std::io::Error::new(
             std::io::ErrorKind::Other,
             format!("Codec error: {:?}", error),
         ))

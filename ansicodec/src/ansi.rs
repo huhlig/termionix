@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::AnsiResult;
+use crate::AnsiCodecResult;
 pub use crate::style::{
     AnsiSelectGraphicRendition, Blink, Color, Font, Ideogram, Intensity, SGRParameter, Script,
     Underline,
@@ -54,7 +54,7 @@ pub enum AnsiSequence {
     ///
     /// Common examples include NULL (0x00), Bell (0x07), Backspace (0x08),
     /// Tab (0x09), Line Feed (0x0A), and Carriage Return (0x0D).
-    Control(AnsiControlCode),
+    AnsiControlCode(AnsiControlCode),
 
     /// A standalone ESC character (0x1B) that is not part of a recognized sequence.
     ///
@@ -208,7 +208,7 @@ impl AnsiSequence {
         match self {
             AnsiSequence::Character(c) => c.len_utf8(),
             AnsiSequence::Unicode(c) => c.len_utf8(),
-            AnsiSequence::Control(code) => code.len(),
+            AnsiSequence::AnsiControlCode(code) => code.len(),
             AnsiSequence::AnsiEscape => 1,
             AnsiSequence::AnsiCSI(csi) => csi.len(),
             AnsiSequence::AnsiSGR(sgr) => sgr.len(None),
@@ -310,7 +310,7 @@ impl AnsiSequence {
     /// - [`write()`](AnsiSequence::write) - Write to a `std::io::Write` trait object
     /// - [`len()`](AnsiSequence::len) - Get the encoded byte length without encoding
     /// - [`Display`](std::fmt::Display) - Convert to a string representation
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -436,7 +436,7 @@ impl AnsiSequence {
                 writer.write_all(encoded.as_bytes())?;
                 Ok(encoded.len())
             }
-            AnsiSequence::Control(code) => code.write(writer),
+            AnsiSequence::AnsiControlCode(code) => code.write(writer),
             AnsiSequence::AnsiEscape => {
                 writer.write_all(&[0x1B])?;
                 Ok(1)
@@ -462,7 +462,7 @@ impl std::fmt::Display for AnsiSequence {
         match self {
             AnsiSequence::Character(c) => write!(f, "{}", c),
             AnsiSequence::Unicode(c) => write!(f, "{}", c),
-            AnsiSequence::Control(code) => write!(f, "{}", code),
+            AnsiSequence::AnsiControlCode(code) => write!(f, "{}", code),
             AnsiSequence::AnsiEscape => write!(f, "\x1b"),
             AnsiSequence::AnsiCSI(csi) => write!(f, "{}", csi),
             AnsiSequence::AnsiSGR(sgr) => write!(f, "{}", sgr),
@@ -675,7 +675,7 @@ impl TelnetCommand {
     ///
     /// - [`write()`](TelnetCommand::write) - Write to a `std::io::Write` trait object
     /// - [`len()`](TelnetCommand::len) - Get the encoded byte length
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -1002,7 +1002,7 @@ impl AnsiControlCode {
     /// # See Also
     ///
     /// - [`write()`](AnsiControlCode::write) - Write to a `std::io::Write` trait object
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -1439,7 +1439,7 @@ impl AnsiControlSequenceIntroducer {
     /// # See Also
     ///
     /// - [`write()`](AnsiControlSequenceIntroducer::write) - Write to a `std::io::Write` trait object
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -1936,7 +1936,7 @@ impl AnsiDeviceControlString {
     /// This method implements the Device Control String (DCS) as defined in:
     /// - ISO/IEC 6429 (Information technology — Control functions for coded character sets)
     /// - ANSI X3.64-1979 (Extended Control Functions)
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -2096,7 +2096,7 @@ impl AnsiOperatingSystemCommand {
     /// # See Also
     ///
     /// - [`write()`](AnsiOperatingSystemCommand::write) - Write to a `std::io::Write` trait object
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -2207,7 +2207,7 @@ impl AnsiStartOfString {
     /// # Returns
     ///
     /// Returns `Ok(bytes_written)` on success.
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -2323,7 +2323,7 @@ impl AnsiPrivacyMessage {
     /// # Returns
     ///
     /// Returns `Ok(bytes_written)` on success.
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -2459,7 +2459,7 @@ impl AnsiApplicationProgramCommand {
     /// # See Also
     ///
     /// - [`write()`](AnsiApplicationProgramCommand::write) - Write to a `std::io::Write` trait object
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> AnsiCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -2528,7 +2528,7 @@ mod tests {
 
     #[test]
     fn test_ansi_sequence_control_len() {
-        let seq = AnsiSequence::Control(AnsiControlCode::LF);
+        let seq = AnsiSequence::AnsiControlCode(AnsiControlCode::LF);
         assert_eq!(seq.len(), 1);
     }
 
@@ -2564,7 +2564,7 @@ mod tests {
 
     #[test]
     fn test_ansi_sequence_encode_control() {
-        let seq = AnsiSequence::Control(AnsiControlCode::LF);
+        let seq = AnsiSequence::AnsiControlCode(AnsiControlCode::LF);
         let mut buffer = BytesMut::new();
         let written = seq.encode(&mut buffer).unwrap();
         assert_eq!(written, 1);
@@ -3141,7 +3141,7 @@ mod tests {
 
         let seq1 = AnsiSequence::Character('H');
         let seq2 = AnsiSequence::Character('i');
-        let seq3 = AnsiSequence::Control(AnsiControlCode::LF);
+        let seq3 = AnsiSequence::AnsiControlCode(AnsiControlCode::LF);
 
         seq1.encode(&mut buffer).unwrap();
         seq2.encode(&mut buffer).unwrap();

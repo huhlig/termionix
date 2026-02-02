@@ -13,7 +13,7 @@
 
 use std::net::SocketAddr;
 use std::sync::Arc;
-use termionix_service::{
+use termionix_server::{
     ConnectionManager, TelnetConnection, TelnetHandler, TelnetServer, TelnetServerConfig,
 };
 use termionix_terminal::{TerminalCommand, TerminalEvent};

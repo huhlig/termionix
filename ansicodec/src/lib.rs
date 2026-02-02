@@ -32,14 +32,15 @@ pub use self::ansi::{
 pub use self::codec::AnsiCodec;
 pub use self::config::{AnsiConfig, ColorMode};
 pub use self::parser::AnsiParser;
-pub use self::result::{AnsiError, AnsiResult};
+pub use self::result::{AnsiCodecError, AnsiCodecResult};
 pub use self::string::{Segment, SegmentedString};
 pub use self::style::{Blink, Color, Font, Ideogram, Intensity, SGRParameter, Script, Underline};
 pub use self::utility::{Span, SpannedString, StyledString, strip_ansi_codes};
-
-// Type aliases for backward compatibility
-pub type Style = AnsiSelectGraphicRendition;
-pub type ControlCode = AnsiControlCode;
+pub use termionix_telnetcodec::{
+    SubnegotiationErrorKind, TelnetArgument, TelnetCodec, TelnetCodecError, TelnetCodecResult,
+    TelnetEvent, TelnetFrame, TelnetOption, TelnetSide, gmcp, linemode, msdp, mssp, naocrd, naohts,
+    naws, status,
+};
 
 #[cfg(test)]
 mod tests {

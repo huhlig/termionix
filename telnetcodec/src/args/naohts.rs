@@ -25,7 +25,7 @@
 //!
 //! The first byte is the number of tabstops. The remaining bytes are the tabstops.
 
-use crate::CodecResult;
+use crate::TelnetCodecResult;
 use byteorder::WriteBytesExt;
 use bytes::{Buf, BufMut};
 
@@ -193,7 +193,7 @@ impl NAOHTS {
     /// assert_eq!(bytes_written, 4);
     /// assert_eq!(buffer.as_ref(), &[8, 16, 24, 32]);
     /// ```
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> CodecResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> TelnetCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -256,7 +256,7 @@ impl NAOHTS {
     /// let naohts = NAOHTS::decode(&mut buffer).unwrap();
     /// assert_eq!(naohts.tab_stops, vec![8, 16, 24, 32]);
     /// ```
-    pub fn decode<T: Buf>(src: &mut T) -> CodecResult<NAOHTS> {
+    pub fn decode<T: Buf>(src: &mut T) -> TelnetCodecResult<NAOHTS> {
         let mut tab_stops = Vec::new();
 
         // Read all remaining bytes as tab stop positions

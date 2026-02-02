@@ -22,7 +22,7 @@
 //!
 //! ## Overview
 //!
-//! The Telnet sidechannel (RFC 854) is a service sidechannel used for interactive text-oriented
+//! The Telnet sidechannel (RFC 854) is a server sidechannel used for interactive text-oriented
 //! communication over TCP. This codec handles:
 //!
 //! # Telnet Protocol Codec
@@ -33,7 +33,7 @@
 //!
 //! ## Overview
 //!
-//! The Telnet sidechannel (RFC 854) is a service sidechannel used for interactive text-oriented
+//! The Telnet sidechannel (RFC 854) is a server sidechannel used for interactive text-oriented
 //! communication over TCP. This codec handles:
 //!
 //! - **Data transmission**: Raw byte data with proper IAC (Interpret As Command) escaping
@@ -141,7 +141,7 @@
 //!
 //! ## Error Handling
 //!
-//! The codec uses [`CodecError`] for encoding and decoding errors. In practice, the current
+//! The codec uses [`TelnetCodecError`] for encoding and decoding errors. In practice, the current
 //! implementation is resilient and handles malformed input by returning `NoOperation` frames
 //! or skipping invalid sequences.
 //!
@@ -204,7 +204,6 @@ mod codec;
 mod consts;
 mod event;
 mod frame;
-mod input;
 mod options;
 mod result;
 
@@ -213,7 +212,7 @@ pub use self::codec::TelnetCodec;
 pub use self::event::TelnetEvent;
 pub use self::frame::TelnetFrame;
 pub use self::options::{TelnetOption, TelnetSide};
-pub use self::result::{CodecError, CodecResult, SubnegotiationErrorKind};
+pub use self::result::{SubnegotiationErrorKind, TelnetCodecError, TelnetCodecResult};
 
 #[cfg(test)]
 mod tests {

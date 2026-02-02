@@ -21,7 +21,7 @@ use crate::ansi::{
 };
 use crate::consts::MAX_SEQUENCE_LENGTH;
 use crate::style::AnsiSelectGraphicRendition;
-use crate::{AnsiError, AnsiResult};
+use crate::{AnsiCodecError, AnsiCodecResult};
 use tracing::instrument;
 
 /// Internal state machine states for the ANSI mapper parser.
@@ -122,6 +122,7 @@ enum State {
 /// The parser operates as a state machine, maintaining internal state between calls
 /// to handle incomplete sequences. This allows it to process streaming input where
 /// escape sequences may arrive across multiple buffer reads.
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AnsiParser {
     /// Internal buffer for accumulating bytes of escape sequences.
     ///
@@ -177,11 +178,11 @@ impl AnsiParser {
     /// - `None` - More bytes needed to complete the current sequence
     /// - `Some(sequence)` - A complete sequence has been parsed
     #[instrument(level = "trace", skip(self, byte))]
-    pub fn next(&mut self, byte: u8) -> AnsiResult<Option<AnsiSequence>> {
+    pub fn next(&mut self, byte: u8) -> AnsiCodecResult<Option<AnsiSequence>> {
         // Check buffer size before processing
         if self.bytes.len() >= MAX_SEQUENCE_LENGTH {
             // Buffer overflow - reset and return error
-            let error = AnsiError::SequenceTooLong {
+            let error = AnsiCodecError::SequenceTooLong {
                 length: self.bytes.len(),
                 max: MAX_SEQUENCE_LENGTH,
             };
@@ -218,7 +219,7 @@ impl AnsiParser {
             // ASCII control characters (excluding ESC)
             0x00..=0x1F | 0x7F => {
                 if let Some(control) = AnsiControlCode::from_byte(byte) {
-                    Some(AnsiSequence::Control(control))
+                    Some(AnsiSequence::AnsiControlCode(control))
                 } else {
                     Some(AnsiSequence::Character(byte as char))
                 }
@@ -226,7 +227,7 @@ impl AnsiParser {
             // C1 control characters (0x80-0x9F)
             0x80..=0x9F => {
                 if let Some(control) = AnsiControlCode::from_byte(byte) {
-                    Some(AnsiSequence::Control(control))
+                    Some(AnsiSequence::AnsiControlCode(control))
                 } else {
                     Some(AnsiSequence::Character(byte as char))
                 }
@@ -624,19 +625,31 @@ mod tests {
 
         // Test Bell (0x07)
         let result = parser.next(0x07).unwrap();
-        assert_eq!(result, Some(AnsiSequence::Control(AnsiControlCode::BEL)));
+        assert_eq!(
+            result,
+            Some(AnsiSequence::AnsiControlCode(AnsiControlCode::BEL))
+        );
 
         // Test Line Feed (0x0A)
         let result = parser.next(0x0A).unwrap();
-        assert_eq!(result, Some(AnsiSequence::Control(AnsiControlCode::LF)));
+        assert_eq!(
+            result,
+            Some(AnsiSequence::AnsiControlCode(AnsiControlCode::LF))
+        );
 
         // Test Carriage Return (0x0D)
         let result = parser.next(0x0D).unwrap();
-        assert_eq!(result, Some(AnsiSequence::Control(AnsiControlCode::CR)));
+        assert_eq!(
+            result,
+            Some(AnsiSequence::AnsiControlCode(AnsiControlCode::CR))
+        );
 
         // Test Tab (0x09)
         let result = parser.next(0x09).unwrap();
-        assert_eq!(result, Some(AnsiSequence::Control(AnsiControlCode::HT)));
+        assert_eq!(
+            result,
+            Some(AnsiSequence::AnsiControlCode(AnsiControlCode::HT))
+        );
     }
 
     #[test]
@@ -852,7 +865,10 @@ mod tests {
             let result = parser.next(b'1');
             if result.is_err() {
                 // Should get an error for sequence too long
-                assert!(matches!(result, Err(AnsiError::SequenceTooLong { .. })));
+                assert!(matches!(
+                    result,
+                    Err(AnsiCodecError::SequenceTooLong { .. })
+                ));
                 return;
             }
         }
@@ -1057,10 +1073,16 @@ mod tests {
 
         // Test NEL (Next Line) - 0x85
         let result = parser.next(0x85).unwrap();
-        assert_eq!(result, Some(AnsiSequence::Control(AnsiControlCode::NEL)));
+        assert_eq!(
+            result,
+            Some(AnsiSequence::AnsiControlCode(AnsiControlCode::NEL))
+        );
 
         // Test RI (Reverse Index) - 0x8D
         let result = parser.next(0x8D).unwrap();
-        assert_eq!(result, Some(AnsiSequence::Control(AnsiControlCode::RI)));
+        assert_eq!(
+            result,
+            Some(AnsiSequence::AnsiControlCode(AnsiControlCode::RI))
+        );
     }
 }

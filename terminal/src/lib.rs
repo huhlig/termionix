@@ -30,6 +30,18 @@ pub use self::result::{TerminalError, TerminalResult};
 pub use self::types::{CursorPosition, TerminalSize};
 pub use self::utility::{terminal_word_unwrap, terminal_word_wrap};
 
+// Re-export types from termionix_ansicodec
+pub use termionix_ansicodec::{
+    AnsiApplicationProgramCommand, AnsiCodec, AnsiCodecError, AnsiCodecResult, AnsiConfig,
+    AnsiControlCode, AnsiControlSequenceIntroducer, AnsiDeviceControlString,
+    AnsiOperatingSystemCommand, AnsiParser, AnsiPrivacyMessage, AnsiSelectGraphicRendition,
+    AnsiSequence, AnsiStartOfString, Blink, Color, ColorMode, Font, Ideogram, Intensity,
+    SGRParameter, Script, Segment, SegmentedString, Span, SpannedString, StyledString,
+    SubnegotiationErrorKind, TelnetArgument, TelnetCodec, TelnetCodecError, TelnetCodecResult,
+    TelnetCommand, TelnetEvent, TelnetFrame, TelnetOption, TelnetSide, Underline, gmcp, linemode,
+    msdp, mssp, naocrd, naohts, naws, status, utility::strip_ansi_codes,
+};
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -39,9 +51,7 @@ mod tests {
     fn test_module_exports_exist() {
         // Verify all public exports are accessible
         let _ = std::any::type_name::<TerminalBuffer>();
-        let _ = std::any::type_name::<
-            TerminalCodec<termionix_ansicodec::AnsiCodec<termionix_telnetcodec::TelnetCodec>>,
-        >();
+        let _ = std::any::type_name::<TerminalCodec<AnsiCodec<TelnetCodec>>>();
         let _ = std::any::type_name::<TerminalCommand>();
         let _ = std::any::type_name::<TerminalEvent>();
         let _ = std::any::type_name::<TerminalError>();
@@ -64,13 +74,9 @@ mod tests {
         assert_eq!(buffer.height(), 40);
     }
 
-    fn create_test_codec()
-    -> TerminalCodec<termionix_ansicodec::AnsiCodec<termionix_telnetcodec::TelnetCodec>> {
-        let telnet_codec = termionix_telnetcodec::TelnetCodec::new();
-        let ansi_codec = termionix_ansicodec::AnsiCodec::new(
-            termionix_ansicodec::AnsiConfig::default(),
-            telnet_codec,
-        );
+    fn create_test_codec() -> TerminalCodec<AnsiCodec<TelnetCodec>> {
+        let telnet_codec = TelnetCodec::new();
+        let ansi_codec = AnsiCodec::new(AnsiConfig::default(), telnet_codec);
         TerminalCodec::new(ansi_codec)
     }
 
@@ -103,12 +109,12 @@ mod tests {
     #[test]
     fn test_terminal_command_variants() {
         // Verify all command variants can be created
-        let _ = TerminalCommand::SendBreak;
-        let _ = TerminalCommand::SendInterruptProcess;
-        let _ = TerminalCommand::SendAbortOutput;
-        let _ = TerminalCommand::SendAreYouThere;
-        let _ = TerminalCommand::SendEraseCharacter;
-        let _ = TerminalCommand::SendEraseLine;
+        let _ = TerminalCommand::Break;
+        let _ = TerminalCommand::InterruptProcess;
+        let _ = TerminalCommand::AbortOutput;
+        let _ = TerminalCommand::AreYouThere;
+        let _ = TerminalCommand::EraseCharacter;
+        let _ = TerminalCommand::EraseLine;
     }
 
     #[test]

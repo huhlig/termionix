@@ -16,10 +16,9 @@
 
 use crate::types::{CursorPosition, TerminalSize};
 use enum_kinds::EnumKind;
-use termionix_ansicodec::SegmentedString;
-use termionix_telnetcodec::msdp::MudServerData;
-use termionix_telnetcodec::mssp::MudServerStatus;
-use termionix_telnetcodec::status::TelnetOptionStatus;
+use termionix_ansicodec::{
+    SegmentedString, msdp::MudServerData, mssp::MudServerStatus, status::TelnetOptionStatus,
+};
 
 /// Terminal Events
 #[derive(Clone, Debug, EnumKind)]
@@ -78,7 +77,7 @@ pub enum TerminalEvent {
     MudServerData(MudServerData),
     /// Mud Server Status
     MudServerStatus(MudServerStatus),
-    // TODO: Add More Sidechannel Data Types
+    // TODO: Add More User Sendable Sidechannel Data Types
 }
 
 #[cfg(test)]

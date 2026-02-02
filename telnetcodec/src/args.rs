@@ -17,7 +17,9 @@
 use crate::TelnetOption;
 use crate::args::gmcp::GmcpMessage;
 use crate::args::naws::WindowSize;
-use crate::result::CodecResult;
+use crate::msdp::MudServerData;
+use crate::mssp::MudServerStatus;
+use crate::result::TelnetCodecResult;
 use bytes::{BufMut, BytesMut};
 use std::fmt::Formatter;
 
@@ -54,6 +56,10 @@ pub enum TelnetArgument {
     /// GMCP (Generic Mud Communication Protocol) message.
     /// Contains a package name and optional JSON data payload.
     GMCP(GmcpMessage),
+    /// Mud Server Data message.
+    MudServerData(MudServerData),
+    /// Mud Server Status message.
+    MudServerStatus(MudServerStatus),
     /// Terminal type subnegotiation.
     TerminalType(String),
     /// A subnegotiation for an unknown option.
@@ -141,7 +147,7 @@ impl TelnetArgument {
     /// println!("Wrote {} bytes", written);
     /// # Ok::<(), Box<dyn std::error::Error>>(())
     /// ```
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> CodecResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> TelnetCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -254,6 +260,8 @@ impl TelnetArgument {
             TelnetArgument::CharsetRejected => TelnetOption::Charset,
             TelnetArgument::CharsetTTableRejected => TelnetOption::Charset,
             TelnetArgument::GMCP(_) => TelnetOption::GMCP,
+            TelnetArgument::MudServerData(_) => TelnetOption::MSDP,
+            TelnetArgument::MudServerStatus(_) => TelnetOption::MSSP,
             TelnetArgument::TerminalType(_) => TelnetOption::TTYPE,
             TelnetArgument::Unknown(option, _) => TelnetOption::Unknown(option.to_u8()),
         }
@@ -268,7 +276,9 @@ impl std::fmt::Display for TelnetArgument {
             TelnetArgument::CharsetAccepted(v) => write!(f, "CharsetAccepted({v:?})"),
             TelnetArgument::CharsetRejected => write!(f, "CharsetRejected"),
             TelnetArgument::CharsetTTableRejected => write!(f, "CharsetTableRejected"),
-            TelnetArgument::GMCP(v) => write!(f, "GMCP({})", v),
+            TelnetArgument::GMCP(msg) => write!(f, "GMCP({msg})"),
+            TelnetArgument::MudServerData(msg) => write!(f, "MudServerData({msg})"),
+            TelnetArgument::MudServerStatus(msg) => write!(f, "MudServerStatus({msg})"),
             TelnetArgument::TerminalType(ttype) => write!(f, "TerminalType({ttype})"),
             TelnetArgument::Unknown(o, v) => write!(f, "{o}-{v:?}"),
         }

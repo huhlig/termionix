@@ -19,9 +19,8 @@
 use async_trait::async_trait;
 use std::sync::Arc;
 use std::time::Duration;
-use termionix_service::{
-    ConnectionId, ServerConfig, ServerHandler, TelnetConnection, TelnetServer,
-};
+use termionix_server::{ConnectionId, ServerConfig, ServerHandler, TelnetConnection, TelnetServer};
+use termionix_service::TerminalCommand;
 use tokio::net::TcpStream;
 
 struct MemoryTestHandler;
@@ -153,9 +152,7 @@ async fn test_broadcast_memory_stability() {
 
     // Perform many broadcasts
     for _ in 0..100 {
-        let _ = manager
-            .broadcast(termionix_terminal::TerminalCommand::SendEraseLine)
-            .await;
+        let _ = manager.broadcast(TerminalCommand::EraseLine).await;
         tokio::time::sleep(Duration::from_millis(10)).await;
     }
 

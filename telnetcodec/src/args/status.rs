@@ -25,7 +25,7 @@
 //! status of the Telnet options. The data is sent in a series of bytes.
 //!
 
-use crate::{CodecError, CodecResult, SubnegotiationErrorKind, TelnetOption, consts};
+use crate::{SubnegotiationErrorKind, TelnetCodecError, TelnetCodecResult, TelnetOption, consts};
 use byteorder::WriteBytesExt;
 use bytes::{Buf, BufMut};
 use std::collections::HashMap;
@@ -41,11 +41,11 @@ pub enum StatusCommand {
 
 impl StatusCommand {
     /// Status Command From Byte
-    pub fn from_byte(byte: u8) -> CodecResult<Self> {
+    pub fn from_byte(byte: u8) -> TelnetCodecResult<Self> {
         match byte {
             consts::option::status::IS => Ok(StatusCommand::Is),
             consts::option::status::SEND => Ok(StatusCommand::Send),
-            _ => Err(CodecError::SubnegotiationError {
+            _ => Err(TelnetCodecError::SubnegotiationError {
                 option: Some(consts::option::STATUS),
                 reason: SubnegotiationErrorKind::InvalidCommand {
                     command: byte,
@@ -90,7 +90,7 @@ impl TelnetOptionStatus {
     ///
     /// Encode `TelnetOptionStatus` to `BufMut`
     ///
-    pub fn encode<T: BufMut>(&self, dst: &mut T) -> CodecResult<usize> {
+    pub fn encode<T: BufMut>(&self, dst: &mut T) -> TelnetCodecResult<usize> {
         Ok(self.write(&mut dst.writer())?)
     }
 
@@ -122,9 +122,9 @@ impl TelnetOptionStatus {
     ///
     /// Decode `TelnetOptionStatus` from `Buf`
     ///
-    pub fn decode<T: Buf>(src: &mut T) -> CodecResult<TelnetOptionStatus> {
+    pub fn decode<T: Buf>(src: &mut T) -> TelnetCodecResult<TelnetOptionStatus> {
         if src.remaining() < 1 {
-            return Err(CodecError::SubnegotiationError {
+            return Err(TelnetCodecError::SubnegotiationError {
                 option: Some(consts::option::STATUS),
                 reason: SubnegotiationErrorKind::InsufficientData {
                     required: 1,
@@ -139,7 +139,7 @@ impl TelnetOptionStatus {
 
         // SEND command should have no additional data
         if matches!(command, StatusCommand::Send) && src.remaining() > 0 {
-            return Err(CodecError::SubnegotiationError {
+            return Err(TelnetCodecError::SubnegotiationError {
                 option: Some(consts::option::STATUS),
                 reason: SubnegotiationErrorKind::UnexpectedData {
                     reason: "Status SEND should not contain option data".into(),
@@ -153,7 +153,7 @@ impl TelnetOptionStatus {
             let option_code = src.get_u8();
 
             let option = TelnetOption::try_from(option_code).map_err(|_| {
-                CodecError::SubnegotiationError {
+                TelnetCodecError::SubnegotiationError {
                     option: Some(consts::option::STATUS),
                     reason: SubnegotiationErrorKind::UnknownOption { code: option_code },
                 }
@@ -167,7 +167,7 @@ impl TelnetOptionStatus {
                 consts::WILL => entry.1 = true,  // WILL
                 consts::WONT => entry.1 = false, // WONT
                 _ => {
-                    return Err(CodecError::SubnegotiationError {
+                    return Err(TelnetCodecError::SubnegotiationError {
                         option: Some(consts::option::STATUS),
                         reason: SubnegotiationErrorKind::InvalidVerb { verb },
                     });
@@ -176,7 +176,7 @@ impl TelnetOptionStatus {
         }
 
         if src.remaining() > 0 {
-            return Err(CodecError::SubnegotiationError {
+            return Err(TelnetCodecError::SubnegotiationError {
                 option: Some(consts::option::STATUS),
                 reason: SubnegotiationErrorKind::IncompleteData {
                     description: "incomplete option pair".into(),

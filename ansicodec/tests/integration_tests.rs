@@ -105,7 +105,7 @@ fn test_mixed_text_and_control_codes() {
     // Count control codes
     let control_count = sequences
         .iter()
-        .filter(|s| matches!(s, AnsiSequence::Control(_)))
+        .filter(|s| matches!(s, AnsiSequence::AnsiControlCode(_)))
         .count();
 
     assert_eq!(control_count, 4); // 2 CR + 2 LF
@@ -157,7 +157,7 @@ fn test_parser_state_machine() {
     let result = parser.next(0x07).unwrap(); // BEL
     assert!(matches!(
         result,
-        Some(AnsiSequence::Control(AnsiControlCode::BEL))
+        Some(AnsiSequence::AnsiControlCode(AnsiControlCode::BEL))
     ));
 
     // Test escape sequence start

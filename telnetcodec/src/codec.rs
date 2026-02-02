@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use super::{CodecError, TelnetEvent, TelnetFrame, TelnetOption, consts};
+use super::{TelnetCodecError, TelnetEvent, TelnetFrame, TelnetOption, consts};
 use crate::args::TelnetArgument;
 use crate::args::gmcp::GmcpMessage;
 use crate::options::{TelnetOptions, TelnetSide};
@@ -26,10 +26,11 @@ use tracing::warn;
 ///
 /// `TelnetCodec` is responsible for managing the state and buffers required for processing data
 /// when implementing the Telnet sidechannel. It is typically used in conjunction with asynchronous
-/// service libraries to handle the transmission and reception of Telnet messages over a connection.
+/// server libraries to handle the transmission and reception of Telnet messages over a connection.
 ///
 /// This struct is typically paired with a transport-like implementation
 /// to facilitate stream I/O management for the Telnet sidechannel.
+#[derive(Clone, Debug)]
 pub struct TelnetCodec {
     decoder_buffer: BytesMut,
     decoder_state: DecoderState,
@@ -66,7 +67,7 @@ impl TelnetCodec {
     }
 
     /// Encode all pending responses into buffer
-    pub fn flush_responses(&mut self, dst: &mut BytesMut) -> Result<(), CodecError> {
+    pub fn flush_responses(&mut self, dst: &mut BytesMut) -> Result<(), TelnetCodecError> {
         while let Some(response) = self.response_queue.pop_front() {
             self.encode_frame(response, dst)?;
         }
@@ -249,7 +250,7 @@ impl Default for TelnetCodec {
 
 impl Decoder for TelnetCodec {
     type Item = TelnetEvent;
-    type Error = CodecError;
+    type Error = TelnetCodecError;
 
     /// Decodes bytes from the provided `src` buffer into a `TelnetEvent` object by interpreting them
     /// using the internal `decoder_state`. The Telnet sidechannel supports various control and data
@@ -573,7 +574,7 @@ impl Decoder for TelnetCodec {
 }
 
 impl Encoder<char> for TelnetCodec {
-    type Error = CodecError;
+    type Error = TelnetCodecError;
 
     fn encode(&mut self, item: char, dst: &mut BytesMut) -> Result<(), Self::Error> {
         dst.reserve(4);
@@ -593,7 +594,7 @@ impl Encoder<char> for TelnetCodec {
 }
 
 impl Encoder<u8> for TelnetCodec {
-    type Error = CodecError;
+    type Error = TelnetCodecError;
 
     fn encode(&mut self, item: u8, dst: &mut BytesMut) -> Result<(), Self::Error> {
         // Encode a raw byte, escaping IAC if necessary
@@ -607,7 +608,7 @@ impl Encoder<u8> for TelnetCodec {
 }
 
 impl Encoder<&str> for TelnetCodec {
-    type Error = CodecError;
+    type Error = TelnetCodecError;
     fn encode(&mut self, item: &str, dst: &mut BytesMut) -> Result<(), Self::Error> {
         for byte in item.as_bytes() {
             self.encode(TelnetFrame::Data(*byte), dst)?;
@@ -618,7 +619,11 @@ impl Encoder<&str> for TelnetCodec {
 
 impl TelnetCodec {
     /// Internal method to encode a single frame without processing the response queue
-    fn encode_frame(&mut self, item: TelnetFrame, dst: &mut BytesMut) -> Result<(), CodecError> {
+    fn encode_frame(
+        &mut self,
+        item: TelnetFrame,
+        dst: &mut BytesMut,
+    ) -> Result<(), TelnetCodecError> {
         match item {
             TelnetFrame::Data(ch) => {
                 dst.reserve(2);
@@ -716,7 +721,7 @@ impl TelnetCodec {
 }
 
 impl Encoder<TelnetFrame> for TelnetCodec {
-    type Error = CodecError;
+    type Error = TelnetCodecError;
 
     /// Encodes a `TelnetFrame` into a byte buffer for transmission over the Telnet sidechannel.
     ///
@@ -782,7 +787,7 @@ impl Encoder<TelnetFrame> for TelnetCodec {
 }
 
 impl Encoder<TelnetEvent> for TelnetCodec {
-    type Error = CodecError;
+    type Error = TelnetCodecError;
 
     /// Encodes a `TelnetEvent` into a byte buffer for transmission over the Telnet sidechannel.
     ///

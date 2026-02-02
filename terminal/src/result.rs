@@ -14,8 +14,7 @@
 // limitations under the License.
 //
 
-use termionix_ansicodec::AnsiError;
-use termionix_telnetcodec::CodecError;
+use termionix_ansicodec::{AnsiCodecError, TelnetCodecError};
 
 /// Result type for the terminal
 pub type TerminalResult<T> = Result<T, TerminalError>;
@@ -23,8 +22,8 @@ pub type TerminalResult<T> = Result<T, TerminalError>;
 #[derive(Debug)]
 pub enum TerminalError {
     IOError(std::io::Error),
-    CodecError(CodecError),
-    AnsiError(AnsiError),
+    CodecError(TelnetCodecError),
+    AnsiError(AnsiCodecError),
 }
 
 impl std::fmt::Display for TerminalError {
@@ -41,14 +40,14 @@ impl From<std::io::Error> for TerminalError {
     }
 }
 
-impl From<CodecError> for TerminalError {
-    fn from(error: CodecError) -> Self {
+impl From<TelnetCodecError> for TerminalError {
+    fn from(error: TelnetCodecError) -> Self {
         TerminalError::CodecError(error)
     }
 }
 
-impl From<AnsiError> for TerminalError {
-    fn from(error: AnsiError) -> Self {
+impl From<AnsiCodecError> for TerminalError {
+    fn from(error: AnsiCodecError) -> Self {
         TerminalError::AnsiError(error)
     }
 }
@@ -72,7 +71,7 @@ mod tests {
 
     #[test]
     fn test_terminal_error_from_codec_error() {
-        let codec_error = CodecError::IOError {
+        let codec_error = TelnetCodecError::IOError {
             kind: std::io::ErrorKind::Other,
             operation: "test".to_string(),
         };
@@ -83,7 +82,8 @@ mod tests {
 
     #[test]
     fn test_terminal_error_from_ansi_error() {
-        let ansi_error = AnsiError::IoError(std::io::Error::new(std::io::ErrorKind::Other, "test"));
+        let ansi_error =
+            AnsiCodecError::IoError(std::io::Error::new(std::io::ErrorKind::Other, "test"));
         let terminal_error: TerminalError = ansi_error.into();
 
         assert!(matches!(terminal_error, TerminalError::AnsiError(_)));
@@ -132,11 +132,11 @@ mod tests {
     #[test]
     fn test_all_error_variants() {
         let io_err = TerminalError::IOError(std::io::Error::new(std::io::ErrorKind::Other, "io"));
-        let codec_err = TerminalError::CodecError(CodecError::IOError {
+        let codec_err = TerminalError::CodecError(TelnetCodecError::IOError {
             kind: std::io::ErrorKind::Other,
             operation: "test".to_string(),
         });
-        let ansi_err = TerminalError::AnsiError(AnsiError::IoError(std::io::Error::new(
+        let ansi_err = TerminalError::AnsiError(AnsiCodecError::IoError(std::io::Error::new(
             std::io::ErrorKind::Other,
             "test",
         )));

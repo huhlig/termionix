@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{AnsiResult, ColorMode};
+use crate::{AnsiCodecResult, ColorMode};
 use bytes::BufMut;
 
 /// Represents a text style with various formatting attributes and colors for terminal output.
@@ -456,7 +456,7 @@ impl AnsiSelectGraphicRendition {
         &self,
         dst: &mut T,
         color_mode: Option<ColorMode>,
-    ) -> AnsiResult<usize> {
+    ) -> AnsiCodecResult<usize> {
         Ok(self.write(&mut dst.writer(), color_mode)?)
     }
 

@@ -19,7 +19,7 @@
 //! These tests verify end-to-end compression/decompression workflows,
 //! real-world usage patterns, and interoperability with actual I/O streams.
 
-use termionix_compress::{Algorithm, CompressionStream};
+use termionix_compress::{CompressionAlgorithm, CompressionStream};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 // ============================================================================
@@ -33,7 +33,7 @@ async fn test_gzip_roundtrip() {
 
     // Compress in background task
     let compress_handle = tokio::spawn(async move {
-        let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+        let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Gzip);
         compressor.write_all(original_data).await.unwrap();
         compressor.shutdown().await.unwrap();
     });
@@ -57,7 +57,7 @@ async fn test_deflate_roundtrip() {
     let (client, server) = tokio::io::duplex(8192);
 
     let compress_handle = tokio::spawn(async move {
-        let mut compressor = CompressionStream::new(client, Algorithm::Deflate);
+        let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Deflate);
         compressor.write_all(original_data).await.unwrap();
         compressor.shutdown().await.unwrap();
     });
@@ -80,7 +80,7 @@ async fn test_zlib_roundtrip() {
     let (client, server) = tokio::io::duplex(8192);
 
     let compress_handle = tokio::spawn(async move {
-        let mut compressor = CompressionStream::new(client, Algorithm::Zlib);
+        let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Zlib);
         compressor.write_all(original_data).await.unwrap();
         compressor.shutdown().await.unwrap();
     });
@@ -103,7 +103,7 @@ async fn test_zstd_roundtrip() {
     let (client, server) = tokio::io::duplex(8192);
 
     let compress_handle = tokio::spawn(async move {
-        let mut compressor = CompressionStream::new(client, Algorithm::Zstd);
+        let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Zstd);
         compressor.write_all(original_data).await.unwrap();
         compressor.shutdown().await.unwrap();
     });
@@ -126,7 +126,7 @@ async fn test_brotli_roundtrip() {
     let (client, server) = tokio::io::duplex(8192);
 
     let compress_handle = tokio::spawn(async move {
-        let mut compressor = CompressionStream::new(client, Algorithm::Brotli);
+        let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Brotli);
         compressor.write_all(original_data).await.unwrap();
         compressor.shutdown().await.unwrap();
     });
@@ -152,7 +152,7 @@ async fn test_duplex_stream_compression() {
     let (client, server) = tokio::io::duplex(1024);
 
     let write_handle = tokio::spawn(async move {
-        let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+        let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Gzip);
         compressor.write_all(b"Hello from client!").await.unwrap();
         compressor.shutdown().await.unwrap();
     });
@@ -174,7 +174,7 @@ async fn test_bidirectional_compression() {
     let (client, server) = tokio::io::duplex(2048);
 
     let client_handle = tokio::spawn(async move {
-        let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+        let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Gzip);
         compressor.write_all(b"Request from client").await.unwrap();
         compressor.shutdown().await.unwrap();
     });
@@ -220,7 +220,7 @@ async fn test_compress_large_text_file() {
 
     let data_clone = original_data.clone();
     let compress_handle = tokio::spawn(async move {
-        let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+        let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Gzip);
         compressor.write_all(&data_clone).await.unwrap();
         compressor.shutdown().await.unwrap();
     });
@@ -245,7 +245,7 @@ async fn test_compress_binary_data() {
 
     let data_clone = binary_data.clone();
     let compress_handle = tokio::spawn(async move {
-        let mut compressor = CompressionStream::new(client, Algorithm::Zstd);
+        let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Zstd);
         compressor.write_all(&data_clone).await.unwrap();
         compressor.shutdown().await.unwrap();
     });
@@ -267,7 +267,7 @@ async fn test_streaming_large_data() {
     let (client, server) = tokio::io::duplex(1024 * 1024);
 
     let write_handle = tokio::spawn(async move {
-        let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+        let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Gzip);
 
         let chunk_size = 1024;
         let num_chunks = 100;
@@ -316,7 +316,7 @@ async fn test_http_response_compression() {
     let (client, server) = tokio::io::duplex(4096);
 
     let write_handle = tokio::spawn(async move {
-        let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+        let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Gzip);
         compressor.write_all(http_body.as_bytes()).await.unwrap();
         compressor.shutdown().await.unwrap();
     });
@@ -351,7 +351,7 @@ async fn test_log_file_compression() {
     let (client, server) = tokio::io::duplex(1024 * 1024);
 
     let write_handle = tokio::spawn(async move {
-        let mut compressor = CompressionStream::new(client, Algorithm::Zstd);
+        let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Zstd);
         compressor.write_all(log_data.as_bytes()).await.unwrap();
         compressor.shutdown().await.unwrap();
     });
@@ -377,7 +377,7 @@ async fn test_telnet_protocol_compression() {
     let (client, server) = tokio::io::duplex(4096);
 
     let compress_handle = tokio::spawn(async move {
-        let mut compressor = CompressionStream::new(client, Algorithm::Deflate);
+        let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Deflate);
         compressor.write_all(telnet_data).await.unwrap();
         compressor.shutdown().await.unwrap();
     });
@@ -401,7 +401,7 @@ async fn test_telnet_protocol_compression() {
 #[tokio::test]
 async fn test_graceful_shutdown_on_error() {
     let (client, _server) = tokio::io::duplex(1024);
-    let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+    let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Gzip);
 
     compressor.write_all(b"some data").await.unwrap();
 
@@ -413,7 +413,7 @@ async fn test_graceful_shutdown_on_error() {
 #[tokio::test]
 async fn test_multiple_shutdowns() {
     let (client, _server) = tokio::io::duplex(1024);
-    let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+    let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Gzip);
 
     compressor.write_all(b"data").await.unwrap();
     compressor.shutdown().await.unwrap();
@@ -432,12 +432,12 @@ async fn test_compression_ratio_comparison() {
     let test_data = b"AAAAAAAAAA".repeat(1000);
 
     for algo in [
-        Algorithm::None,
-        Algorithm::Gzip,
-        Algorithm::Deflate,
-        Algorithm::Zlib,
-        Algorithm::Zstd,
-        Algorithm::Brotli,
+        CompressionAlgorithm::None,
+        CompressionAlgorithm::Gzip,
+        CompressionAlgorithm::Deflate,
+        CompressionAlgorithm::Zlib,
+        CompressionAlgorithm::Zstd,
+        CompressionAlgorithm::Brotli,
     ] {
         let (client, server) = tokio::io::duplex(1024 * 1024);
         let data_clone = test_data.clone();
@@ -458,7 +458,7 @@ async fn test_compression_ratio_comparison() {
         write_handle.await.unwrap();
         let compressed = read_handle.await.unwrap();
 
-        if algo == Algorithm::None {
+        if algo == CompressionAlgorithm::None {
             assert_eq!(compressed.len(), test_data.len());
         } else {
             // All compression algorithms should reduce size significantly
@@ -477,11 +477,11 @@ async fn test_small_data_overhead() {
     let small_data = b"Hi";
 
     for algo in [
-        Algorithm::Gzip,
-        Algorithm::Deflate,
-        Algorithm::Zlib,
-        Algorithm::Zstd,
-        Algorithm::Brotli,
+        CompressionAlgorithm::Gzip,
+        CompressionAlgorithm::Deflate,
+        CompressionAlgorithm::Zlib,
+        CompressionAlgorithm::Zstd,
+        CompressionAlgorithm::Brotli,
     ] {
         let (client, server) = tokio::io::duplex(1024);
 
@@ -520,7 +520,7 @@ async fn test_concurrent_compression_streams() {
             let (client, server) = tokio::io::duplex(4096);
 
             let write_handle = tokio::spawn(async move {
-                let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+                let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Gzip);
                 let data = format!("Stream {} data", i);
                 compressor.write_all(data.as_bytes()).await.unwrap();
                 compressor.shutdown().await.unwrap();
@@ -553,12 +553,12 @@ async fn test_concurrent_compression_streams() {
 #[tokio::test]
 async fn test_empty_stream_compression() {
     for algo in [
-        Algorithm::None,
-        Algorithm::Gzip,
-        Algorithm::Deflate,
-        Algorithm::Zlib,
-        Algorithm::Zstd,
-        Algorithm::Brotli,
+        CompressionAlgorithm::None,
+        CompressionAlgorithm::Gzip,
+        CompressionAlgorithm::Deflate,
+        CompressionAlgorithm::Zlib,
+        CompressionAlgorithm::Zstd,
+        CompressionAlgorithm::Brotli,
     ] {
         let (client, server) = tokio::io::duplex(1024);
 
@@ -578,7 +578,7 @@ async fn test_empty_stream_compression() {
         let result = read_handle.await.unwrap();
 
         // Empty stream should produce minimal output
-        if algo == Algorithm::None {
+        if algo == CompressionAlgorithm::None {
             assert_eq!(result.len(), 0);
         } else {
             // Compressed formats may have headers/footers
@@ -592,7 +592,7 @@ async fn test_single_byte_compression() {
     let (client, server) = tokio::io::duplex(1024);
 
     let compress_handle = tokio::spawn(async move {
-        let mut compressor = CompressionStream::new(client, Algorithm::Gzip);
+        let mut compressor = CompressionStream::new(client, CompressionAlgorithm::Gzip);
         compressor.write_all(b"A").await.unwrap();
         compressor.shutdown().await.unwrap();
     });

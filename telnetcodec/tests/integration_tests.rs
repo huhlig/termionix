@@ -120,11 +120,11 @@ fn client_server_mutual_binary_negotiation() {
         .unwrap();
 
     // Server receives client's WILL
-    let events = decode_all(&mut server, &mut client_buffer);
+    let _events = decode_all(&mut server, &mut client_buffer);
     assert!(server.is_enabled_remote(TelnetOption::TransmitBinary));
 
     // Client receives server's WILL
-    let events = decode_all(&mut client, &mut server_buffer);
+    let _events = decode_all(&mut client, &mut server_buffer);
     assert!(client.is_enabled_remote(TelnetOption::TransmitBinary));
 }
 
@@ -139,7 +139,7 @@ fn client_server_reject_unsupported_option() {
         .unwrap();
 
     // Client should reject it (no OptionStatus event for unsupported options)
-    let events = decode_all(&mut client, &mut buffer);
+    let _events = decode_all(&mut client, &mut buffer);
     // Unsupported options may not generate events or may generate rejection
     assert!(!client.is_enabled_local(TelnetOption::Unknown(200)));
 }

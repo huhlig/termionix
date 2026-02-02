@@ -4,9 +4,10 @@ members = [
     "ansicodec",
     "client",
     "compress",
-    "service",
+    "server",
+    "testsuite",
     "telnetcodec",
-    "terminal", "suite",
+    "terminal", "service",
 ]
 
 [workspace.package]
@@ -43,6 +44,7 @@ termionix-client = { path = "client" }
 termionix-telnetcodec = { path = "telnetcodec" }
 termionix-compress = { path = "compress" }
 termionix-service = { path = "service" }
+termionix-server = { path = "server" }
 termionix-terminal = { path = "terminal" }
 thiserror = { version = "2", features = ["default"] }
 tokio = { version = "1", features = ["rt-multi-thread", "tracing", "net", "test-util", "macros", "io-util", "signal"] }
