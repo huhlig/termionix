@@ -1,0 +1,367 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A collection of `Span` objects representing parsed segments of an ANSI-formatted string."><title>SpannedString in termionix_server - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-ca0dd0c4.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="termionix_server" data-themes="" data-resource-suffix="" data-rustdoc-version="1.93.0 (254b59607 2026-01-19)" data-channel="1.93.0" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-a3946164.js" data-settings-js="settings-c38705f0.js" ><script src="../static.files/storage-e2aeef58.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-a410ff4d.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-263c88ec.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc struct"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">SpannedString</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../termionix_server/index.html">termionix_<wbr>server</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Spanned<wbr>String</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#structure" title="Structure">Structure</a></li><li><a href="#methods" title="Methods">Methods</a></li><li><a href="#examples" title="Examples">Examples</a></li><li><a href="#performance" title="Performance">Performance</a></li><li><a href="#see-also" title="See Also">See Also</a></li></ul><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.count" title="count">count</a></li><li><a href="#method.into_segmented_string" title="into_segmented_string">into_segmented_string</a></li><li><a href="#method.iter" title="iter">iter</a></li><li><a href="#method.len" title="len">len</a></li><li><a href="#method.parse" title="parse">parse</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block trait-implementation"><li><a href="#impl-Clone-for-SpannedString" title="Clone">Clone</a></li><li><a href="#impl-Debug-for-SpannedString" title="Debug">Debug</a></li><li><a href="#impl-Eq-for-SpannedString" title="Eq">Eq</a></li><li><a href="#impl-Index%3Cusize%3E-for-SpannedString" title="Index&#60;usize&#62;">Index&#60;usize&#62;</a></li><li><a href="#impl-PartialEq-for-SpannedString" title="PartialEq">PartialEq</a></li><li><a href="#impl-StructuralPartialEq-for-SpannedString" title="StructuralPartialEq">StructuralPartialEq</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-Freeze-for-SpannedString" title="Freeze">Freeze</a></li><li><a href="#impl-RefUnwindSafe-for-SpannedString" title="RefUnwindSafe">RefUnwindSafe</a></li><li><a href="#impl-Send-for-SpannedString" title="Send">Send</a></li><li><a href="#impl-Sync-for-SpannedString" title="Sync">Sync</a></li><li><a href="#impl-Unpin-for-SpannedString" title="Unpin">Unpin</a></li><li><a href="#impl-UnwindSafe-for-SpannedString" title="UnwindSafe">UnwindSafe</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-Any-for-T" title="Any">Any</a></li><li><a href="#impl-Borrow%3CT%3E-for-T" title="Borrow&#60;T&#62;">Borrow&#60;T&#62;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-T" title="BorrowMut&#60;T&#62;">BorrowMut&#60;T&#62;</a></li><li><a href="#impl-CloneToUninit-for-T" title="CloneToUninit">CloneToUninit</a></li><li><a href="#impl-Equivalent%3CK%3E-for-Q" title="Equivalent&#60;K&#62;">Equivalent&#60;K&#62;</a></li><li><a href="#impl-From%3CT%3E-for-T" title="From&#60;T&#62;">From&#60;T&#62;</a></li><li><a href="#impl-Instrument-for-T" title="Instrument">Instrument</a></li><li><a href="#impl-Into%3CU%3E-for-T" title="Into&#60;U&#62;">Into&#60;U&#62;</a></li><li><a href="#impl-ToOwned-for-T" title="ToOwned">ToOwned</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T" title="TryFrom&#60;U&#62;">TryFrom&#60;U&#62;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T" title="TryInto&#60;U&#62;">TryInto&#60;U&#62;</a></li><li><a href="#impl-WithSubscriber-for-T" title="WithSubscriber">WithSubscriber</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="index.html">In crate termionix_<wbr>server</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="index.html">termionix_server</a></div><h1>Struct <span class="struct">Spanned<wbr>String</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"></span></div><pre class="rust item-decl"><code>pub struct SpannedString(<span class="comment">/* private fields */</span>);</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A collection of <a href="enum.Span.html" title="enum termionix_server::Span"><code>Span</code></a> objects representing parsed segments of an ANSI-formatted string.</p>
+<p><code>SpannedString</code> provides a convenient wrapper around a vector of spans, offering methods to
+query the total byte length, count of spans, and iterate over individual segments.
+This type is returned by <a href="struct.SpannedString.html#method.parse" title="associated function termionix_server::SpannedString::parse"><code>SpannedString::parse</code></a> and represents the complete parsing
+result of an input string.</p>
+<h2 id="structure"><a class="doc-anchor" href="#structure">§</a>Structure</h2>
+<p>Internally, <code>SpannedString</code> is a newtype wrapper around <code>Vec&lt;Span&gt;</code>, providing a more
+semantic interface for working with parsed ANSI strings. Each span in the collection
+represents a contiguous segment of the original input with its byte range and type.</p>
+<h2 id="methods"><a class="doc-anchor" href="#methods">§</a>Methods</h2>
+<ul>
+<li><a href="struct.SpannedString.html#method.len" title="method termionix_server::SpannedString::len"><code>len()</code></a> - Returns the total byte length from first to last span</li>
+<li><a href="struct.SpannedString.html#method.count" title="method termionix_server::SpannedString::count"><code>count()</code></a> - Returns the number of spans in the collection</li>
+<li><a href="struct.SpannedString.html#method.iter" title="method termionix_server::SpannedString::iter"><code>iter()</code></a> - Returns an iterator over the spans</li>
+<li><a href="struct.SpannedString.html#method.parse" title="associated function termionix_server::SpannedString::parse"><code>parse()</code></a> - Parses a string into a <code>SpannedString</code></li>
+</ul>
+<p>The collection also supports indexing via <code>[usize]</code> to access individual spans.</p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>Basic usage:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SpannedString;
+
+<span class="kw">let </span>spans = SpannedString::parse(<span class="string">"\x1b[31mHello\x1b[0m"</span>);
+
+<span class="comment">// Total byte length of the parsed string
+</span><span class="macro">assert_eq!</span>(spans.len(), <span class="number">14</span>);
+
+<span class="comment">// Number of distinct spans (CSI, ASCII, CSI)
+</span><span class="macro">assert_eq!</span>(spans.count(), <span class="number">3</span>);
+
+<span class="comment">// Access individual spans by index
+</span><span class="kw">let </span>first_span = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>];
+<span class="macro">assert_eq!</span>(first_span.start(), <span class="number">0</span>);</code></pre></div>
+<p>Iterating over spans:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"Hello\nWorld"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">for </span>span <span class="kw">in </span>spans.iter() {
+    <span class="kw">match </span>span {
+        Span::ASCII { range } =&gt; <span class="macro">println!</span>(<span class="string">"Text: {:?}"</span>, <span class="kw-2">&amp;</span>input[range.clone()]),
+        Span::Control { value, .. } =&gt; <span class="macro">println!</span>(<span class="string">"Control: {:?}"</span>, value),
+        <span class="kw">_ </span>=&gt; {}
+    }
+}</code></pre></div><h2 id="performance"><a class="doc-anchor" href="#performance">§</a>Performance</h2>
+<ul>
+<li>Indexing is O(1)</li>
+<li>Iteration is O(n) where n is the span count</li>
+<li><code>len()</code> is O(1) as it only checks first and last spans</li>
+<li><code>count()</code> is O(1) as it returns the vector length</li>
+</ul>
+<h2 id="see-also"><a class="doc-anchor" href="#see-also">§</a>See Also</h2>
+<ul>
+<li><a href="enum.Span.html" title="enum termionix_server::Span"><code>Span</code></a> - Individual span structure with range and type</li>
+<li>[<code>CSICommand</code>] - CSI command enumeration</li>
+<li>[<code>ControlCode</code>] - Control code enumeration</li>
+</ul>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-SpannedString" class="impl"><a href="#impl-SpannedString" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.len" class="method"><h4 class="code-header">pub fn <a href="#method.len" class="fn">len</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a></h4></section></summary><div class="docblock"><p>Returns the total byte length from the first to last span.</p>
+<p>This method calculates the span of bytes from the start of the first span
+to the end of the last span. For an empty <code>SpannedString</code>, returns 0.</p>
+<h5 id="returns"><a class="doc-anchor" href="#returns">§</a>Returns</h5>
+<p>The total byte length covered by all spans, or 0 if empty.</p>
+<h5 id="examples-1"><a class="doc-anchor" href="#examples-1">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SpannedString;
+
+<span class="kw">let </span>spans = SpannedString::parse(<span class="string">"Hello"</span>);
+<span class="macro">assert_eq!</span>(spans.len(), <span class="number">5</span>);
+
+<span class="kw">let </span>empty = SpannedString::parse(<span class="string">""</span>);
+<span class="macro">assert_eq!</span>(empty.len(), <span class="number">0</span>);</code></pre></div><h5 id="performance-1"><a class="doc-anchor" href="#performance-1">§</a>Performance</h5>
+<p>This is an O(1) operation as it only accesses the first and last elements.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.count" class="method"><h4 class="code-header">pub fn <a href="#method.count" class="fn">count</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a></h4></section></summary><div class="docblock"><p>Returns the number of spans in the collection.</p>
+<p>Each span represents a contiguous segment of the parsed string, such as
+a block of ASCII text, a control sequence, or a Unicode character sequence.</p>
+<h5 id="returns-1"><a class="doc-anchor" href="#returns-1">§</a>Returns</h5>
+<p>The number of <a href="enum.Span.html" title="enum termionix_server::Span"><code>Span</code></a> elements in the collection.</p>
+<h5 id="examples-2"><a class="doc-anchor" href="#examples-2">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SpannedString;
+
+<span class="kw">let </span>spans = SpannedString::parse(<span class="string">"\x1b[31mRed\x1b[0m"</span>);
+<span class="macro">assert_eq!</span>(spans.count(), <span class="number">3</span>); <span class="comment">// CSI, ASCII text, CSI
+
+</span><span class="kw">let </span>simple = SpannedString::parse(<span class="string">"Hello"</span>);
+<span class="macro">assert_eq!</span>(simple.count(), <span class="number">1</span>); <span class="comment">// Single ASCII span</span></code></pre></div><h5 id="performance-2"><a class="doc-anchor" href="#performance-2">§</a>Performance</h5>
+<p>This is an O(1) operation.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.iter" class="method"><h4 class="code-header">pub fn <a href="#method.iter" class="fn">iter</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/slice/iter/struct.Iter.html" title="struct core::slice::iter::Iter">Iter</a>&lt;'_, <a class="enum" href="enum.Span.html" title="enum termionix_server::Span">Span</a>&gt;</h4></section></summary><div class="docblock"><p>Returns an iterator over the spans in the collection.</p>
+<p>The iterator yields references to each <a href="enum.Span.html" title="enum termionix_server::Span"><code>Span</code></a> in order, from the
+beginning to the end of the parsed string.</p>
+<h5 id="returns-2"><a class="doc-anchor" href="#returns-2">§</a>Returns</h5>
+<p>A slice iterator over the internal span collection.</p>
+<h5 id="examples-3"><a class="doc-anchor" href="#examples-3">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>spans = SpannedString::parse(<span class="string">"Hello\nWorld"</span>);
+
+<span class="kw">for </span>span <span class="kw">in </span>spans.iter() {
+    <span class="macro">println!</span>(<span class="string">"Span: {} bytes"</span>, span.len());
+}</code></pre></div>
+<p>Filtering specific span types:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1b[31mRed\x1b[0m Text"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">let </span>text_spans: Vec&lt;<span class="kw">_</span>&gt; = spans.iter()
+    .filter(|s| <span class="macro">matches!</span>(s, Span::ASCII { .. } | Span::Unicode { .. }))
+    .collect();</code></pre></div></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-SpannedString-1" class="impl"><a href="#impl-SpannedString-1" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.parse" class="method"><h4 class="code-header">pub fn <a href="#method.parse" class="fn">parse</a>(string: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.str.html">str</a>) -&gt; <a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a></h4></section></summary><div class="docblock"><p>Parses a string containing ANSI escape sequences into a <code>SpannedString</code>.</p>
+<p>This method performs a single-pass analysis of the input string, identifying and
+categorizing each sequence of bytes into distinct span types. It handles ASCII text,
+Unicode characters, control codes, and all common ANSI escape sequences including
+CSI, OSC, DCS, and others.</p>
+<h5 id="arguments"><a class="doc-anchor" href="#arguments">§</a>Arguments</h5>
+<ul>
+<li><code>string</code> - A string slice to parse. Can contain any combination of:
+<ul>
+<li>Plain ASCII text (0x20-0x7E)</li>
+<li>Unicode characters (multi-byte UTF-8 sequences)</li>
+<li>C0/C1 control codes (newlines, tabs, etc.)</li>
+<li>ANSI escape sequences (colors, cursor movement, etc.)</li>
+</ul>
+</li>
+</ul>
+<h5 id="returns-3"><a class="doc-anchor" href="#returns-3">§</a>Returns</h5>
+<p>A <code>SpannedString</code> containing a collection of <a href="enum.Span.html" title="enum termionix_server::Span"><code>Span</code></a> objects, each representing
+a contiguous segment of the input with its byte range and type. The spans cover
+the entire input from byte 0 to the end, with no gaps or overlaps.</p>
+<h5 id="parsing-behavior"><a class="doc-anchor" href="#parsing-behavior">§</a>Parsing Behavior</h5><h6 id="span-types-detected"><a class="doc-anchor" href="#span-types-detected">§</a>Span Types Detected</h6>
+<ul>
+<li><strong>ASCII</strong>: Consecutive printable ASCII characters (0x20-0x7E)</li>
+<li><strong>Unicode</strong>: Multi-byte UTF-8 sequences (non-ASCII characters)</li>
+<li><strong>Control</strong>: C0 control codes (0x00-0x1F except ESC) and C1 codes (0x80-0x9F)</li>
+<li><strong>CSI</strong>: Control Sequence Introducer (ESC [ … final_byte)</li>
+<li><strong>OSC</strong>: Operating System Command (ESC ] … ST or BEL)</li>
+<li><strong>DCS</strong>: Device Control String (ESC P … ST)</li>
+<li><strong>SOS</strong>: Start of String (ESC X … ST)</li>
+<li><strong>ST</strong>: String Terminator (ESC )</li>
+<li><strong>PM</strong>: Privacy Message (ESC ^ … ST)</li>
+<li><strong>APC</strong>: Application Program Command (ESC _ … ST)</li>
+<li><strong>Escape</strong>: Standalone ESC character or unrecognized escape sequences</li>
+</ul>
+<h6 id="greedy-segment-merging"><a class="doc-anchor" href="#greedy-segment-merging">§</a>Greedy Segment Merging</h6>
+<p>The parser employs intelligent merging strategies to minimize the number of spans:</p>
+<ul>
+<li><strong>Consecutive ASCII</strong> → Single ASCII span</li>
+<li><strong>Consecutive Unicode</strong> → Single Unicode span</li>
+<li><strong>ASCII followed by Unicode</strong> → Single Unicode span (promoted)</li>
+<li><strong>Unicode followed by ASCII</strong> → Single Unicode span (merged)</li>
+<li><strong>Consecutive identical control codes</strong> → Single Control span</li>
+</ul>
+<p>This optimization reduces memory usage while preserving semantic meaning.</p>
+<h6 id="csi-command-parsing"><a class="doc-anchor" href="#csi-command-parsing">§</a>CSI Command Parsing</h6>
+<p>CSI sequences (ESC [ … final_byte) are parsed into specific [<code>CSICommand</code>] variants:</p>
+<ul>
+<li>Cursor movement: CursorUp, CursorDown, CursorPosition, etc.</li>
+<li>Erasing: EraseInDisplay, EraseInLine</li>
+<li>Scrolling: ScrollUp, ScrollDown</li>
+<li>Mode setting: SetMode, ResetMode</li>
+<li>Unknown sequences: CSICommand::Unknown</li>
+</ul>
+<h6 id="escape-sequence-termination"><a class="doc-anchor" href="#escape-sequence-termination">§</a>Escape Sequence Termination</h6>
+<p>String-type escape sequences (OSC, DCS, SOS, PM, APC) are terminated by:</p>
+<ul>
+<li><strong>ST</strong> (String Terminator): ESC \ or 0x9C</li>
+<li><strong>BEL</strong> (Bell): 0x07 (for OSC only)</li>
+</ul>
+<p>If no valid terminator is found, the sequence extends to the end of the input.</p>
+<h5 id="performance-3"><a class="doc-anchor" href="#performance-3">§</a>Performance</h5>
+<ul>
+<li><strong>Time Complexity</strong>: O(n) where n is the length of the input string in bytes</li>
+<li><strong>Space Complexity</strong>: O(m) where m is the number of distinct segments</li>
+<li><strong>Single Pass</strong>: The entire string is processed in one forward iteration</li>
+<li><strong>No Allocations During Parse</strong>: Spans only store byte ranges, not copied data</li>
+</ul>
+<h5 id="examples-4"><a class="doc-anchor" href="#examples-4">§</a>Examples</h5>
+<p>Parse plain text:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SpannedString;
+
+<span class="kw">let </span>spans = SpannedString::parse(<span class="string">"Hello World"</span>);
+<span class="macro">assert_eq!</span>(spans.count(), <span class="number">1</span>); <span class="comment">// Single ASCII span
+</span><span class="macro">assert_eq!</span>(spans.len(), <span class="number">11</span>);</code></pre></div>
+<p>Parse text with ANSI colors:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1b[31mRed\x1b[0m Normal"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// Structure: CSI, ASCII("Red"), CSI, ASCII(" Normal")
+</span><span class="macro">assert_eq!</span>(spans.count(), <span class="number">4</span>);</code></pre></div>
+<p>Parse mixed content with control codes:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span, ControlCode};
+
+<span class="kw">let </span>input = <span class="string">"Line 1\nLine 2\tTabbed"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// Structure: ASCII, Control(LF), ASCII, Control(HT), ASCII
+</span><span class="macro">assert_eq!</span>(spans.count(), <span class="number">5</span>);</code></pre></div>
+<p>Parse Unicode text:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SpannedString;
+
+<span class="kw">let </span>input = <span class="string">"Hello 世界"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// ASCII and Unicode merged into single Unicode span
+</span><span class="macro">assert_eq!</span>(spans.count(), <span class="number">1</span>);</code></pre></div>
+<p>Parse complex ANSI sequences:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1b]0;Window Title\x07\x1b[2J\x1b[H"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// Structure: OSC, CSI(EraseInDisplay), CSI(CursorPosition)
+</span><span class="macro">assert_eq!</span>(spans.count(), <span class="number">3</span>);</code></pre></div>
+<p>Accessing span details:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1b[31mRed\x1b[0m"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">for </span>span <span class="kw">in </span>spans.iter() {
+    <span class="kw">match </span>span {
+        Span::CSI { range, value } =&gt; {
+            <span class="macro">println!</span>(<span class="string">"CSI command at bytes {}..{}"</span>, range.start, range.end);
+        }
+        Span::ASCII { range } =&gt; {
+            <span class="macro">println!</span>(<span class="string">"Text at bytes {}..{}"</span>, range.start, range.end);
+        }
+        <span class="kw">_ </span>=&gt; {}
+    }
+}</code></pre></div><h5 id="edge-cases"><a class="doc-anchor" href="#edge-cases">§</a>Edge Cases</h5>
+<ul>
+<li><strong>Empty String</strong>: Returns an empty <code>SpannedString</code> with zero spans</li>
+<li><strong>Incomplete Escape Sequences</strong>: Treated as Escape span containing the incomplete bytes</li>
+<li><strong>Invalid UTF-8</strong>: Each byte is treated individually (may create invalid ranges)</li>
+<li><strong>Malformed CSI</strong>: Parsed as CSICommand::Unknown with available parameters</li>
+<li><strong>Unterminated String Sequences</strong>: Extend to the end of input</li>
+</ul>
+<h5 id="use-cases"><a class="doc-anchor" href="#use-cases">§</a>Use Cases</h5>
+<p>This method is ideal for:</p>
+<ul>
+<li><strong>ANSI String Analysis</strong>: Understanding the structure of terminal output</li>
+<li><strong>Syntax Highlighting</strong>: Identifying different types of content</li>
+<li><strong>Content Filtering</strong>: Extracting or removing specific span types</li>
+<li><strong>Format Conversion</strong>: Converting to other representations like <a href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString"><code>SegmentedString</code></a></li>
+<li><strong>Debugging</strong>: Inspecting the composition of ANSI-formatted strings</li>
+</ul>
+<h5 id="see-also-1"><a class="doc-anchor" href="#see-also-1">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SpannedString.html#method.into_segmented_string" title="method termionix_server::SpannedString::into_segmented_string"><code>SpannedString::into_segmented_string</code></a> - Convert to <code>SegmentedString</code> with owned data</li>
+<li><a href="enum.Span.html" title="enum termionix_server::Span"><code>Span</code></a> - Individual span enum with all variants</li>
+<li>[<code>CSICommand</code>] - Parsed CSI command types</li>
+<li>[<code>ControlCode</code>] - Control code enumeration</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.into_segmented_string" class="method"><h4 class="code-header">pub fn <a href="#method.into_segmented_string" class="fn">into_segmented_string</a>(&amp;self, source: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.str.html">str</a>) -&gt; <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Converts this <code>SpannedString</code> into a <code>SegmentedString</code> by extracting actual content
+from the source string.</p>
+<p>This method transforms a lightweight parse result (<a href="struct.SpannedString.html" title="struct termionix_server::SpannedString"><code>SpannedString</code></a>) that only contains
+byte ranges into a <a href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString"><code>SegmentedString</code></a> with actual string data. This is useful when you
+need to:</p>
+<ul>
+<li>Build terminal output from parsed ANSI strings</li>
+<li>Manipulate the structure while preserving content</li>
+<li>Convert between different string representations</li>
+<li>Apply transformations to parsed ANSI content</li>
+</ul>
+<h5 id="arguments-1"><a class="doc-anchor" href="#arguments-1">§</a>Arguments</h5>
+<ul>
+<li><code>source</code> - The original string that was parsed to create this <code>SpannedString</code>.
+The byte ranges in each <a href="enum.Span.html" title="enum termionix_server::Span"><code>Span</code></a> reference positions in this string.</li>
+</ul>
+<h5 id="returns-4"><a class="doc-anchor" href="#returns-4">§</a>Returns</h5>
+<p>A new <a href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString"><code>SegmentedString</code></a> containing the actual text and control sequences,
+ready for further manipulation or rendering.</p>
+<h5 id="segment-conversion"><a class="doc-anchor" href="#segment-conversion">§</a>Segment Conversion</h5>
+<p>Each <a href="enum.Span.html" title="enum termionix_server::Span"><code>Span</code></a> variant is converted to its corresponding <a href="enum.Segment.html" title="enum termionix_server::Segment"><code>Segment</code></a> variant:</p>
+<ul>
+<li>
+<p><strong>Text Segments</strong>: <code>ASCII</code> and <code>Unicode</code> spans extract the text from the source
+string and push it using <a href="struct.SegmentedString.html#method.push_str" title="method termionix_server::SegmentedString::push_str"><code>push_str</code></a>, which automatically
+handles merging of adjacent compatible segments.</p>
+</li>
+<li>
+<p><strong>Control Codes</strong>: <code>Control</code> spans are converted to control code segments using
+<a href="SegmentedString::push_control"><code>push_control</code></a>.</p>
+</li>
+<li>
+<p><strong>Escape Sequences</strong>: <code>CSI</code>, <code>OSC</code>, <code>DCS</code>, etc. are converted to their corresponding
+segment types. For escape sequences containing raw data (OSC, DCS, SOS, ST, PM, APC),
+the byte ranges are extracted from the source and stored as <code>Vec&lt;u8&gt;</code>.</p>
+</li>
+</ul>
+<h5 id="memory-and-performance"><a class="doc-anchor" href="#memory-and-performance">§</a>Memory and Performance</h5>
+<ul>
+<li>
+<p><strong>Memory</strong>: This method allocates new <code>String</code> and <code>Vec&lt;u8&gt;</code> buffers for each segment.
+The resulting <code>SegmentedString</code> owns all its data, unlike <code>SpannedString</code> which only
+stores ranges.</p>
+</li>
+<li>
+<p><strong>Performance</strong>: O(n) where n is the number of spans. Each span requires a string
+slice extraction or byte copy operation.</p>
+</li>
+<li>
+<p><strong>Segment Merging</strong>: Text segments may be merged by <code>SegmentedString::push_str</code>,
+potentially reducing the total number of segments in the result.</p>
+</li>
+</ul>
+<h5 id="examples-5"><a class="doc-anchor" href="#examples-5">§</a>Examples</h5>
+<p>Basic conversion:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SpannedString;
+
+<span class="kw">let </span>input = <span class="string">"\x1b[31mHello\x1b[0m World"</span>;
+<span class="kw">let </span>spanned = SpannedString::parse(input);
+<span class="kw">let </span>segmented = spanned.into_segmented_string(input);</code></pre></div>
+<p>Parsing and converting in one step:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SpannedString;
+
+<span class="kw">let </span>ansi_text = <span class="string">"\x1b[1;32mSuccess!\x1b[0m\n"</span>;
+<span class="kw">let </span>segmented = SpannedString::parse(ansi_text)
+    .into_segmented_string(ansi_text);</code></pre></div>
+<p>Working with Unicode content:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SpannedString;
+
+<span class="kw">let </span>input = <span class="string">"Hello 世界\n"</span>;
+<span class="kw">let </span>spanned = SpannedString::parse(input);
+<span class="kw">let </span>segmented = spanned.into_segmented_string(input);</code></pre></div><h5 id="panics"><a class="doc-anchor" href="#panics">§</a>Panics</h5>
+<p>This method does not panic. If a byte range in any span is invalid (out of bounds or
+not on a UTF-8 character boundary), that segment will be silently skipped. This is
+handled gracefully by the <a href="https://doc.rust-lang.org/1.93.0/std/primitive.str.html#method.get" title="method str::get"><code>str::get</code></a> method which returns <code>None</code> for invalid ranges.</p>
+<h5 id="see-also-2"><a class="doc-anchor" href="#see-also-2">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SpannedString.html#method.parse" title="associated function termionix_server::SpannedString::parse"><code>SpannedString::parse</code></a> - Parse a string into a <code>SpannedString</code></li>
+<li><a href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString"><code>SegmentedString</code></a> - The target type with owned segment data</li>
+<li><a href="struct.SegmentedString.html#method.push_str" title="method termionix_server::SegmentedString::push_str"><code>SegmentedString::push_str</code></a> - How text segments are added (with merging)</li>
+<li><a href="struct.SegmentedString.html#method.push_segment" title="method termionix_server::SegmentedString::push_segment"><code>SegmentedString::push_segment</code></a> - How non-text segments are added</li>
+</ul>
+</div></details></div></details></div><h2 id="trait-implementations" class="section-header">Trait Implementations<a href="#trait-implementations" class="anchor">§</a></h2><div id="trait-implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Clone-for-SpannedString" class="impl"><a href="#impl-Clone-for-SpannedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone" class="method trait-impl"><a href="#method.clone" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#tymethod.clone" class="fn">clone</a>(&amp;self) -&gt; <a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a></h4></section></summary><div class='docblock'>Returns a duplicate of the value. <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#tymethod.clone">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_from" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/clone.rs.html#245-247">Source</a></span><a href="#method.clone_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#method.clone_from" class="fn">clone_from</a>(&amp;mut self, source: &amp;Self)</h4></section></summary><div class='docblock'>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#method.clone_from">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Debug-for-SpannedString" class="impl"><a href="#impl-Debug-for-SpannedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt" class="method trait-impl"><a href="#method.fmt" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Debug.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>, <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/fmt/struct.Error.html" title="struct core::fmt::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Debug.html#tymethod.fmt">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Index%3Cusize%3E-for-SpannedString" class="impl"><a href="#impl-Index%3Cusize%3E-for-SpannedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/ops/index/trait.Index.html" title="trait core::ops::index::Index">Index</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt; for <a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Output" class="associatedtype trait-impl"><a href="#associatedtype.Output" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/ops/index/trait.Index.html#associatedtype.Output" class="associatedtype">Output</a> = <a class="enum" href="enum.Span.html" title="enum termionix_server::Span">Span</a></h4></section></summary><div class='docblock'>The returned type after indexing.</div></details><details class="toggle method-toggle" open><summary><section id="method.index" class="method trait-impl"><a href="#method.index" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/ops/index/trait.Index.html#tymethod.index" class="fn">index</a>(&amp;self, index: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>) -&gt; &amp;&lt;<a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a> as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/ops/index/trait.Index.html" title="trait core::ops::index::Index">Index</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/ops/index/trait.Index.html#associatedtype.Output" title="type core::ops::index::Index::Output">Output</a></h4></section></summary><div class='docblock'>Performs the indexing (<code>container[index]</code>) operation. <a href="https://doc.rust-lang.org/1.93.0/core/ops/index/trait.Index.html#tymethod.index">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-PartialEq-for-SpannedString" class="impl"><a href="#impl-PartialEq-for-SpannedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialEq.html" title="trait core::cmp::PartialEq">PartialEq</a> for <a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.eq" class="method trait-impl"><a href="#method.eq" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialEq.html#tymethod.eq" class="fn">eq</a>(&amp;self, other: &amp;<a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class='docblock'>Tests for <code>self</code> and <code>other</code> values to be equal, and is used by <code>==</code>.</div></details><details class="toggle method-toggle" open><summary><section id="method.ne" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/cmp.rs.html#264">Source</a></span><a href="#method.ne" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialEq.html#method.ne" class="fn">ne</a>(&amp;self, other: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;Rhs</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class='docblock'>Tests for <code>!=</code>. The default implementation is almost always sufficient,
+and should not be overridden without very good reason.</div></details></div></details><section id="impl-Eq-for-SpannedString" class="impl"><a href="#impl-Eq-for-SpannedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.Eq.html" title="trait core::cmp::Eq">Eq</a> for <a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a></h3></section><section id="impl-StructuralPartialEq-for-SpannedString" class="impl"><a href="#impl-StructuralPartialEq-for-SpannedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.StructuralPartialEq.html" title="trait core::marker::StructuralPartialEq">StructuralPartialEq</a> for <a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a></h3></section></div><h2 id="synthetic-implementations" class="section-header">Auto Trait Implementations<a href="#synthetic-implementations" class="anchor">§</a></h2><div id="synthetic-implementations-list"><section id="impl-Freeze-for-SpannedString" class="impl"><a href="#impl-Freeze-for-SpannedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Freeze.html" title="trait core::marker::Freeze">Freeze</a> for <a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a></h3></section><section id="impl-RefUnwindSafe-for-SpannedString" class="impl"><a href="#impl-RefUnwindSafe-for-SpannedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/panic/unwind_safe/trait.RefUnwindSafe.html" title="trait core::panic::unwind_safe::RefUnwindSafe">RefUnwindSafe</a> for <a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a></h3></section><section id="impl-Send-for-SpannedString" class="impl"><a href="#impl-Send-for-SpannedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> for <a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a></h3></section><section id="impl-Sync-for-SpannedString" class="impl"><a href="#impl-Sync-for-SpannedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> for <a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a></h3></section><section id="impl-Unpin-for-SpannedString" class="impl"><a href="#impl-Unpin-for-SpannedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Unpin.html" title="trait core::marker::Unpin">Unpin</a> for <a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a></h3></section><section id="impl-UnwindSafe-for-SpannedString" class="impl"><a href="#impl-UnwindSafe-for-SpannedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/panic/unwind_safe/trait.UnwindSafe.html" title="trait core::panic::unwind_safe::UnwindSafe">UnwindSafe</a> for <a class="struct" href="struct.SpannedString.html" title="struct termionix_server::SpannedString">SpannedString</a></h3></section></div><h2 id="blanket-implementations" class="section-header">Blanket Implementations<a href="#blanket-implementations" class="anchor">§</a></h2><div id="blanket-implementations-list"><details class="toggle implementors-toggle"><summary><section id="impl-Any-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/any.rs.html#138">Source</a><a href="#impl-Any-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/any/trait.Any.html" title="trait core::any::Any">Any</a> for T<div class="where">where
+    T: 'static + ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.type_id" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/any.rs.html#139">Source</a><a href="#method.type_id" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/any/trait.Any.html#tymethod.type_id" class="fn">type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></h4></section></summary><div class='docblock'>Gets the <code>TypeId</code> of <code>self</code>. <a href="https://doc.rust-lang.org/1.93.0/core/any/trait.Any.html#tymethod.type_id">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Borrow%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#212">Source</a><a href="#impl-Borrow%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#214">Source</a><a href="#method.borrow" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html#tymethod.borrow" class="fn">borrow</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;T</a></h4></section></summary><div class='docblock'>Immutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html#tymethod.borrow">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-BorrowMut%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#221">Source</a><a href="#impl-BorrowMut%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.BorrowMut.html" title="trait core::borrow::BorrowMut">BorrowMut</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow_mut" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#222">Source</a><a href="#method.borrow_mut" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut" class="fn">borrow_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;mut T</a></h4></section></summary><div class='docblock'>Mutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-CloneToUninit-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/clone.rs.html#547">Source</a><a href="#impl-CloneToUninit-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.CloneToUninit.html" title="trait core::clone::CloneToUninit">CloneToUninit</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone_to_uninit" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/clone.rs.html#549">Source</a><a href="#method.clone_to_uninit" class="anchor">§</a><h4 class="code-header">unsafe fn <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit" class="fn">clone_to_uninit</a>(&amp;self, dest: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.pointer.html">*mut </a><a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u8.html">u8</a>)</h4></section></summary><span class="item-info"><div class="stab unstable"><span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>clone_to_uninit</code>)</span></div></span><div class='docblock'>Performs copy-assignment from <code>self</code> to <code>dest</code>. <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Equivalent%3CK%3E-for-Q" class="impl"><a href="#impl-Equivalent%3CK%3E-for-Q" class="anchor">§</a><h3 class="code-header">impl&lt;Q, K&gt; Equivalent&lt;K&gt; for Q<div class="where">where
+    Q: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.Eq.html" title="trait core::cmp::Eq">Eq</a> + ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,
+    K: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;Q&gt; + ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.equivalent" class="method trait-impl"><a href="#method.equivalent" class="anchor">§</a><h4 class="code-header">fn <a class="fn">equivalent</a>(&amp;self, key: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;K</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class='docblock'>Checks if this value is equivalent to the given key. <a>Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-From%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#785">Source</a><a href="#impl-From%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#788">Source</a><a href="#method.from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html#tymethod.from" class="fn">from</a>(t: T) -&gt; T</h4></section></summary><div class="docblock"><p>Returns the argument unchanged.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Instrument-for-T" class="impl"><a href="#impl-Instrument-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; Instrument for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.instrument" class="method trait-impl"><a href="#method.instrument" class="anchor">§</a><h4 class="code-header">fn <a class="fn">instrument</a>(self, span: Span) -&gt; Instrumented&lt;Self&gt;</h4></section></summary><div class='docblock'>Instruments this type with the provided [<code>Span</code>], returning an
+<code>Instrumented</code> wrapper. <a>Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.in_current_span" class="method trait-impl"><a href="#method.in_current_span" class="anchor">§</a><h4 class="code-header">fn <a class="fn">in_current_span</a>(self) -&gt; Instrumented&lt;Self&gt;</h4></section></summary><div class='docblock'>Instruments this type with the <a href="super::Span::current()">current</a> <a href="crate::Span"><code>Span</code></a>, returning an
+<code>Instrumented</code> wrapper. <a>Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Into%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#767-769">Source</a><a href="#impl-Into%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#777">Source</a><a href="#method.into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html#tymethod.into" class="fn">into</a>(self) -&gt; U</h4></section></summary><div class="docblock"><p>Calls <code>U::from(self)</code>.</p>
+<p>That is, this conversion is whatever the implementation of
+<code><a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for U</code> chooses to do.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-ToOwned-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#85-87">Source</a><a href="#impl-ToOwned-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html" title="trait alloc::borrow::ToOwned">ToOwned</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Owned" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#89">Source</a><a href="#associatedtype.Owned" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#associatedtype.Owned" class="associatedtype">Owned</a> = T</h4></section></summary><div class='docblock'>The resulting type after obtaining ownership.</div></details><details class="toggle method-toggle" open><summary><section id="method.to_owned" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#90">Source</a><a href="#method.to_owned" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned" class="fn">to_owned</a>(&amp;self) -&gt; T</h4></section></summary><div class='docblock'>Creates owned data from borrowed data, usually by cloning. <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#94">Source</a><a href="#method.clone_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#method.clone_into" class="fn">clone_into</a>(&amp;self, target: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;mut T</a>)</h4></section></summary><div class='docblock'>Uses borrowed data to replace owned data, usually by cloning. <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#method.clone_into">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryFrom%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#827-829">Source</a><a href="#impl-TryFrom%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error-1" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#831">Source</a><a href="#associatedtype.Error-1" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" class="associatedtype">Error</a> = <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/convert/enum.Infallible.html" title="enum core::convert::Infallible">Infallible</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#834">Source</a><a href="#method.try_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#tymethod.try_from" class="fn">try_from</a>(value: U) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;T, &lt;T as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryInto%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#811-813">Source</a><a href="#impl-TryInto%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryInto.html" title="trait core::convert::TryInto">TryInto</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#815">Source</a><a href="#associatedtype.Error" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryInto.html#associatedtype.Error" class="associatedtype">Error</a> = &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#818">Source</a><a href="#method.try_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryInto.html#tymethod.try_into" class="fn">try_into</a>(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;U, &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-WithSubscriber-for-T" class="impl"><a href="#impl-WithSubscriber-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; WithSubscriber for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.with_subscriber" class="method trait-impl"><a href="#method.with_subscriber" class="anchor">§</a><h4 class="code-header">fn <a class="fn">with_subscriber</a>&lt;S&gt;(self, subscriber: S) -&gt; WithDispatch&lt;Self&gt;<div class="where">where
+    S: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;Dispatch&gt;,</div></h4></section></summary><div class='docblock'>Attaches the provided <a href="super::Subscriber"><code>Subscriber</code></a> to this type, returning a
+[<code>WithDispatch</code>] wrapper. <a>Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.with_current_subscriber" class="method trait-impl"><a href="#method.with_current_subscriber" class="anchor">§</a><h4 class="code-header">fn <a class="fn">with_current_subscriber</a>(self) -&gt; WithDispatch&lt;Self&gt;</h4></section></summary><div class='docblock'>Attaches the current <a href="dispatcher#setting-the-default-subscriber">default</a> <a href="super::Subscriber"><code>Subscriber</code></a> to this type, returning a
+[<code>WithDispatch</code>] wrapper. <a>Read more</a></div></details></div></details></div></section></div></main></body></html>

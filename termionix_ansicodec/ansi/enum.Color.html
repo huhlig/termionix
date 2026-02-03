@@ -1,0 +1,541 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Represents a color that can be used in terminal output through ANSI escape sequences."><title>Color in termionix_ansicodec::ansi - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-ca0dd0c4.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="termionix_ansicodec" data-themes="" data-resource-suffix="" data-rustdoc-version="1.93.0 (254b59607 2026-01-19)" data-channel="1.93.0" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-a3946164.js" data-settings-js="settings-c38705f0.js" ><script src="../../static.files/storage-e2aeef58.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-a410ff4d.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-263c88ec.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc enum"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Color</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../termionix_ansicodec/index.html">termionix_<wbr>ansicodec</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Color</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#color-levels" title="Color Levels">Color Levels</a></li><li><a href="#variants-1" title="Variants">Variants</a><ul><li><a href="#basic-colors-standard-8" title="Basic Colors (Standard 8)">Basic Colors (Standard 8)</a></li><li><a href="#bright-colors-boldintense-8" title="Bright Colors (Bold/Intense 8)">Bright Colors (Bold/Intense 8)</a></li><li><a href="#extended-colors" title="Extended Colors">Extended Colors</a></li></ul></li><li><a href="#color-mode-compatibility" title="Color Mode Compatibility">Color Mode Compatibility</a></li><li><a href="#examples" title="Examples">Examples</a></li><li><a href="#color-palette-reference" title="Color Palette Reference">Color Palette Reference</a><ul><li><a href="#256-color-palette-structure" title="256-Color Palette Structure">256-Color Palette Structure</a></li></ul></li><li><a href="#ansi-escape-sequences" title="ANSI Escape Sequences">ANSI Escape Sequences</a><ul><li><a href="#basic-colors" title="Basic Colors">Basic Colors</a></li><li><a href="#bright-colors" title="Bright Colors">Bright Colors</a></li><li><a href="#256-color-fixed" title="256-Color (Fixed)">256-Color (Fixed)</a></li><li><a href="#true-color-rgb" title="True Color (RGB)">True Color (RGB)</a></li></ul></li><li><a href="#terminal-compatibility" title="Terminal Compatibility">Terminal Compatibility</a></li><li><a href="#see-also" title="See Also">See Also</a></li></ul><h3><a href="#variants">Variants</a></h3><ul class="block variant"><li><a href="#variant.Black" title="Black">Black</a></li><li><a href="#variant.Blue" title="Blue">Blue</a></li><li><a href="#variant.BrightBlack" title="BrightBlack">BrightBlack</a></li><li><a href="#variant.BrightBlue" title="BrightBlue">BrightBlue</a></li><li><a href="#variant.BrightCyan" title="BrightCyan">BrightCyan</a></li><li><a href="#variant.BrightGreen" title="BrightGreen">BrightGreen</a></li><li><a href="#variant.BrightPurple" title="BrightPurple">BrightPurple</a></li><li><a href="#variant.BrightRed" title="BrightRed">BrightRed</a></li><li><a href="#variant.BrightWhite" title="BrightWhite">BrightWhite</a></li><li><a href="#variant.BrightYellow" title="BrightYellow">BrightYellow</a></li><li><a href="#variant.Cyan" title="Cyan">Cyan</a></li><li><a href="#variant.Fixed" title="Fixed">Fixed</a></li><li><a href="#variant.Green" title="Green">Green</a></li><li><a href="#variant.Purple" title="Purple">Purple</a></li><li><a href="#variant.RGB" title="RGB">RGB</a></li><li><a href="#variant.Red" title="Red">Red</a></li><li><a href="#variant.White" title="White">White</a></li><li><a href="#variant.Yellow" title="Yellow">Yellow</a></li></ul><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.to_basic" title="to_basic">to_basic</a></li><li><a href="#method.to_fixed" title="to_fixed">to_fixed</a></li><li><a href="#method.to_truecolor" title="to_truecolor">to_truecolor</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block trait-implementation"><li><a href="#impl-Clone-for-Color" title="Clone">Clone</a></li><li><a href="#impl-Copy-for-Color" title="Copy">Copy</a></li><li><a href="#impl-Debug-for-Color" title="Debug">Debug</a></li><li><a href="#impl-Eq-for-Color" title="Eq">Eq</a></li><li><a href="#impl-Hash-for-Color" title="Hash">Hash</a></li><li><a href="#impl-Ord-for-Color" title="Ord">Ord</a></li><li><a href="#impl-PartialEq-for-Color" title="PartialEq">PartialEq</a></li><li><a href="#impl-PartialOrd-for-Color" title="PartialOrd">PartialOrd</a></li><li><a href="#impl-StructuralPartialEq-for-Color" title="StructuralPartialEq">StructuralPartialEq</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-Freeze-for-Color" title="Freeze">Freeze</a></li><li><a href="#impl-RefUnwindSafe-for-Color" title="RefUnwindSafe">RefUnwindSafe</a></li><li><a href="#impl-Send-for-Color" title="Send">Send</a></li><li><a href="#impl-Sync-for-Color" title="Sync">Sync</a></li><li><a href="#impl-Unpin-for-Color" title="Unpin">Unpin</a></li><li><a href="#impl-UnwindSafe-for-Color" title="UnwindSafe">UnwindSafe</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-Any-for-T" title="Any">Any</a></li><li><a href="#impl-Borrow%3CT%3E-for-T" title="Borrow&#60;T&#62;">Borrow&#60;T&#62;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-T" title="BorrowMut&#60;T&#62;">BorrowMut&#60;T&#62;</a></li><li><a href="#impl-CloneToUninit-for-T" title="CloneToUninit">CloneToUninit</a></li><li><a href="#impl-From%3CT%3E-for-T" title="From&#60;T&#62;">From&#60;T&#62;</a></li><li><a href="#impl-Instrument-for-T" title="Instrument">Instrument</a></li><li><a href="#impl-Into%3CU%3E-for-T" title="Into&#60;U&#62;">Into&#60;U&#62;</a></li><li><a href="#impl-ToOwned-for-T" title="ToOwned">ToOwned</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T" title="TryFrom&#60;U&#62;">TryFrom&#60;U&#62;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T" title="TryInto&#60;U&#62;">TryInto&#60;U&#62;</a></li><li><a href="#impl-WithSubscriber-for-T" title="WithSubscriber">WithSubscriber</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="index.html">In termionix_<wbr>ansicodec::<wbr>ansi</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">termionix_ansicodec</a>::<wbr><a href="index.html">ansi</a></div><h1>Enum <span class="enum">Color</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/termionix_ansicodec/style.rs.html#1444-1495">Source</a> </span></div><pre class="rust item-decl"><code>pub enum Color {
+<details class="toggle type-contents-toggle"><summary class="hideme"><span>Show 18 variants</span></summary>    Black,
+    Red,
+    Green,
+    Yellow,
+    Blue,
+    Purple,
+    Cyan,
+    White,
+    BrightBlack,
+    BrightRed,
+    BrightGreen,
+    BrightYellow,
+    BrightBlue,
+    BrightPurple,
+    BrightCyan,
+    BrightWhite,
+    Fixed(<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u8.html">u8</a>),
+    RGB(<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u8.html">u8</a>, <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u8.html">u8</a>, <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u8.html">u8</a>),
+</details>}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Represents a color that can be used in terminal output through ANSI escape sequences.</p>
+<p><code>Color</code> provides four levels of color specification, from basic 16-color support
+to full 24-bit RGB true color. The enum variants correspond to different ANSI
+color escape sequence formats that terminals support.</p>
+<h2 id="color-levels"><a class="doc-anchor" href="#color-levels">§</a>Color Levels</h2>
+<ul>
+<li><strong>Basic Colors</strong> (16 colors): The 8 standard ANSI colors plus their bright variants</li>
+<li><strong>Fixed Palette</strong> (256 colors): Extended 8-bit color palette via <a href="../enum.Color.html#variant.Fixed" title="variant termionix_ansicodec::Color::Fixed"><code>Fixed</code></a></li>
+<li><strong>True Color</strong> (16.7M colors): 24-bit RGB color via <a href="../enum.Color.html#variant.RGB" title="variant termionix_ansicodec::Color::RGB"><code>RGB</code></a></li>
+</ul>
+<h2 id="variants-1"><a class="doc-anchor" href="#variants-1">§</a>Variants</h2><h3 id="basic-colors-standard-8"><a class="doc-anchor" href="#basic-colors-standard-8">§</a>Basic Colors (Standard 8)</h3>
+<p>The first 8 colors are the standard ANSI colors that have been supported since
+the earliest terminals. These can typically be customized in terminal emulator
+settings and correspond to foreground codes 30-37 and background codes 40-47.</p>
+<ul>
+<li><a href="../enum.Color.html#variant.Black" title="variant termionix_ansicodec::Color::Black"><code>Black</code></a> - Usually rendered as dark gray rather than true black</li>
+<li><a href="../enum.Color.html#variant.Red" title="variant termionix_ansicodec::Color::Red"><code>Red</code></a> - Standard red</li>
+<li><a href="../enum.Color.html#variant.Green" title="variant termionix_ansicodec::Color::Green"><code>Green</code></a> - Standard green</li>
+<li><a href="../enum.Color.html#variant.Yellow" title="variant termionix_ansicodec::Color::Yellow"><code>Yellow</code></a> - Standard yellow/orange</li>
+<li><a href="../enum.Color.html#variant.Blue" title="variant termionix_ansicodec::Color::Blue"><code>Blue</code></a> - Standard blue</li>
+<li><a href="../enum.Color.html#variant.Purple" title="variant termionix_ansicodec::Color::Purple"><code>Purple</code></a> - Magenta/Purple</li>
+<li><a href="../enum.Color.html#variant.Cyan" title="variant termionix_ansicodec::Color::Cyan"><code>Cyan</code></a> - Cyan/Aqua</li>
+<li><a href="../enum.Color.html#variant.White" title="variant termionix_ansicodec::Color::White"><code>White</code></a> - Usually light gray rather than true white</li>
+</ul>
+<h3 id="bright-colors-boldintense-8"><a class="doc-anchor" href="#bright-colors-boldintense-8">§</a>Bright Colors (Bold/Intense 8)</h3>
+<p>The bright variants provide more vivid versions of the basic colors. These
+correspond to the AIXterm specification (foreground codes 90-97, background
+codes 100-107) and are widely supported in modern terminals.</p>
+<ul>
+<li><a href="../enum.Color.html#variant.BrightBlack" title="variant termionix_ansicodec::Color::BrightBlack"><code>BrightBlack</code></a> - Often used as a gray color</li>
+<li><a href="../enum.Color.html#variant.BrightRed" title="variant termionix_ansicodec::Color::BrightRed"><code>BrightRed</code></a> - Vivid red</li>
+<li><a href="../enum.Color.html#variant.BrightGreen" title="variant termionix_ansicodec::Color::BrightGreen"><code>BrightGreen</code></a> - Vivid green</li>
+<li><a href="../enum.Color.html#variant.BrightYellow" title="variant termionix_ansicodec::Color::BrightYellow"><code>BrightYellow</code></a> - Vivid yellow</li>
+<li><a href="../enum.Color.html#variant.BrightBlue" title="variant termionix_ansicodec::Color::BrightBlue"><code>BrightBlue</code></a> - Vivid blue</li>
+<li><a href="../enum.Color.html#variant.BrightPurple" title="variant termionix_ansicodec::Color::BrightPurple"><code>BrightPurple</code></a> - Vivid magenta/purple</li>
+<li><a href="../enum.Color.html#variant.BrightCyan" title="variant termionix_ansicodec::Color::BrightCyan"><code>BrightCyan</code></a> - Vivid cyan</li>
+<li><a href="../enum.Color.html#variant.BrightWhite" title="variant termionix_ansicodec::Color::BrightWhite"><code>BrightWhite</code></a> - True white or near-white</li>
+</ul>
+<h3 id="extended-colors"><a class="doc-anchor" href="#extended-colors">§</a>Extended Colors</h3>
+<ul>
+<li><a href="../enum.Color.html#variant.Fixed" title="variant termionix_ansicodec::Color::Fixed"><code>Fixed</code></a> - 256-color palette (8-bit color)</li>
+<li><a href="../enum.Color.html#variant.RGB" title="variant termionix_ansicodec::Color::RGB"><code>RGB</code></a> - True color (24-bit RGB)</li>
+</ul>
+<h2 id="color-mode-compatibility"><a class="doc-anchor" href="#color-mode-compatibility">§</a>Color Mode Compatibility</h2>
+<p>Colors are rendered differently depending on the <a href="../enum.ColorMode.html" title="enum termionix_ansicodec::ColorMode"><code>ColorMode</code></a> used:</p>
+<ul>
+<li><a href="../enum.ColorMode.html#variant.None" title="variant termionix_ansicodec::ColorMode::None"><code>ColorMode::None</code></a>: No colors are rendered</li>
+<li><a href="../enum.ColorMode.html#variant.Basic" title="variant termionix_ansicodec::ColorMode::Basic"><code>ColorMode::Basic</code></a>: Only the 16 basic colors are rendered</li>
+<li><a href="../enum.ColorMode.html#variant.FixedColor" title="variant termionix_ansicodec::ColorMode::FixedColor"><code>ColorMode::FixedColor</code></a>: 256-color palette is used</li>
+<li><a href="../enum.ColorMode.html#variant.TrueColor" title="variant termionix_ansicodec::ColorMode::TrueColor"><code>ColorMode::TrueColor</code></a>: Full RGB colors are used</li>
+</ul>
+<p>The methods <a href="../enum.Color.html#method.to_basic" title="method termionix_ansicodec::Color::to_basic"><code>to_basic()</code></a>, <a href="../enum.Color.html#method.to_fixed" title="method termionix_ansicodec::Color::to_fixed"><code>to_fixed()</code></a>,
+and <a href="../enum.Color.html#method.to_truecolor" title="method termionix_ansicodec::Color::to_truecolor"><code>to_truecolor()</code></a> can be used to convert between
+these representations.</p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>Using basic colors:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{StyledString, Style, Color, ColorMode};
+
+<span class="kw">let </span>styled = StyledString::from_string(<span class="string">"Error"</span>, <span class="prelude-val">Some</span>(Style {
+    foreground: <span class="prelude-val">Some</span>(Color::Red),
+    ..Default::default()
+}));</code></pre></div>
+<p>Using bright colors:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{Color, Style};
+
+<span class="kw">let </span>style = Style {
+    foreground: <span class="prelude-val">Some</span>(Color::BrightRed),
+    background: <span class="prelude-val">Some</span>(Color::BrightBlack),
+    ..Default::default()
+};</code></pre></div>
+<p>Using 256-color palette:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Color;
+
+<span class="comment">// Use color #196 from the 256-color palette (bright red)
+</span><span class="kw">let </span>bright_red = Color::Fixed(<span class="number">196</span>);
+
+<span class="comment">// Use color #234 from the 256-color palette (dark gray)
+</span><span class="kw">let </span>dark_gray = Color::Fixed(<span class="number">234</span>);</code></pre></div>
+<p>Using true color (RGB):</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Color;
+
+<span class="comment">// Create a custom orange color
+</span><span class="kw">let </span>orange = Color::RGB(<span class="number">255</span>, <span class="number">165</span>, <span class="number">0</span>);
+
+<span class="comment">// Create a custom teal color
+</span><span class="kw">let </span>teal = Color::RGB(<span class="number">0</span>, <span class="number">128</span>, <span class="number">128</span>);</code></pre></div>
+<p>Converting between color modes:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Color;
+
+<span class="kw">let </span>true_color = Color::RGB(<span class="number">255</span>, <span class="number">100</span>, <span class="number">50</span>);
+
+<span class="comment">// Convert to 256-color palette
+</span><span class="kw">let </span>fixed = true_color.to_fixed();
+
+<span class="comment">// Convert to basic 16-color palette
+</span><span class="kw">let </span>basic = true_color.to_basic();</code></pre></div><h2 id="color-palette-reference"><a class="doc-anchor" href="#color-palette-reference">§</a>Color Palette Reference</h2><h3 id="256-color-palette-structure"><a class="doc-anchor" href="#256-color-palette-structure">§</a>256-Color Palette Structure</h3>
+<p>The 256-color palette (used with <a href="../enum.Color.html#variant.Fixed" title="variant termionix_ansicodec::Color::Fixed"><code>Fixed</code></a>) is structured as:</p>
+<ul>
+<li><strong>0-7</strong>: Standard colors (matches basic <a href="../enum.Color.html#variant.Black" title="variant termionix_ansicodec::Color::Black"><code>Black</code></a> through <a href="../enum.Color.html#variant.White" title="variant termionix_ansicodec::Color::White"><code>White</code></a>)</li>
+<li><strong>8-15</strong>: Bright colors (matches <a href="../enum.Color.html#variant.BrightBlack" title="variant termionix_ansicodec::Color::BrightBlack"><code>BrightBlack</code></a> through <a href="../enum.Color.html#variant.BrightWhite" title="variant termionix_ansicodec::Color::BrightWhite"><code>BrightWhite</code></a>)</li>
+<li><strong>16-231</strong>: 6×6×6 RGB cube (216 colors)
+<ul>
+<li>Formula: <code>16 + 36×r + 6×g + b</code> where r, g, b ∈ [0, 5]</li>
+</ul>
+</li>
+<li><strong>232-255</strong>: Grayscale ramp (24 shades from dark to light)</li>
+</ul>
+<p>See the <a href="https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg">XTerm 256 Color Chart</a>
+for a visual reference.</p>
+<h2 id="ansi-escape-sequences"><a class="doc-anchor" href="#ansi-escape-sequences">§</a>ANSI Escape Sequences</h2>
+<p>When rendered to terminal output, colors generate different ANSI sequences:</p>
+<h3 id="basic-colors"><a class="doc-anchor" href="#basic-colors">§</a>Basic Colors</h3>
+<ul>
+<li>Foreground: <code>\x1b[30m</code> through <code>\x1b[37m</code></li>
+<li>Background: <code>\x1b[40m</code> through <code>\x1b[47m</code></li>
+</ul>
+<h3 id="bright-colors"><a class="doc-anchor" href="#bright-colors">§</a>Bright Colors</h3>
+<ul>
+<li>Foreground: <code>\x1b[90m</code> through <code>\x1b[97m</code></li>
+<li>Background: <code>\x1b[100m</code> through <code>\x1b[107m</code></li>
+</ul>
+<h3 id="256-color-fixed"><a class="doc-anchor" href="#256-color-fixed">§</a>256-Color (Fixed)</h3>
+<ul>
+<li>Foreground: <code>\x1b[38;5;&lt;n&gt;m</code> where n is 0-255</li>
+<li>Background: <code>\x1b[48;5;&lt;n&gt;m</code> where n is 0-255</li>
+</ul>
+<h3 id="true-color-rgb"><a class="doc-anchor" href="#true-color-rgb">§</a>True Color (RGB)</h3>
+<ul>
+<li>Foreground: <code>\x1b[38;2;&lt;r&gt;;&lt;g&gt;;&lt;b&gt;m</code></li>
+<li>Background: <code>\x1b[48;2;&lt;r&gt;;&lt;g&gt;;&lt;b&gt;m</code></li>
+</ul>
+<h2 id="terminal-compatibility"><a class="doc-anchor" href="#terminal-compatibility">§</a>Terminal Compatibility</h2>
+<p>Not all terminals support all color modes:</p>
+<ul>
+<li><strong>Basic colors</strong>: Universally supported (since VT100 era)</li>
+<li><strong>Bright colors</strong>: Widely supported (AIXterm standard)</li>
+<li><strong>256 colors</strong>: Supported by most modern terminals</li>
+<li><strong>True color</strong>: Requires <code>COLORTERM=truecolor</code> or <code>COLORTERM=24bit</code></li>
+</ul>
+<p>Use <a href="../enum.ColorMode.html" title="enum termionix_ansicodec::ColorMode"><code>ColorMode</code></a> detection at runtime to adapt to terminal capabilities.</p>
+<h2 id="see-also"><a class="doc-anchor" href="#see-also">§</a>See Also</h2>
+<ul>
+<li><a href="../enum.ColorMode.html" title="enum termionix_ansicodec::ColorMode"><code>ColorMode</code></a> - Determines which color capabilities to use</li>
+<li><a href="struct.AnsiSelectGraphicRendition.html" title="struct termionix_ansicodec::ansi::AnsiSelectGraphicRendition"><code>AnsiSelectGraphicRendition</code></a> - Container for text styling including colors</li>
+<li><a href="../utility/struct.StyledString.html" title="struct termionix_ansicodec::utility::StyledString"><code>StyledString</code></a> - For building styled text output</li>
+</ul>
+</div></details><h2 id="variants" class="variants section-header">Variants<a href="#variants" class="anchor">§</a></h2><div class="variants"><section id="variant.Black" class="variant"><a href="#variant.Black" class="anchor">§</a><h3 class="code-header">Black</h3></section><div class="docblock"><p>Black - Color #0 (FG <code>30</code>, BG <code>40</code>).</p>
+</div><section id="variant.Red" class="variant"><a href="#variant.Red" class="anchor">§</a><h3 class="code-header">Red</h3></section><div class="docblock"><p>Red - Color #1 (FG <code>31</code>, BG <code>41</code>).</p>
+</div><section id="variant.Green" class="variant"><a href="#variant.Green" class="anchor">§</a><h3 class="code-header">Green</h3></section><div class="docblock"><p>Green - Color #2 (FG <code>32</code>, BG <code>42</code>).</p>
+</div><section id="variant.Yellow" class="variant"><a href="#variant.Yellow" class="anchor">§</a><h3 class="code-header">Yellow</h3></section><div class="docblock"><p>Yellow - Color #3 (FG <code>33</code>, BG <code>43</code>).</p>
+</div><section id="variant.Blue" class="variant"><a href="#variant.Blue" class="anchor">§</a><h3 class="code-header">Blue</h3></section><div class="docblock"><p>Blue - Color #4 (FG <code>34</code>, BG <code>44</code>).</p>
+</div><section id="variant.Purple" class="variant"><a href="#variant.Purple" class="anchor">§</a><h3 class="code-header">Purple</h3></section><div class="docblock"><p>Purple - Color #5 (FG <code>35</code>, BG <code>45</code>).</p>
+</div><section id="variant.Cyan" class="variant"><a href="#variant.Cyan" class="anchor">§</a><h3 class="code-header">Cyan</h3></section><div class="docblock"><p>Cyan - Color #6 (FG <code>36</code>, BG <code>46</code>).</p>
+</div><section id="variant.White" class="variant"><a href="#variant.White" class="anchor">§</a><h3 class="code-header">White</h3></section><div class="docblock"><p>White - Color #7 (FG <code>37</code>, BG <code>47</code>).</p>
+</div><section id="variant.BrightBlack" class="variant"><a href="#variant.BrightBlack" class="anchor">§</a><h3 class="code-header">BrightBlack</h3></section><div class="docblock"><p>Black - Color #0 (FG <code>90</code>, BG <code>100</code>).</p>
+</div><section id="variant.BrightRed" class="variant"><a href="#variant.BrightRed" class="anchor">§</a><h3 class="code-header">BrightRed</h3></section><div class="docblock"><p>Red - Color #1 (FG <code>91</code>, BG <code>101</code>).</p>
+</div><section id="variant.BrightGreen" class="variant"><a href="#variant.BrightGreen" class="anchor">§</a><h3 class="code-header">BrightGreen</h3></section><div class="docblock"><p>Green - Color #2 (FG <code>92</code>, BG <code>102</code>).</p>
+</div><section id="variant.BrightYellow" class="variant"><a href="#variant.BrightYellow" class="anchor">§</a><h3 class="code-header">BrightYellow</h3></section><div class="docblock"><p>Yellow - Color #3 (FG <code>93</code>, BG <code>103</code>).</p>
+</div><section id="variant.BrightBlue" class="variant"><a href="#variant.BrightBlue" class="anchor">§</a><h3 class="code-header">BrightBlue</h3></section><div class="docblock"><p>Blue - Color #4 (FG <code>94</code>, BG <code>104</code>).</p>
+</div><section id="variant.BrightPurple" class="variant"><a href="#variant.BrightPurple" class="anchor">§</a><h3 class="code-header">BrightPurple</h3></section><div class="docblock"><p>Purple - Color #5 (FG <code>95</code>, BG <code>105</code>).</p>
+</div><section id="variant.BrightCyan" class="variant"><a href="#variant.BrightCyan" class="anchor">§</a><h3 class="code-header">BrightCyan</h3></section><div class="docblock"><p>Cyan - Color #6 (FG <code>96</code>, BG <code>106</code>).</p>
+</div><section id="variant.BrightWhite" class="variant"><a href="#variant.BrightWhite" class="anchor">§</a><h3 class="code-header">BrightWhite</h3></section><div class="docblock"><p>White - Color #7 (FG <code>97</code>, BG <code>107</code>).</p>
+</div><section id="variant.Fixed" class="variant"><a href="#variant.Fixed" class="anchor">§</a><h3 class="code-header">Fixed(<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u8.html">u8</a>)</h3></section><div class="docblock"><p>A color number from 0 to 255, for use in 256-color terminal environments.</p>
+<ul>
+<li>Colours 0 to 7 are the <code>Black</code> to <code>White</code> variants respectively. These colors can usually
+be changed in the terminal emulator.</li>
+<li>Colours 8 to 15 are brighter versions of the eight colors above. These can also usually
+be changed in the terminal emulator, or it could be configured to use the original
+colors and show the text in bold instead. It varies depending on the program.</li>
+<li>Colours 16 to 231 contain several palettes of bright colors, arranged in six squares
+measuring six by six each.</li>
+<li>Colours 232 to 255 are shades of gray from black to white.</li>
+</ul>
+<p>Reference [XTerm - Color Chart][https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg].</p>
+</div><section id="variant.RGB" class="variant"><a href="#variant.RGB" class="anchor">§</a><h3 class="code-header">RGB(<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u8.html">u8</a>, <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u8.html">u8</a>, <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u8.html">u8</a>)</h3></section><div class="docblock"><p>A 24-bit RGB color, as specified by ISO-8613-3.</p>
+</div></div><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Color" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1497-2245">Source</a><a href="#impl-Color" class="anchor">§</a><h3 class="code-header">impl <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.to_basic" class="method"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1601-1660">Source</a><h4 class="code-header">pub fn <a href="#method.to_basic" class="fn">to_basic</a>(&amp;self) -&gt; <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h4></section></summary><div class="docblock"><p>Converts this color to its nearest equivalent in the basic 16-color palette.</p>
+<p>This method performs downsampling from higher color modes to the basic ANSI
+16-color palette (8 standard colors + 8 bright variants). This is useful when:</p>
+<ul>
+<li>Targeting terminals with limited color support</li>
+<li>Ensuring maximum compatibility across different terminal emulators</li>
+<li>Reducing color complexity while maintaining reasonable visual fidelity</li>
+</ul>
+<h5 id="conversion-rules"><a class="doc-anchor" href="#conversion-rules">§</a>Conversion Rules</h5>
+<ul>
+<li><strong>Basic colors</strong> (<a href="../enum.Color.html#variant.Black" title="variant termionix_ansicodec::Color::Black"><code>Black</code></a>-<a href="../enum.Color.html#variant.White" title="variant termionix_ansicodec::Color::White"><code>White</code></a>): Returned unchanged</li>
+<li><strong>Bright colors</strong> (<a href="../enum.Color.html#variant.BrightBlack" title="variant termionix_ansicodec::Color::BrightBlack"><code>BrightBlack</code></a>-<a href="../enum.Color.html#variant.BrightWhite" title="variant termionix_ansicodec::Color::BrightWhite"><code>BrightWhite</code></a>): Returned unchanged</li>
+<li><strong>Fixed palette</strong> (<a href="../enum.Color.html#variant.Fixed" title="variant termionix_ansicodec::Color::Fixed"><code>Fixed</code></a>): Mapped to the corresponding basic/bright color
+<ul>
+<li>Colors 0-7 map to basic colors</li>
+<li>Colors 8-15 map to bright colors</li>
+<li>Colors 16-255 are converted to their nearest basic color equivalent</li>
+</ul>
+</li>
+<li><strong>RGB colors</strong> (<a href="../enum.Color.html#variant.RGB" title="variant termionix_ansicodec::Color::RGB"><code>RGB</code></a>): Mapped to the nearest basic color by calculating
+color distance in RGB space</li>
+</ul>
+<h5 id="algorithm"><a class="doc-anchor" href="#algorithm">§</a>Algorithm</h5>
+<p>For RGB colors, the conversion finds the closest basic color by:</p>
+<ol>
+<li>Calculating the Euclidean distance in RGB color space</li>
+<li>Selecting the basic/bright color with the minimum distance</li>
+<li>Choosing bright variants for colors with higher overall intensity</li>
+</ol>
+<h5 id="examples-1"><a class="doc-anchor" href="#examples-1">§</a>Examples</h5>
+<p>Basic colors are preserved:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Color;
+
+<span class="kw">let </span>red = Color::Red;
+<span class="macro">assert_eq!</span>(red.to_basic(), Color::Red);
+
+<span class="kw">let </span>bright_blue = Color::BrightBlue;
+<span class="macro">assert_eq!</span>(bright_blue.to_basic(), Color::BrightBlue);</code></pre></div>
+<p>Fixed palette colors are converted:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Color;
+
+<span class="comment">// Color 0-7 map to basic colors
+</span><span class="kw">let </span>fixed_red = Color::Fixed(<span class="number">1</span>);
+<span class="macro">assert_eq!</span>(fixed_red.to_basic(), Color::Red);
+
+<span class="comment">// Color 8-15 map to bright colors
+</span><span class="kw">let </span>fixed_bright_red = Color::Fixed(<span class="number">9</span>);
+<span class="macro">assert_eq!</span>(fixed_bright_red.to_basic(), Color::BrightRed);
+
+<span class="comment">// Higher colors are converted to nearest match
+</span><span class="kw">let </span>fixed_196 = Color::Fixed(<span class="number">196</span>); <span class="comment">// Bright red in 256-color palette
+</span><span class="kw">let </span>basic = fixed_196.to_basic(); <span class="comment">// Converts to Red or BrightRed</span></code></pre></div>
+<p>RGB colors are approximated:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Color;
+
+<span class="comment">// Bright red RGB
+</span><span class="kw">let </span>rgb_red = Color::RGB(<span class="number">255</span>, <span class="number">0</span>, <span class="number">0</span>);
+<span class="kw">let </span>basic = rgb_red.to_basic();
+<span class="comment">// Results in Color::Red or Color::BrightRed depending on intensity
+
+// Custom orange color
+</span><span class="kw">let </span>orange = Color::RGB(<span class="number">255</span>, <span class="number">165</span>, <span class="number">0</span>);
+<span class="kw">let </span>basic = orange.to_basic();
+<span class="comment">// Approximated to nearest basic color (likely Yellow or BrightYellow)</span></code></pre></div><h5 id="use-cases"><a class="doc-anchor" href="#use-cases">§</a>Use Cases</h5>
+<p>Fallback for limited terminals:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{Color, ColorMode};
+
+<span class="kw">fn </span>get_color_for_mode(color: Color, mode: <span class="kw-2">&amp;</span>ColorMode) -&gt; Color {
+    <span class="kw">match </span>mode {
+        ColorMode::None =&gt; color, <span class="comment">// Not used
+        </span>ColorMode::Basic =&gt; color.to_basic(),
+        ColorMode::FixedColor =&gt; color.to_fixed(),
+        ColorMode::TrueColor =&gt; color.to_truecolor(),
+    }
+}</code></pre></div><h5 id="performance"><a class="doc-anchor" href="#performance">§</a>Performance</h5>
+<ul>
+<li>Basic/Bright colors: O(1) - immediate return</li>
+<li>Fixed colors: O(1) for colors 0-15, O(1) computation for others</li>
+<li>RGB colors: O(1) - fixed number of distance calculations</li>
+</ul>
+<h5 id="see-also-1"><a class="doc-anchor" href="#see-also-1">§</a>See Also</h5>
+<ul>
+<li><a href="../enum.Color.html#method.to_fixed" title="method termionix_ansicodec::Color::to_fixed"><code>to_fixed()</code></a> - Convert to 256-color palette</li>
+<li><a href="../enum.Color.html#method.to_truecolor" title="method termionix_ansicodec::Color::to_truecolor"><code>to_truecolor()</code></a> - Convert to 24-bit RGB</li>
+<li><a href="../enum.ColorMode.html#variant.Basic" title="variant termionix_ansicodec::ColorMode::Basic"><code>ColorMode::Basic</code></a> - The color mode that uses this conversion</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.to_fixed" class="method"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1778-1801">Source</a><h4 class="code-header">pub fn <a href="#method.to_fixed" class="fn">to_fixed</a>(&amp;self) -&gt; <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h4></section></summary><div class="docblock"><p>Converts this color to the 256-color fixed palette format.</p>
+<p>This method converts any color representation to a <a href="../enum.Color.html#variant.Fixed" title="variant termionix_ansicodec::Color::Fixed"><code>Fixed</code></a> palette
+index (0-255). The 256-color palette provides a good balance between color variety
+and terminal compatibility, supported by most modern terminal emulators.</p>
+<h5 id="conversion-rules-1"><a class="doc-anchor" href="#conversion-rules-1">§</a>Conversion Rules</h5>
+<ul>
+<li><strong>Basic colors</strong> (<a href="../enum.Color.html#variant.Black" title="variant termionix_ansicodec::Color::Black"><code>Black</code></a>-<a href="../enum.Color.html#variant.White" title="variant termionix_ansicodec::Color::White"><code>White</code></a>): Mapped to palette indices 0-7</li>
+<li><strong>Bright colors</strong> (<a href="../enum.Color.html#variant.BrightBlack" title="variant termionix_ansicodec::Color::BrightBlack"><code>BrightBlack</code></a>-<a href="../enum.Color.html#variant.BrightWhite" title="variant termionix_ansicodec::Color::BrightWhite"><code>BrightWhite</code></a>): Mapped to palette indices 8-15</li>
+<li><strong>Fixed palette</strong> (<a href="../enum.Color.html#variant.Fixed" title="variant termionix_ansicodec::Color::Fixed"><code>Fixed</code></a>): Returned unchanged</li>
+<li><strong>RGB colors</strong> (<a href="../enum.Color.html#variant.RGB" title="variant termionix_ansicodec::Color::RGB"><code>RGB</code></a>): Mapped to the nearest color in the 256-color palette</li>
+</ul>
+<h5 id="256-color-palette-structure-1"><a class="doc-anchor" href="#256-color-palette-structure-1">§</a>256-Color Palette Structure</h5>
+<p>The fixed palette is organized as follows:</p>
+<ul>
+<li><strong>0-7</strong>: Basic ANSI colors (Black, Red, Green, Yellow, Blue, Purple, Cyan, White)</li>
+<li><strong>8-15</strong>: Bright ANSI colors (corresponding bright variants)</li>
+<li><strong>16-231</strong>: 6×6×6 RGB cube with formula: <code>16 + 36×r + 6×g + b</code> where r,g,b ∈ [0,5]</li>
+<li><strong>232-255</strong>: 24-level grayscale ramp from dark to light</li>
+</ul>
+<h5 id="rgb-to-fixed-conversion-algorithm"><a class="doc-anchor" href="#rgb-to-fixed-conversion-algorithm">§</a>RGB to Fixed Conversion Algorithm</h5>
+<p>For RGB colors, the conversion process:</p>
+<ol>
+<li>Determines if the color is a grayscale (R ≈ G ≈ B)</li>
+<li>For grayscale: Maps to the grayscale ramp (indices 232-255) or extreme black/white</li>
+<li>For color: Converts to the 6×6×6 RGB cube (indices 16-231) by:
+<ul>
+<li>Quantizing each RGB channel from 0-255 to 0-5</li>
+<li>Applying the formula: <code>16 + 36×r + 6×g + b</code></li>
+</ul>
+</li>
+</ol>
+<h5 id="examples-2"><a class="doc-anchor" href="#examples-2">§</a>Examples</h5>
+<p>Basic colors to fixed indices:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Color;
+
+<span class="macro">assert_eq!</span>(Color::Black.to_fixed(), Color::Fixed(<span class="number">0</span>));
+<span class="macro">assert_eq!</span>(Color::Red.to_fixed(), Color::Fixed(<span class="number">1</span>));
+<span class="macro">assert_eq!</span>(Color::White.to_fixed(), Color::Fixed(<span class="number">7</span>));</code></pre></div>
+<p>Bright colors to fixed indices:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Color;
+
+<span class="macro">assert_eq!</span>(Color::BrightBlack.to_fixed(), Color::Fixed(<span class="number">8</span>));
+<span class="macro">assert_eq!</span>(Color::BrightRed.to_fixed(), Color::Fixed(<span class="number">9</span>));
+<span class="macro">assert_eq!</span>(Color::BrightWhite.to_fixed(), Color::Fixed(<span class="number">15</span>));</code></pre></div>
+<p>RGB colors are approximated:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Color;
+
+<span class="comment">// Bright red approximated to fixed palette
+</span><span class="kw">let </span>red = Color::RGB(<span class="number">255</span>, <span class="number">0</span>, <span class="number">0</span>);
+<span class="kw">let </span>fixed = red.to_fixed();
+<span class="comment">// Results in a Color::Fixed variant close to red
+
+// Grayscale values map to grayscale ramp
+</span><span class="kw">let </span>gray = Color::RGB(<span class="number">128</span>, <span class="number">128</span>, <span class="number">128</span>);
+<span class="kw">let </span>fixed = gray.to_fixed();
+<span class="comment">// Results in Color::Fixed in range 232-255</span></code></pre></div>
+<p>Converting colors for 256-color terminals:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{Color, Style, ColorMode};
+
+<span class="kw">let </span>style = Style {
+    foreground: <span class="prelude-val">Some</span>(Color::RGB(<span class="number">255</span>, <span class="number">100</span>, <span class="number">50</span>).to_fixed()),
+    ..Default::default()
+};</code></pre></div><h5 id="use-cases-1"><a class="doc-anchor" href="#use-cases-1">§</a>Use Cases</h5>
+<p>Progressive enhancement:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{Color, ColorMode};
+
+<span class="kw">fn </span>adapt_color(color: Color, mode: <span class="kw-2">&amp;</span>ColorMode) -&gt; Color {
+    <span class="kw">match </span>mode {
+        ColorMode::Basic =&gt; color.to_basic(),
+        ColorMode::FixedColor =&gt; color.to_fixed(),
+        ColorMode::TrueColor =&gt; color,
+        ColorMode::None =&gt; color,
+    }
+}</code></pre></div><h5 id="visual-fidelity"><a class="doc-anchor" href="#visual-fidelity">§</a>Visual Fidelity</h5>
+<p>The 256-color palette provides good color reproduction for most use cases:</p>
+<ul>
+<li>The 6×6×6 RGB cube offers 216 distinct colors</li>
+<li>The grayscale ramp provides smooth gray transitions</li>
+<li>Most RGB colors map to visually close approximations</li>
+</ul>
+<h5 id="performance-1"><a class="doc-anchor" href="#performance-1">§</a>Performance</h5>
+<ul>
+<li>Basic/Bright colors: O(1) - direct index mapping</li>
+<li>Fixed colors: O(1) - identity function</li>
+<li>RGB colors: O(1) - constant-time calculation</li>
+</ul>
+<h5 id="see-also-2"><a class="doc-anchor" href="#see-also-2">§</a>See Also</h5>
+<ul>
+<li><a href="../enum.Color.html#method.to_basic" title="method termionix_ansicodec::Color::to_basic"><code>to_basic()</code></a> - Convert to 16-color palette</li>
+<li><a href="../enum.Color.html#method.to_truecolor" title="method termionix_ansicodec::Color::to_truecolor"><code>to_truecolor()</code></a> - Convert to 24-bit RGB</li>
+<li><a href="../enum.ColorMode.html#variant.FixedColor" title="variant termionix_ansicodec::ColorMode::FixedColor"><code>ColorMode::FixedColor</code></a> - The color mode that uses this format</li>
+<li><a href="https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg">XTerm 256 Color Chart</a></li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.to_truecolor" class="method"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1961-2019">Source</a><h4 class="code-header">pub fn <a href="#method.to_truecolor" class="fn">to_truecolor</a>(&amp;self) -&gt; <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h4></section></summary><div class="docblock"><p>Converts this color to 24-bit RGB true color format.</p>
+<p>This method converts any color representation to an <a href="../enum.Color.html#variant.RGB" title="variant termionix_ansicodec::Color::RGB"><code>RGB</code></a> true color
+with full 24-bit color depth (8 bits per channel). True color provides the highest
+color fidelity but requires terminal support (check <code>COLORTERM=truecolor</code>).</p>
+<h5 id="conversion-rules-2"><a class="doc-anchor" href="#conversion-rules-2">§</a>Conversion Rules</h5>
+<ul>
+<li><strong>Basic colors</strong> (<a href="../enum.Color.html#variant.Black" title="variant termionix_ansicodec::Color::Black"><code>Black</code></a>-<a href="../enum.Color.html#variant.White" title="variant termionix_ansicodec::Color::White"><code>White</code></a>): Mapped to standard RGB values</li>
+<li><strong>Bright colors</strong> (<a href="../enum.Color.html#variant.BrightBlack" title="variant termionix_ansicodec::Color::BrightBlack"><code>BrightBlack</code></a>-<a href="../enum.Color.html#variant.BrightWhite" title="variant termionix_ansicodec::Color::BrightWhite"><code>BrightWhite</code></a>): Mapped to bright RGB values</li>
+<li><strong>Fixed palette</strong> (<a href="../enum.Color.html#variant.Fixed" title="variant termionix_ansicodec::Color::Fixed"><code>Fixed</code></a>): Converted to the RGB values of the 256-color palette</li>
+<li><strong>RGB colors</strong> (<a href="../enum.Color.html#variant.RGB" title="variant termionix_ansicodec::Color::RGB"><code>RGB</code></a>): Returned unchanged</li>
+</ul>
+<h5 id="standard-rgb-mappings"><a class="doc-anchor" href="#standard-rgb-mappings">§</a>Standard RGB Mappings</h5>
+<p>Basic colors are mapped to commonly-used RGB values:</p>
+<div><table><thead><tr><th>Color</th><th>RGB Value</th><th>Hex</th></tr></thead><tbody>
+<tr><td>Black</td><td>(0, 0, 0)</td><td>#000000</td></tr>
+<tr><td>Red</td><td>(128, 0, 0)</td><td>#800000</td></tr>
+<tr><td>Green</td><td>(0, 128, 0)</td><td>#008000</td></tr>
+<tr><td>Yellow</td><td>(128, 128, 0)</td><td>#808000</td></tr>
+<tr><td>Blue</td><td>(0, 0, 128)</td><td>#000080</td></tr>
+<tr><td>Purple</td><td>(128, 0, 128)</td><td>#800080</td></tr>
+<tr><td>Cyan</td><td>(0, 128, 128)</td><td>#008080</td></tr>
+<tr><td>White</td><td>(192, 192, 192)</td><td>#C0C0C0</td></tr>
+</tbody></table>
+</div>
+<p>Bright colors use more intense values:</p>
+<div><table><thead><tr><th>Color</th><th>RGB Value</th><th>Hex</th></tr></thead><tbody>
+<tr><td>BrightBlack</td><td>(128, 128, 128)</td><td>#808080</td></tr>
+<tr><td>BrightRed</td><td>(255, 0, 0)</td><td>#FF0000</td></tr>
+<tr><td>BrightGreen</td><td>(0, 255, 0)</td><td>#00FF00</td></tr>
+<tr><td>BrightYellow</td><td>(255, 255, 0)</td><td>#FFFF00</td></tr>
+<tr><td>BrightBlue</td><td>(0, 0, 255)</td><td>#0000FF</td></tr>
+<tr><td>BrightPurple</td><td>(255, 0, 255)</td><td>#FF00FF</td></tr>
+<tr><td>BrightCyan</td><td>(0, 255, 255)</td><td>#00FFFF</td></tr>
+<tr><td>BrightWhite</td><td>(255, 255, 255)</td><td>#FFFFFF</td></tr>
+</tbody></table>
+</div><h5 id="fixed-palette-conversion"><a class="doc-anchor" href="#fixed-palette-conversion">§</a>Fixed Palette Conversion</h5>
+<p>For <a href="../enum.Color.html#variant.Fixed" title="variant termionix_ansicodec::Color::Fixed"><code>Fixed</code></a> colors, the conversion follows the 256-color palette structure:</p>
+<ul>
+<li><strong>0-15</strong>: Maps to the basic/bright standard RGB values above</li>
+<li><strong>16-231</strong>: 6×6×6 RGB cube with values calculated from the cube position</li>
+<li><strong>232-255</strong>: Grayscale ramp with evenly distributed gray values</li>
+</ul>
+<h5 id="examples-3"><a class="doc-anchor" href="#examples-3">§</a>Examples</h5>
+<p>Basic colors to RGB:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Color;
+
+<span class="kw">let </span>red = Color::Red.to_truecolor();
+<span class="macro">assert_eq!</span>(red, Color::RGB(<span class="number">205</span>, <span class="number">0</span>, <span class="number">0</span>));
+
+<span class="kw">let </span>bright_red = Color::BrightRed.to_truecolor();
+<span class="macro">assert_eq!</span>(bright_red, Color::RGB(<span class="number">255</span>, <span class="number">0</span>, <span class="number">0</span>));</code></pre></div>
+<p>Fixed palette to RGB:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Color;
+
+<span class="comment">// Fixed color 1 (Red) converts to standard red RGB
+</span><span class="kw">let </span>fixed_red = Color::Fixed(<span class="number">1</span>).to_truecolor();
+<span class="macro">assert_eq!</span>(fixed_red, Color::RGB(<span class="number">205</span>, <span class="number">0</span>, <span class="number">0</span>));
+
+<span class="comment">// Fixed colors from RGB cube convert to their RGB equivalents
+</span><span class="kw">let </span>fixed_color = Color::Fixed(<span class="number">196</span>); <span class="comment">// A red from the RGB cube
+</span><span class="kw">let </span>rgb = fixed_color.to_truecolor();
+<span class="comment">// Results in a Color::RGB variant</span></code></pre></div>
+<p>RGB colors are preserved:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Color;
+
+<span class="kw">let </span>custom = Color::RGB(<span class="number">123</span>, <span class="number">45</span>, <span class="number">67</span>);
+<span class="macro">assert_eq!</span>(custom.to_truecolor(), custom);</code></pre></div>
+<p>Using for true color output:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{Color, Style, ColorMode};
+
+<span class="comment">// Ensure all colors are in RGB format for true color terminals
+</span><span class="kw">let </span>style = Style {
+    foreground: <span class="prelude-val">Some</span>(Color::Red.to_truecolor()),
+    background: <span class="prelude-val">Some</span>(Color::Fixed(<span class="number">234</span>).to_truecolor()),
+    ..Default::default()
+};</code></pre></div><h5 id="use-cases-2"><a class="doc-anchor" href="#use-cases-2">§</a>Use Cases</h5>
+<p>Normalizing colors to RGB:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Color;
+
+<span class="kw">fn </span>get_rgb_values(color: Color) -&gt; (u8, u8, u8) {
+    <span class="kw">match </span>color.to_truecolor() {
+        Color::RGB(r, g, b) =&gt; (r, g, b),
+        <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">"to_truecolor always returns RGB"</span>),
+    }
+}</code></pre></div>
+<p>Color manipulation:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Color;
+
+<span class="kw">fn </span>lighten(color: Color, amount: u8) -&gt; Color {
+    <span class="kw">match </span>color.to_truecolor() {
+        Color::RGB(r, g, b) =&gt; Color::RGB(
+            r.saturating_add(amount),
+            g.saturating_add(amount),
+            b.saturating_add(amount),
+        ),
+        <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+    }
+}</code></pre></div><h5 id="terminal-support"><a class="doc-anchor" href="#terminal-support">§</a>Terminal Support</h5>
+<p>True color support can be detected by checking:</p>
+<div class="example-wrap"><pre class="language-bash"><code>echo $COLORTERM  # Should be &quot;truecolor&quot; or &quot;24bit&quot;</code></pre></div>
+<p>Most modern terminals support true color:</p>
+<ul>
+<li>iTerm2 (macOS)</li>
+<li>Windows Terminal</li>
+<li>GNOME Terminal (3.x+)</li>
+<li>Konsole (KDE)</li>
+<li>Alacritty</li>
+<li>kitty</li>
+</ul>
+<h5 id="performance-2"><a class="doc-anchor" href="#performance-2">§</a>Performance</h5>
+<ul>
+<li>Basic/Bright colors: O(1) - direct mapping</li>
+<li>Fixed colors: O(1) - lookup or calculation</li>
+<li>RGB colors: O(1) - identity function</li>
+</ul>
+<h5 id="see-also-3"><a class="doc-anchor" href="#see-also-3">§</a>See Also</h5>
+<ul>
+<li><a href="../enum.Color.html#method.to_basic" title="method termionix_ansicodec::Color::to_basic"><code>to_basic()</code></a> - Convert to 16-color palette</li>
+<li><a href="../enum.Color.html#method.to_fixed" title="method termionix_ansicodec::Color::to_fixed"><code>to_fixed()</code></a> - Convert to 256-color palette</li>
+<li><a href="../enum.ColorMode.html#variant.TrueColor" title="variant termionix_ansicodec::ColorMode::TrueColor"><code>ColorMode::TrueColor</code></a> - The color mode that uses RGB format</li>
+</ul>
+</div></details></div></details></div><h2 id="trait-implementations" class="section-header">Trait Implementations<a href="#trait-implementations" class="anchor">§</a></h2><div id="trait-implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Clone-for-Color" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1443">Source</a><a href="#impl-Clone-for-Color" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone" class="method trait-impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1443">Source</a><a href="#method.clone" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#tymethod.clone" class="fn">clone</a>(&amp;self) -&gt; <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h4></section></summary><div class='docblock'>Returns a duplicate of the value. <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#tymethod.clone">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_from" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/clone.rs.html#245-247">Source</a></span><a href="#method.clone_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#method.clone_from" class="fn">clone_from</a>(&amp;mut self, source: &amp;Self)</h4></section></summary><div class='docblock'>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#method.clone_from">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Debug-for-Color" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1443">Source</a><a href="#impl-Debug-for-Color" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt" class="method trait-impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1443">Source</a><a href="#method.fmt" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Debug.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="type" href="https://doc.rust-lang.org/1.93.0/core/fmt/type.Result.html" title="type core::fmt::Result">Result</a></h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Debug.html#tymethod.fmt">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Hash-for-Color" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1443">Source</a><a href="#impl-Hash-for-Color" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a> for <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.hash" class="method trait-impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1443">Source</a><a href="#method.hash" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hash.html#tymethod.hash" class="fn">hash</a>&lt;__H: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hasher.html" title="trait core::hash::Hasher">Hasher</a>&gt;(&amp;self, state: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;mut __H</a>)</h4></section></summary><div class='docblock'>Feeds this value into the given <a href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hasher.html" title="trait core::hash::Hasher"><code>Hasher</code></a>. <a href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hash.html#tymethod.hash">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.hash_slice" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.3.0">1.3.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/hash/mod.rs.html#235-237">Source</a></span><a href="#method.hash_slice" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hash.html#method.hash_slice" class="fn">hash_slice</a>&lt;H&gt;(data: &amp;[Self], state: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;mut H</a>)<div class="where">where
+    H: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hasher.html" title="trait core::hash::Hasher">Hasher</a>,
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h4></section></summary><div class='docblock'>Feeds a slice of this type into the given <a href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hasher.html" title="trait core::hash::Hasher"><code>Hasher</code></a>. <a href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hash.html#method.hash_slice">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Ord-for-Color" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1443">Source</a><a href="#impl-Ord-for-Color" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.Ord.html" title="trait core::cmp::Ord">Ord</a> for <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.cmp" class="method trait-impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1443">Source</a><a href="#method.cmp" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.Ord.html#tymethod.cmp" class="fn">cmp</a>(&amp;self, other: &amp;<a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/cmp/enum.Ordering.html" title="enum core::cmp::Ordering">Ordering</a></h4></section></summary><div class='docblock'>This method returns an <a href="https://doc.rust-lang.org/1.93.0/core/cmp/enum.Ordering.html" title="enum core::cmp::Ordering"><code>Ordering</code></a> between <code>self</code> and <code>other</code>. <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.Ord.html#tymethod.cmp">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.max" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.21.0">1.21.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/cmp.rs.html#1021-1023">Source</a></span><a href="#method.max" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.Ord.html#method.max" class="fn">max</a>(self, other: Self) -&gt; Self<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h4></section></summary><div class='docblock'>Compares and returns the maximum of two values. <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.Ord.html#method.max">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.min" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.21.0">1.21.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/cmp.rs.html#1060-1062">Source</a></span><a href="#method.min" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.Ord.html#method.min" class="fn">min</a>(self, other: Self) -&gt; Self<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h4></section></summary><div class='docblock'>Compares and returns the minimum of two values. <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.Ord.html#method.min">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clamp" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.50.0">1.50.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/cmp.rs.html#1086-1088">Source</a></span><a href="#method.clamp" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.Ord.html#method.clamp" class="fn">clamp</a>(self, min: Self, max: Self) -&gt; Self<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h4></section></summary><div class='docblock'>Restrict a value to a certain interval. <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.Ord.html#method.clamp">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-PartialEq-for-Color" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1443">Source</a><a href="#impl-PartialEq-for-Color" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialEq.html" title="trait core::cmp::PartialEq">PartialEq</a> for <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.eq" class="method trait-impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1443">Source</a><a href="#method.eq" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialEq.html#tymethod.eq" class="fn">eq</a>(&amp;self, other: &amp;<a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class='docblock'>Tests for <code>self</code> and <code>other</code> values to be equal, and is used by <code>==</code>.</div></details><details class="toggle method-toggle" open><summary><section id="method.ne" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/cmp.rs.html#264">Source</a></span><a href="#method.ne" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialEq.html#method.ne" class="fn">ne</a>(&amp;self, other: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;Rhs</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class='docblock'>Tests for <code>!=</code>. The default implementation is almost always sufficient,
+and should not be overridden without very good reason.</div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-PartialOrd-for-Color" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1443">Source</a><a href="#impl-PartialOrd-for-Color" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialOrd.html" title="trait core::cmp::PartialOrd">PartialOrd</a> for <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.partial_cmp" class="method trait-impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1443">Source</a><a href="#method.partial_cmp" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialOrd.html#tymethod.partial_cmp" class="fn">partial_cmp</a>(&amp;self, other: &amp;<a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="enum" href="https://doc.rust-lang.org/1.93.0/core/cmp/enum.Ordering.html" title="enum core::cmp::Ordering">Ordering</a>&gt;</h4></section></summary><div class='docblock'>This method returns an ordering between <code>self</code> and <code>other</code> values if one exists. <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialOrd.html#tymethod.partial_cmp">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.lt" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/cmp.rs.html#1398">Source</a></span><a href="#method.lt" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialOrd.html#method.lt" class="fn">lt</a>(&amp;self, other: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;Rhs</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class='docblock'>Tests less than (for <code>self</code> and <code>other</code>) and is used by the <code>&lt;</code> operator. <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialOrd.html#method.lt">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.le" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/cmp.rs.html#1416">Source</a></span><a href="#method.le" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialOrd.html#method.le" class="fn">le</a>(&amp;self, other: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;Rhs</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class='docblock'>Tests less than or equal to (for <code>self</code> and <code>other</code>) and is used by the
+<code>&lt;=</code> operator. <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialOrd.html#method.le">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.gt" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/cmp.rs.html#1434">Source</a></span><a href="#method.gt" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialOrd.html#method.gt" class="fn">gt</a>(&amp;self, other: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;Rhs</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class='docblock'>Tests greater than (for <code>self</code> and <code>other</code>) and is used by the <code>&gt;</code>
+operator. <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialOrd.html#method.gt">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.ge" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/cmp.rs.html#1452">Source</a></span><a href="#method.ge" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialOrd.html#method.ge" class="fn">ge</a>(&amp;self, other: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;Rhs</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class='docblock'>Tests greater than or equal to (for <code>self</code> and <code>other</code>) and is used by
+the <code>&gt;=</code> operator. <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialOrd.html#method.ge">Read more</a></div></details></div></details><section id="impl-Copy-for-Color" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1443">Source</a><a href="#impl-Copy-for-Color" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Copy.html" title="trait core::marker::Copy">Copy</a> for <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h3></section><section id="impl-Eq-for-Color" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1443">Source</a><a href="#impl-Eq-for-Color" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.Eq.html" title="trait core::cmp::Eq">Eq</a> for <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h3></section><section id="impl-StructuralPartialEq-for-Color" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#1443">Source</a><a href="#impl-StructuralPartialEq-for-Color" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.StructuralPartialEq.html" title="trait core::marker::StructuralPartialEq">StructuralPartialEq</a> for <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h3></section></div><h2 id="synthetic-implementations" class="section-header">Auto Trait Implementations<a href="#synthetic-implementations" class="anchor">§</a></h2><div id="synthetic-implementations-list"><section id="impl-Freeze-for-Color" class="impl"><a href="#impl-Freeze-for-Color" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Freeze.html" title="trait core::marker::Freeze">Freeze</a> for <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h3></section><section id="impl-RefUnwindSafe-for-Color" class="impl"><a href="#impl-RefUnwindSafe-for-Color" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/panic/unwind_safe/trait.RefUnwindSafe.html" title="trait core::panic::unwind_safe::RefUnwindSafe">RefUnwindSafe</a> for <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h3></section><section id="impl-Send-for-Color" class="impl"><a href="#impl-Send-for-Color" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> for <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h3></section><section id="impl-Sync-for-Color" class="impl"><a href="#impl-Sync-for-Color" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> for <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h3></section><section id="impl-Unpin-for-Color" class="impl"><a href="#impl-Unpin-for-Color" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Unpin.html" title="trait core::marker::Unpin">Unpin</a> for <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h3></section><section id="impl-UnwindSafe-for-Color" class="impl"><a href="#impl-UnwindSafe-for-Color" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/panic/unwind_safe/trait.UnwindSafe.html" title="trait core::panic::unwind_safe::UnwindSafe">UnwindSafe</a> for <a class="enum" href="../enum.Color.html" title="enum termionix_ansicodec::Color">Color</a></h3></section></div><h2 id="blanket-implementations" class="section-header">Blanket Implementations<a href="#blanket-implementations" class="anchor">§</a></h2><div id="blanket-implementations-list"><details class="toggle implementors-toggle"><summary><section id="impl-Any-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/any.rs.html#138">Source</a><a href="#impl-Any-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/any/trait.Any.html" title="trait core::any::Any">Any</a> for T<div class="where">where
+    T: 'static + ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.type_id" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/any.rs.html#139">Source</a><a href="#method.type_id" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/any/trait.Any.html#tymethod.type_id" class="fn">type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></h4></section></summary><div class='docblock'>Gets the <code>TypeId</code> of <code>self</code>. <a href="https://doc.rust-lang.org/1.93.0/core/any/trait.Any.html#tymethod.type_id">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Borrow%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#212">Source</a><a href="#impl-Borrow%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#214">Source</a><a href="#method.borrow" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html#tymethod.borrow" class="fn">borrow</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;T</a></h4></section></summary><div class='docblock'>Immutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html#tymethod.borrow">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-BorrowMut%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#221">Source</a><a href="#impl-BorrowMut%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.BorrowMut.html" title="trait core::borrow::BorrowMut">BorrowMut</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow_mut" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#222">Source</a><a href="#method.borrow_mut" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut" class="fn">borrow_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;mut T</a></h4></section></summary><div class='docblock'>Mutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-CloneToUninit-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/clone.rs.html#547">Source</a><a href="#impl-CloneToUninit-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.CloneToUninit.html" title="trait core::clone::CloneToUninit">CloneToUninit</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone_to_uninit" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/clone.rs.html#549">Source</a><a href="#method.clone_to_uninit" class="anchor">§</a><h4 class="code-header">unsafe fn <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit" class="fn">clone_to_uninit</a>(&amp;self, dest: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.pointer.html">*mut </a><a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u8.html">u8</a>)</h4></section></summary><span class="item-info"><div class="stab unstable"><span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>clone_to_uninit</code>)</span></div></span><div class='docblock'>Performs copy-assignment from <code>self</code> to <code>dest</code>. <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-From%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#785">Source</a><a href="#impl-From%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#788">Source</a><a href="#method.from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html#tymethod.from" class="fn">from</a>(t: T) -&gt; T</h4></section></summary><div class="docblock"><p>Returns the argument unchanged.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Instrument-for-T" class="impl"><a href="#impl-Instrument-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; Instrument for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.instrument" class="method trait-impl"><a href="#method.instrument" class="anchor">§</a><h4 class="code-header">fn <a class="fn">instrument</a>(self, span: Span) -&gt; Instrumented&lt;Self&gt;</h4></section></summary><div class='docblock'>Instruments this type with the provided [<code>Span</code>], returning an
+<code>Instrumented</code> wrapper. <a>Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.in_current_span" class="method trait-impl"><a href="#method.in_current_span" class="anchor">§</a><h4 class="code-header">fn <a class="fn">in_current_span</a>(self) -&gt; Instrumented&lt;Self&gt;</h4></section></summary><div class='docblock'>Instruments this type with the <a href="super::Span::current()">current</a> <a href="crate::Span"><code>Span</code></a>, returning an
+<code>Instrumented</code> wrapper. <a>Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Into%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#767-769">Source</a><a href="#impl-Into%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#777">Source</a><a href="#method.into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html#tymethod.into" class="fn">into</a>(self) -&gt; U</h4></section></summary><div class="docblock"><p>Calls <code>U::from(self)</code>.</p>
+<p>That is, this conversion is whatever the implementation of
+<code><a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for U</code> chooses to do.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-ToOwned-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#85-87">Source</a><a href="#impl-ToOwned-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html" title="trait alloc::borrow::ToOwned">ToOwned</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Owned" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#89">Source</a><a href="#associatedtype.Owned" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#associatedtype.Owned" class="associatedtype">Owned</a> = T</h4></section></summary><div class='docblock'>The resulting type after obtaining ownership.</div></details><details class="toggle method-toggle" open><summary><section id="method.to_owned" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#90">Source</a><a href="#method.to_owned" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned" class="fn">to_owned</a>(&amp;self) -&gt; T</h4></section></summary><div class='docblock'>Creates owned data from borrowed data, usually by cloning. <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#94">Source</a><a href="#method.clone_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#method.clone_into" class="fn">clone_into</a>(&amp;self, target: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;mut T</a>)</h4></section></summary><div class='docblock'>Uses borrowed data to replace owned data, usually by cloning. <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#method.clone_into">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryFrom%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#827-829">Source</a><a href="#impl-TryFrom%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error-1" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#831">Source</a><a href="#associatedtype.Error-1" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" class="associatedtype">Error</a> = <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/convert/enum.Infallible.html" title="enum core::convert::Infallible">Infallible</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#834">Source</a><a href="#method.try_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#tymethod.try_from" class="fn">try_from</a>(value: U) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;T, &lt;T as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryInto%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#811-813">Source</a><a href="#impl-TryInto%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryInto.html" title="trait core::convert::TryInto">TryInto</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#815">Source</a><a href="#associatedtype.Error" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryInto.html#associatedtype.Error" class="associatedtype">Error</a> = &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#818">Source</a><a href="#method.try_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryInto.html#tymethod.try_into" class="fn">try_into</a>(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;U, &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-WithSubscriber-for-T" class="impl"><a href="#impl-WithSubscriber-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; WithSubscriber for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.with_subscriber" class="method trait-impl"><a href="#method.with_subscriber" class="anchor">§</a><h4 class="code-header">fn <a class="fn">with_subscriber</a>&lt;S&gt;(self, subscriber: S) -&gt; WithDispatch&lt;Self&gt;<div class="where">where
+    S: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;Dispatch&gt;,</div></h4></section></summary><div class='docblock'>Attaches the provided <a href="super::Subscriber"><code>Subscriber</code></a> to this type, returning a
+[<code>WithDispatch</code>] wrapper. <a>Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.with_current_subscriber" class="method trait-impl"><a href="#method.with_current_subscriber" class="anchor">§</a><h4 class="code-header">fn <a class="fn">with_current_subscriber</a>(self) -&gt; WithDispatch&lt;Self&gt;</h4></section></summary><div class='docblock'>Attaches the current <a href="dispatcher#setting-the-default-subscriber">default</a> <a href="super::Subscriber"><code>Subscriber</code></a> to this type, returning a
+[<code>WithDispatch</code>] wrapper. <a>Read more</a></div></details></div></details></div></section></div></main></body></html>

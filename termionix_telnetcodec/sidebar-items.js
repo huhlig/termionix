@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["SubnegotiationErrorKind","TelnetArgument","TelnetCodecError","TelnetEvent","TelnetFrame","TelnetOption","TelnetSide"],"mod":["gmcp","linemode","msdp","mssp","naocrd","naohts","naws","status"],"struct":["TelnetCodec"],"type":["TelnetCodecResult"]};

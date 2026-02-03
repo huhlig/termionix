@@ -1,0 +1,137 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Termionix Telnet Protocol Codec"><title>termionix_telnetcodec - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-ca0dd0c4.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="termionix_telnetcodec" data-themes="" data-resource-suffix="" data-rustdoc-version="1.93.0 (254b59607 2026-01-19)" data-channel="1.93.0" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-a3946164.js" data-settings-js="settings-c38705f0.js" ><script src="../static.files/storage-e2aeef58.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-a410ff4d.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-263c88ec.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Crate termionix_telnetcodec</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../termionix_telnetcodec/index.html">termionix_<wbr>telnetcodec</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section id="rustdoc-toc"><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#termionix-telnet-protocol-codec" title="Termionix Telnet Protocol Codec">Termionix Telnet Protocol Codec</a><ul><li><a href="#overview" title="Overview">Overview</a></li></ul></li><li><a href="#telnet-protocol-codec" title="Telnet Protocol Codec">Telnet Protocol Codec</a><ul><li><a href="#overview-1" title="Overview">Overview</a></li><li><a href="#core-components" title="Core Components">Core Components</a></li><li><a href="#usage-example" title="Usage Example">Usage Example</a></li><li><a href="#protocol-details" title="Protocol Details">Protocol Details</a></li><li><a href="#error-handling" title="Error Handling">Error Handling</a></li><li><a href="#performance-considerations" title="Performance Considerations">Performance Considerations</a></li><li><a href="#thread-safety" title="Thread Safety">Thread Safety</a></li><li><a href="#testing" title="Testing">Testing</a></li><li><a href="#related-rfcs" title="Related RFCs">Related RFCs</a></li><li><a href="#mud-protocol-extensions" title="MUD Protocol Extensions">MUD Protocol Extensions</a></li></ul></li></ul><h3><a href="#modules">Crate Items</a></h3><ul class="block"><li><a href="#modules" title="Modules">Modules</a></li><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li><li><a href="#types" title="Type Aliases">Type Aliases</a></li></ul></section><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><h1>Crate <span>termionix_<wbr>telnetcodec</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/termionix_telnetcodec/lib.rs.html#17-371">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="termionix-telnet-protocol-codec"><a class="doc-anchor" href="#termionix-telnet-protocol-codec">§</a>Termionix Telnet Protocol Codec</h2>
+<p>This crate provides a complete implementation of the Telnet sidechannel codec for encoding and
+decoding Telnet sidechannel messages. It is designed to work with asynchronous networking libraries
+like Tokio and provides a stateful, byte-oriented interface for handling Telnet communication.</p>
+<h3 id="overview"><a class="doc-anchor" href="#overview">§</a>Overview</h3>
+<p>The Telnet sidechannel (RFC 854) is a server sidechannel used for interactive text-oriented
+communication over TCP. This codec handles:</p>
+<h2 id="telnet-protocol-codec"><a class="doc-anchor" href="#telnet-protocol-codec">§</a>Telnet Protocol Codec</h2>
+<p>This module provides a complete implementation of the Telnet sidechannel codec for encoding and
+decoding Telnet sidechannel messages. It is designed to work with asynchronous networking libraries
+like Tokio and provides a stateful, byte-oriented interface for handling Telnet communication.</p>
+<h3 id="overview-1"><a class="doc-anchor" href="#overview-1">§</a>Overview</h3>
+<p>The Telnet sidechannel (RFC 854) is a server sidechannel used for interactive text-oriented
+communication over TCP. This codec handles:</p>
+<ul>
+<li><strong>Data transmission</strong>: Raw byte data with proper IAC (Interpret As Command) escaping</li>
+<li><strong>Control commands</strong>: Break, Interrupt Process, Abort Output, etc.</li>
+<li><strong>Option negotiation</strong>: DO, DONT, WILL, WONT commands for enabling sidechannel features</li>
+<li><strong>Subnegotiation</strong>: Extended option negotiation with parameters</li>
+</ul>
+<h3 id="core-components"><a class="doc-anchor" href="#core-components">§</a>Core Components</h3><h4 id="telnetcodec"><a class="doc-anchor" href="#telnetcodec">§</a><a href="struct.TelnetCodec.html" title="struct termionix_telnetcodec::TelnetCodec"><code>TelnetCodec</code></a></h4>
+<p>The main codec structure that implements both [<code>Encoder</code>] and [<code>Decoder</code>] traits from
+<code>tokio_util::codec</code>. It maintains internal state for parsing Telnet sidechannel sequences
+and manages option negotiation state.</p>
+<h4 id="telnetframe"><a class="doc-anchor" href="#telnetframe">§</a><a href="enum.TelnetFrame.html" title="enum termionix_telnetcodec::TelnetFrame"><code>TelnetFrame</code></a></h4>
+<p>An enumeration representing all possible Telnet sidechannel frames:</p>
+<ul>
+<li>Data bytes</li>
+<li>Control commands (NoOperation, DataMark, Break, etc.)</li>
+<li>Negotiation commands (Do, Dont, Will, Wont)</li>
+<li>Subnegotiation sequences</li>
+</ul>
+<h4 id="telnetoption"><a class="doc-anchor" href="#telnetoption">§</a><a href="enum.TelnetOption.html" title="enum termionix_telnetcodec::TelnetOption"><code>TelnetOption</code></a></h4>
+<p>Represents Telnet sidechannel options that can be negotiated between client and server,
+including standard options like Echo, Binary Transmission, and various MUD-specific
+extensions (GMCP, MSDP, etc.).</p>
+<h4 id="telnetevent"><a class="doc-anchor" href="#telnetevent">§</a><a href="enum.TelnetEvent.html" title="enum termionix_telnetcodec::TelnetEvent"><code>TelnetEvent</code></a></h4>
+<p>Higher-level events generated from processing frames, providing a more semantic
+interface for application code.</p>
+<h3 id="usage-example"><a class="doc-anchor" href="#usage-example">§</a>Usage Example</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_telnetcodec::{TelnetCodec, TelnetEvent, TelnetOption};
+<span class="kw">use </span>tokio_util::codec::{Decoder, Encoder, Framed};
+<span class="kw">use </span>tokio::net::TcpStream;
+<span class="kw">use </span>bytes::BytesMut;
+
+<span class="comment">// Create a new codec
+</span><span class="kw">let </span><span class="kw-2">mut </span>codec = TelnetCodec::new();
+
+<span class="comment">// Encoding data
+</span><span class="kw">let </span><span class="kw-2">mut </span>buffer = BytesMut::new();
+codec.encode(TelnetEvent::Data(<span class="string">b'H'</span>), <span class="kw-2">&amp;mut </span>buffer)<span class="question-mark">?</span>;
+codec.encode(TelnetEvent::Data(<span class="string">b'i'</span>), <span class="kw-2">&amp;mut </span>buffer)<span class="question-mark">?</span>;
+
+<span class="comment">// Send a negotiation command
+</span>codec.encode(TelnetEvent::Will(TelnetOption::Echo), <span class="kw-2">&amp;mut </span>buffer)<span class="question-mark">?</span>;
+
+<span class="comment">// Decoding data
+</span><span class="kw">let </span><span class="kw-2">mut </span>input = BytesMut::from(<span class="kw-2">&amp;</span><span class="string">b"Hello\xFF\xFD\x01"</span>[..]); <span class="comment">// Data + DO Echo
+</span><span class="kw">while let </span><span class="prelude-val">Some</span>(event) = codec.decode(<span class="kw-2">&amp;mut </span>input)<span class="question-mark">? </span>{
+    <span class="kw">match </span>event {
+        TelnetEvent::Data(byte) =&gt; <span class="macro">println!</span>(<span class="string">"Received: {}"</span>, byte <span class="kw">as </span>char),
+        TelnetEvent::Do(option) =&gt; <span class="macro">println!</span>(<span class="string">"Server requests: DO {:?}"</span>, option),
+        <span class="kw">_ </span>=&gt; {}
+    }
+}</code></pre></div><h3 id="protocol-details"><a class="doc-anchor" href="#protocol-details">§</a>Protocol Details</h3><h4 id="command-structure"><a class="doc-anchor" href="#command-structure">§</a>Command Structure</h4>
+<p>All Telnet commands start with the IAC (Interpret As Command) byte (0xFF). The basic
+command structure is:</p>
+<ul>
+<li>2-byte commands: <code>IAC &lt;command&gt;</code> (e.g., <code>IAC NOP</code>)</li>
+<li>3-byte negotiation: <code>IAC &lt;DO|DONT|WILL|WONT&gt; &lt;option&gt;</code></li>
+<li>Subnegotiation: <code>IAC SB &lt;option&gt; &lt;data...&gt; IAC SE</code></li>
+</ul>
+<h4 id="iac-escaping"><a class="doc-anchor" href="#iac-escaping">§</a>IAC Escaping</h4>
+<p>Since 0xFF (IAC) is a special byte, it must be escaped when transmitted as data by
+sending it twice: <code>IAC IAC</code> represents a literal 0xFF byte in the data stream.</p>
+<h4 id="option-negotiation"><a class="doc-anchor" href="#option-negotiation">§</a>Option Negotiation</h4>
+<p>The codec automatically tracks option negotiation state through [<code>TelnetOptions</code>]:</p>
+<ul>
+<li><strong>DO</strong>: Request the other party enable an option</li>
+<li><strong>DONT</strong>: Request the other party disable an option</li>
+<li><strong>WILL</strong>: Offer to enable an option locally</li>
+<li><strong>WONT</strong>: Refuse or disable an option locally</li>
+</ul>
+<p>Check option status using:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_telnetcodec::{TelnetCodec, TelnetOption};
+
+<span class="kw">let </span>codec = TelnetCodec::new();
+<span class="kw">if </span>codec.is_enabled_local(TelnetOption::Echo) {
+    <span class="comment">// Echo is enabled on our side
+</span>}
+<span class="kw">if </span>codec.is_enabled_remote(TelnetOption::SuppressGoAhead) {
+    <span class="comment">// Remote side has SGA enabled
+</span>}</code></pre></div><h3 id="error-handling"><a class="doc-anchor" href="#error-handling">§</a>Error Handling</h3>
+<p>The codec uses <a href="enum.TelnetCodecError.html" title="enum termionix_telnetcodec::TelnetCodecError"><code>TelnetCodecError</code></a> for encoding and decoding errors. In practice, the current
+implementation is resilient and handles malformed input by returning <code>NoOperation</code> frames
+or skipping invalid sequences.</p>
+<h3 id="performance-considerations"><a class="doc-anchor" href="#performance-considerations">§</a>Performance Considerations</h3>
+<ul>
+<li>The codec maintains internal buffers for partial frame assembly</li>
+<li>Subnegotiation data is buffered until the complete sequence is received</li>
+<li>State machine transitions occur byte-by-byte for accurate sidechannel parsing</li>
+<li>The codec reserves appropriate buffer space before encoding to minimize allocations</li>
+</ul>
+<h3 id="thread-safety"><a class="doc-anchor" href="#thread-safety">§</a>Thread Safety</h3>
+<p><code>TelnetCodec</code> is <strong>not</strong> thread-safe and should not be shared between threads without
+appropriate synchronization. Typically, each connection has its own codec instance.</p>
+<h3 id="testing"><a class="doc-anchor" href="#testing">§</a>Testing</h3>
+<p>The module includes comprehensive tests covering:</p>
+<ul>
+<li>Encoding and decoding of all frame types</li>
+<li>Round-trip encode/decode verification</li>
+<li>Partial frame handling (streaming scenarios)</li>
+<li>IAC escaping and edge cases</li>
+<li>RFC 854 compliance scenarios</li>
+</ul>
+<h3 id="related-rfcs"><a class="doc-anchor" href="#related-rfcs">§</a>Related RFCs</h3>
+<ul>
+<li>RFC 854: Telnet Protocol Specification</li>
+<li>RFC 855: Telnet Option Specifications</li>
+<li>RFC 856: Telnet Binary Transmission</li>
+<li>RFC 857: Telnet Echo Option</li>
+<li>RFC 858: Telnet Suppress Go Ahead Option</li>
+</ul>
+<h3 id="mud-protocol-extensions"><a class="doc-anchor" href="#mud-protocol-extensions">§</a>MUD Protocol Extensions</h3>
+<p>This implementation includes support for several MUD (Multi-User Dungeon) specific
+sidechannel extensions commonly used in text-based games:</p>
+<ul>
+<li><strong>GMCP</strong> (Generic MUD Communication Protocol): Structured data exchange</li>
+<li><strong>MSDP</strong> (MUD Server Data Protocol): Server state reporting</li>
+<li><strong>MSSP</strong> (MUD Server Status Protocol): Server metadata</li>
+<li><strong>MCCP</strong> (MUD Client Compression Protocol): Stream compression</li>
+<li>And others (see <a href="enum.TelnetOption.html" title="enum termionix_telnetcodec::TelnetOption"><code>TelnetOption</code></a> for full list)</li>
+</ul>
+</div></details><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><dl class="item-table"><dt><a class="mod" href="gmcp/index.html" title="mod termionix_telnetcodec::gmcp">gmcp</a></dt><dd>GMCP (Generic Mud Communication Protocol) argument parsing and handling</dd><dt><a class="mod" href="linemode/index.html" title="mod termionix_telnetcodec::linemode">linemode</a></dt><dd>Line Mode Options</dd><dt><a class="mod" href="msdp/index.html" title="mod termionix_telnetcodec::msdp">msdp</a></dt><dd>MudServerData Option</dd><dt><a class="mod" href="mssp/index.html" title="mod termionix_telnetcodec::mssp">mssp</a></dt><dd>MudServerStatus Option</dd><dt><a class="mod" href="naocrd/index.html" title="mod termionix_telnetcodec::naocrd">naocrd</a></dt><dd>Negotiate About Output Carriage-Return Disposition Data Sender (NAOCRD)</dd><dt><a class="mod" href="naohts/index.html" title="mod termionix_telnetcodec::naohts">naohts</a></dt><dd>NAOHTS Option</dd><dt><a class="mod" href="naws/index.html" title="mod termionix_telnetcodec::naws">naws</a></dt><dd>Negotiate About Window Size</dd><dt><a class="mod" href="status/index.html" title="mod termionix_telnetcodec::status">status</a></dt><dd>Telnet Option Status</dd></dl><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.TelnetCodec.html" title="struct termionix_telnetcodec::TelnetCodec">Telnet<wbr>Codec</a></dt><dd>A codec for handling the Telnet sidechannel, providing functionality to encode and decode Telnet messages.</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.SubnegotiationErrorKind.html" title="enum termionix_telnetcodec::SubnegotiationErrorKind">Subnegotiation<wbr>Error<wbr>Kind</a></dt><dd>Specific kinds of subnegotiation errors with structured context.</dd><dt><a class="enum" href="enum.TelnetArgument.html" title="enum termionix_telnetcodec::TelnetArgument">Telnet<wbr>Argument</a></dt><dd>Telnet Subnegotiation Argument</dd><dt><a class="enum" href="enum.TelnetCodecError.html" title="enum termionix_telnetcodec::TelnetCodecError">Telnet<wbr>Codec<wbr>Error</a></dt><dd>Represents possible errors that can occur in the codec handling process.</dd><dt><a class="enum" href="enum.TelnetEvent.html" title="enum termionix_telnetcodec::TelnetEvent">Telnet<wbr>Event</a></dt><dd><code>TelnetEvent</code> represents user-facing events from the Telnet codec.
+Unlike <code>TelnetFrame</code> which includes low-level sidechannel frames (DO/DONT/WILL/WONT),
+<code>TelnetEvent</code> emits high-level events like <code>OptionStatus</code> when negotiation completes.</dd><dt><a class="enum" href="enum.TelnetFrame.html" title="enum termionix_telnetcodec::TelnetFrame">Telnet<wbr>Frame</a></dt><dd><code>TelnetFrame</code> is a single atomic Frame of data.</dd><dt><a class="enum" href="enum.TelnetOption.html" title="enum termionix_telnetcodec::TelnetOption">Telnet<wbr>Option</a></dt><dd><a href="https://www.iana.org/assignments/telnet-options/telnet-options.xhtml">Telnet Terminal Options</a></dd><dt><a class="enum" href="enum.TelnetSide.html" title="enum termionix_telnetcodec::TelnetSide">Telnet<wbr>Side</a></dt><dd>Represents the perspective of a Telnet option in a client-server negotiation.</dd></dl><h2 id="types" class="section-header">Type Aliases<a href="#types" class="anchor">§</a></h2><dl class="item-table"><dt><a class="type" href="type.TelnetCodecResult.html" title="type termionix_telnetcodec::TelnetCodecResult">Telnet<wbr>Codec<wbr>Result</a></dt><dd>Result Type for Codec Operations</dd></dl></section></div></main></body></html>

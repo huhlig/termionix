@@ -1,0 +1,359 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Text decoration modes for ideographic (CJK) characters."><title>Ideogram in termionix_ansicodec::ansi - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-ca0dd0c4.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="termionix_ansicodec" data-themes="" data-resource-suffix="" data-rustdoc-version="1.93.0 (254b59607 2026-01-19)" data-channel="1.93.0" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-a3946164.js" data-settings-js="settings-c38705f0.js" ><script src="../../static.files/storage-e2aeef58.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-a410ff4d.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-263c88ec.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc enum"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Ideogram</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../termionix_ansicodec/index.html">termionix_<wbr>ansicodec</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Ideogram</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#ansi-sgr-codes" title="ANSI SGR Codes">ANSI SGR Codes</a></li><li><a href="#terminal-support" title="Terminal Support">Terminal Support</a></li><li><a href="#ideographic-writing-systems" title="Ideographic Writing Systems">Ideographic Writing Systems</a></li><li><a href="#use-cases" title="Use Cases">Use Cases</a></li><li><a href="#modern-alternatives" title="Modern Alternatives">Modern Alternatives</a></li><li><a href="#examples" title="Examples">Examples</a></li><li><a href="#default" title="Default">Default</a></li><li><a href="#conversion" title="Conversion">Conversion</a></li><li><a href="#notes" title="Notes">Notes</a></li><li><a href="#historical-context" title="Historical Context">Historical Context</a></li><li><a href="#recommendations" title="Recommendations">Recommendations</a></li><li><a href="#see-also" title="See Also">See Also</a></li></ul><h3><a href="#variants">Variants</a></h3><ul class="block variant"><li><a href="#variant.DoubleOverline" title="DoubleOverline">DoubleOverline</a></li><li><a href="#variant.DoubleUnderline" title="DoubleUnderline">DoubleUnderline</a></li><li><a href="#variant.NoIdeogramAttributes" title="NoIdeogramAttributes">NoIdeogramAttributes</a></li><li><a href="#variant.Overline" title="Overline">Overline</a></li><li><a href="#variant.StressMarking" title="StressMarking">StressMarking</a></li><li><a href="#variant.Underline" title="Underline">Underline</a></li></ul><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.from_u8" title="from_u8">from_u8</a></li><li><a href="#method.to_u8" title="to_u8">to_u8</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block trait-implementation"><li><a href="#impl-Clone-for-Ideogram" title="Clone">Clone</a></li><li><a href="#impl-Copy-for-Ideogram" title="Copy">Copy</a></li><li><a href="#impl-Debug-for-Ideogram" title="Debug">Debug</a></li><li><a href="#impl-Default-for-Ideogram" title="Default">Default</a></li><li><a href="#impl-Eq-for-Ideogram" title="Eq">Eq</a></li><li><a href="#impl-Hash-for-Ideogram" title="Hash">Hash</a></li><li><a href="#impl-PartialEq-for-Ideogram" title="PartialEq">PartialEq</a></li><li><a href="#impl-StructuralPartialEq-for-Ideogram" title="StructuralPartialEq">StructuralPartialEq</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-Freeze-for-Ideogram" title="Freeze">Freeze</a></li><li><a href="#impl-RefUnwindSafe-for-Ideogram" title="RefUnwindSafe">RefUnwindSafe</a></li><li><a href="#impl-Send-for-Ideogram" title="Send">Send</a></li><li><a href="#impl-Sync-for-Ideogram" title="Sync">Sync</a></li><li><a href="#impl-Unpin-for-Ideogram" title="Unpin">Unpin</a></li><li><a href="#impl-UnwindSafe-for-Ideogram" title="UnwindSafe">UnwindSafe</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-Any-for-T" title="Any">Any</a></li><li><a href="#impl-Borrow%3CT%3E-for-T" title="Borrow&#60;T&#62;">Borrow&#60;T&#62;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-T" title="BorrowMut&#60;T&#62;">BorrowMut&#60;T&#62;</a></li><li><a href="#impl-CloneToUninit-for-T" title="CloneToUninit">CloneToUninit</a></li><li><a href="#impl-From%3CT%3E-for-T" title="From&#60;T&#62;">From&#60;T&#62;</a></li><li><a href="#impl-Instrument-for-T" title="Instrument">Instrument</a></li><li><a href="#impl-Into%3CU%3E-for-T" title="Into&#60;U&#62;">Into&#60;U&#62;</a></li><li><a href="#impl-ToOwned-for-T" title="ToOwned">ToOwned</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T" title="TryFrom&#60;U&#62;">TryFrom&#60;U&#62;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T" title="TryInto&#60;U&#62;">TryInto&#60;U&#62;</a></li><li><a href="#impl-WithSubscriber-for-T" title="WithSubscriber">WithSubscriber</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="index.html">In termionix_<wbr>ansicodec::<wbr>ansi</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">termionix_ansicodec</a>::<wbr><a href="index.html">ansi</a></div><h1>Enum <span class="enum">Ideogram</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/termionix_ansicodec/style.rs.html#3715-3813">Source</a> </span></div><pre class="rust item-decl"><code>pub enum Ideogram {
+    Underline,
+    DoubleUnderline,
+    Overline,
+    DoubleOverline,
+    StressMarking,
+    NoIdeogramAttributes,
+}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Text decoration modes for ideographic (CJK) characters.</p>
+<p>The <code>Ideogram</code> enum provides special text decoration options specifically designed
+for ideographic writing systems such as Chinese, Japanese, and Korean (CJK) characters.
+These decorations include underlines, overlines, and stress marking that can be
+positioned differently than standard Latin text decorations.</p>
+<h2 id="ansi-sgr-codes"><a class="doc-anchor" href="#ansi-sgr-codes">§</a>ANSI SGR Codes</h2>
+<p>Each variant corresponds to a specific SGR (Select Graphic Rendition) code:</p>
+<div><table><thead><tr><th>Variant</th><th>SGR Code</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>Underline</code></td><td>60</td><td>Underline or right side line</td></tr>
+<tr><td><code>DoubleUnderline</code></td><td>61</td><td>Double underline or double right side line</td></tr>
+<tr><td><code>Overline</code></td><td>62</td><td>Overline or left side line</td></tr>
+<tr><td><code>DoubleOverline</code></td><td>63</td><td>Double overline or double left side line</td></tr>
+<tr><td><code>StressMarking</code></td><td>64</td><td>Stress marking emphasis</td></tr>
+<tr><td><code>NoIdeogramAttributes</code></td><td>65</td><td>Reset ideogram decorations to none</td></tr>
+</tbody></table>
+</div><h2 id="terminal-support"><a class="doc-anchor" href="#terminal-support">§</a>Terminal Support</h2>
+<p><strong>Warning</strong>: Ideogram decoration codes have extremely limited support across terminal emulators:</p>
+<ul>
+<li>Most modern terminals (iTerm2, GNOME Terminal, Windows Terminal, Alacritty, kitty)
+<strong>do not support</strong> ideogram-specific decorations</li>
+<li>These codes were designed for specialized CJK terminal environments</li>
+<li>When unsupported, terminals typically ignore these codes without error</li>
+<li>Even terminals with CJK support often don’t implement these decorations</li>
+</ul>
+<h2 id="ideographic-writing-systems"><a class="doc-anchor" href="#ideographic-writing-systems">§</a>Ideographic Writing Systems</h2>
+<p>These decorations are specifically designed for:</p>
+<ul>
+<li><strong>Chinese</strong> (Hanzi characters)</li>
+<li><strong>Japanese</strong> (Kanji and Kana)</li>
+<li><strong>Korean</strong> (Hangul and Hanja)</li>
+<li>Other East Asian character systems</li>
+</ul>
+<p>In vertical text layouts, “underline” may appear as a right side line, and “overline”
+as a left side line, which is why the variants have alternative descriptions.</p>
+<h2 id="use-cases"><a class="doc-anchor" href="#use-cases">§</a>Use Cases</h2>
+<p>Ideogram decorations are primarily used for:</p>
+<ul>
+<li>Emphasis in CJK text (similar to bold or italic in Latin text)</li>
+<li>Ruby text annotations (furigana in Japanese)</li>
+<li>Phonetic guides (pinyin in Chinese, romaji in Japanese)</li>
+<li>Semantic emphasis or stress marking</li>
+<li>Traditional text formatting in Asian typography</li>
+<li>Legacy terminal applications supporting CJK</li>
+</ul>
+<h2 id="modern-alternatives"><a class="doc-anchor" href="#modern-alternatives">§</a>Modern Alternatives</h2>
+<p>For modern CJK text emphasis, consider:</p>
+<ul>
+<li>Standard <a href="../enum.Underline.html" title="enum termionix_ansicodec::Underline"><code>Underline</code></a> styles (more widely supported)</li>
+<li><a href="../enum.Intensity.html#variant.Bold" title="variant termionix_ansicodec::Intensity::Bold"><code>Intensity::Bold</code></a> for emphasis</li>
+<li>Unicode combining characters for diacritics</li>
+<li>HTML ruby annotations for web display</li>
+<li>Terminal-specific rich text formats</li>
+</ul>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>Basic usage:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{Style, Ideogram, ColorMode, AnsiConfig};
+
+<span class="kw">let </span>config = AnsiConfig::enabled();
+<span class="kw">let </span>ideogram_style = Style {
+    ideogram: <span class="prelude-val">Some</span>(Ideogram::Underline),
+    ..Default::default()
+};
+
+<span class="kw">let </span><span class="kw-2">mut </span>output = String::new();
+ideogram_style.write_style(<span class="kw-2">&amp;mut </span>output, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>config)).unwrap();
+<span class="comment">// Generates: "\x1b[60m" (rarely supported)</span></code></pre></div>
+<p>Double overline for emphasis:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{Ideogram, Style, ColorMode, AnsiConfig};
+
+<span class="kw">let </span>config = AnsiConfig::enabled();
+<span class="kw">let </span>emphasis_style = Style {
+    ideogram: <span class="prelude-val">Some</span>(Ideogram::DoubleOverline),
+    ..Default::default()
+};
+
+<span class="kw">let </span><span class="kw-2">mut </span>output = String::new();
+emphasis_style.write_style(<span class="kw-2">&amp;mut </span>output, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>config)).unwrap();
+<span class="comment">// Generates: "\x1b[63m"</span></code></pre></div>
+<p>Stress marking:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{Ideogram, Style, ColorMode, AnsiConfig};
+
+<span class="kw">let </span>config = AnsiConfig::enabled();
+<span class="kw">let </span>stress_style = Style {
+    ideogram: <span class="prelude-val">Some</span>(Ideogram::StressMarking),
+    ..Default::default()
+};
+
+<span class="kw">let </span><span class="kw-2">mut </span>output = String::new();
+stress_style.write_style(<span class="kw-2">&amp;mut </span>output, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>config)).unwrap();
+<span class="comment">// Generates: "\x1b[64m"</span></code></pre></div>
+<p>Resetting ideogram attributes:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{Ideogram, Style, ColorMode, AnsiConfig};
+
+<span class="kw">let </span>config = AnsiConfig::enabled();
+<span class="kw">let </span>reset_style = Style {
+    ideogram: <span class="prelude-val">Some</span>(Ideogram::NoIdeogramAttributes),
+    ..Default::default()
+};
+
+<span class="kw">let </span><span class="kw-2">mut </span>output = String::new();
+reset_style.write_style(<span class="kw-2">&amp;mut </span>output, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>config)).unwrap();
+<span class="comment">// Generates: "\x1b[65m"</span></code></pre></div><h2 id="default"><a class="doc-anchor" href="#default">§</a>Default</h2>
+<p>There is no default value for <code>Ideogram</code>. The <code>Style</code> struct uses
+<code>Option&lt;Ideogram&gt;</code> where <code>None</code> means no ideogram decoration is applied.</p>
+<h2 id="conversion"><a class="doc-anchor" href="#conversion">§</a>Conversion</h2>
+<p>The <code>Ideogram</code> enum can be converted to and from SGR codes:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Ideogram;
+
+<span class="comment">// To SGR codes
+</span><span class="macro">assert_eq!</span>(Ideogram::Underline.to_u8(), <span class="number">60</span>);
+<span class="macro">assert_eq!</span>(Ideogram::DoubleUnderline.to_u8(), <span class="number">61</span>);
+<span class="macro">assert_eq!</span>(Ideogram::Overline.to_u8(), <span class="number">62</span>);
+<span class="macro">assert_eq!</span>(Ideogram::DoubleOverline.to_u8(), <span class="number">63</span>);
+<span class="macro">assert_eq!</span>(Ideogram::StressMarking.to_u8(), <span class="number">64</span>);
+<span class="macro">assert_eq!</span>(Ideogram::NoIdeogramAttributes.to_u8(), <span class="number">65</span>);
+
+<span class="comment">// From SGR codes
+</span><span class="macro">assert_eq!</span>(Ideogram::from_u8(<span class="number">60</span>), <span class="prelude-val">Some</span>(Ideogram::Underline));
+<span class="macro">assert_eq!</span>(Ideogram::from_u8(<span class="number">64</span>), <span class="prelude-val">Some</span>(Ideogram::StressMarking));
+<span class="macro">assert_eq!</span>(Ideogram::from_u8(<span class="number">99</span>), <span class="prelude-val">None</span>); <span class="comment">// Invalid code</span></code></pre></div><h2 id="notes"><a class="doc-anchor" href="#notes">§</a>Notes</h2>
+<ul>
+<li>Ideogram decorations do not persist across style resets (<code>\x1b[0m</code>)</li>
+<li>Multiple ideogram selections override each other; only the last one takes effect</li>
+<li>The exact visual appearance depends on terminal implementation and font support</li>
+<li>In vertical text, “underline” and “overline” become side lines</li>
+<li>Setting <code>ideogram: None</code> in a <a href="struct.AnsiSelectGraphicRendition.html" title="struct termionix_ansicodec::ansi::AnsiSelectGraphicRendition"><code>AnsiSelectGraphicRendition</code></a> means no ideogram code is generated</li>
+</ul>
+<h2 id="historical-context"><a class="doc-anchor" href="#historical-context">§</a>Historical Context</h2>
+<p>Ideogram decoration codes were included in the ECMA-48 standard to support
+advanced text formatting in CJK computing environments, particularly for
+Japanese terminals in the 1980s and 1990s. However, they never gained
+widespread adoption outside of specialized systems.</p>
+<h2 id="recommendations"><a class="doc-anchor" href="#recommendations">§</a>Recommendations</h2>
+<p>For production code:</p>
+<ol>
+<li><strong>Avoid relying on ideogram codes</strong> unless targeting specific legacy systems</li>
+<li><strong>Test thoroughly</strong> with target CJK terminals before deployment</li>
+<li><strong>Provide fallbacks</strong> using standard underline or bold styling</li>
+<li><strong>Document limitations</strong> clearly for users</li>
+<li><strong>Consider Unicode alternatives</strong> for better cross-platform support</li>
+</ol>
+<h2 id="see-also"><a class="doc-anchor" href="#see-also">§</a>See Also</h2>
+<ul>
+<li><a href="struct.AnsiSelectGraphicRendition.html" title="struct termionix_ansicodec::ansi::AnsiSelectGraphicRendition"><code>AnsiSelectGraphicRendition</code></a> - Container for text styling including ideogram decorations</li>
+<li><a href="../enum.Underline.html" title="enum termionix_ansicodec::Underline"><code>Underline</code></a> - Standard underline styles (more widely supported)</li>
+<li><a href="../enum.Font.html" title="enum termionix_ansicodec::Font"><code>Font</code></a> - Font selection (similarly has limited support)</li>
+<li><a href="https://www.ecma-international.org/publications-and-standards/standards/ecma-48/">ECMA-48 Standard</a></li>
+</ul>
+</div></details><h2 id="variants" class="variants section-header">Variants<a href="#variants" class="anchor">§</a></h2><div class="variants"><section id="variant.Underline" class="variant"><a href="#variant.Underline" class="anchor">§</a><h3 class="code-header">Underline</h3></section><div class="docblock"><p>Ideogram underline or right side line - SGR code 60.</p>
+<p>In horizontal text layouts, this applies an underline beneath ideographic
+characters. In vertical text layouts, this may appear as a line on the
+right side of the characters.</p>
+<p>This decoration is rarely supported in modern terminal emulators.</p>
+<h4 id="example"><a class="doc-anchor" href="#example">§</a>Example</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Ideogram;
+<span class="macro">assert_eq!</span>(Ideogram::Underline.to_u8(), <span class="number">60</span>);</code></pre></div></div><section id="variant.DoubleUnderline" class="variant"><a href="#variant.DoubleUnderline" class="anchor">§</a><h3 class="code-header">DoubleUnderline</h3></section><div class="docblock"><p>Ideogram double underline or double right side line - SGR code 61.</p>
+<p>Similar to <a href="../enum.Ideogram.html#variant.Underline" title="variant termionix_ansicodec::Ideogram::Underline"><code>Underline</code></a>, but with two parallel lines
+instead of one. Provides stronger emphasis than a single underline.</p>
+<p>In horizontal layouts: double line beneath characters
+In vertical layouts: double line on the right side of characters</p>
+<h4 id="example-1"><a class="doc-anchor" href="#example-1">§</a>Example</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Ideogram;
+<span class="macro">assert_eq!</span>(Ideogram::DoubleUnderline.to_u8(), <span class="number">61</span>);</code></pre></div></div><section id="variant.Overline" class="variant"><a href="#variant.Overline" class="anchor">§</a><h3 class="code-header">Overline</h3></section><div class="docblock"><p>Ideogram overline or left side line - SGR code 62.</p>
+<p>In horizontal text layouts, this applies a line above ideographic characters.
+In vertical text layouts, this may appear as a line on the left side of
+the characters.</p>
+<p>Commonly used for emphasis or to indicate readings/annotations in CJK text.</p>
+<h4 id="example-2"><a class="doc-anchor" href="#example-2">§</a>Example</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Ideogram;
+<span class="macro">assert_eq!</span>(Ideogram::Overline.to_u8(), <span class="number">62</span>);</code></pre></div></div><section id="variant.DoubleOverline" class="variant"><a href="#variant.DoubleOverline" class="anchor">§</a><h3 class="code-header">DoubleOverline</h3></section><div class="docblock"><p>Ideogram double overline or double left side line - SGR code 63.</p>
+<p>Similar to <a href="../enum.Ideogram.html#variant.Overline" title="variant termionix_ansicodec::Ideogram::Overline"><code>Overline</code></a>, but with two parallel lines
+instead of one. Provides stronger emphasis than a single overline.</p>
+<p>In horizontal layouts: double line above characters
+In vertical layouts: double line on the left side of characters</p>
+<h4 id="example-3"><a class="doc-anchor" href="#example-3">§</a>Example</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Ideogram;
+<span class="macro">assert_eq!</span>(Ideogram::DoubleOverline.to_u8(), <span class="number">63</span>);</code></pre></div></div><section id="variant.StressMarking" class="variant"><a href="#variant.StressMarking" class="anchor">§</a><h3 class="code-header">StressMarking</h3></section><div class="docblock"><p>Ideogram stress marking - SGR code 64.</p>
+<p>Applies stress or emphasis marking to ideographic characters. The exact
+visual representation depends on the terminal implementation and may
+include dots, marks, or other indicators positioned around the characters
+to show emphasis.</p>
+<p>In Japanese typography, this might correspond to 傍点 (bōten) or emphasis dots.</p>
+<h4 id="example-4"><a class="doc-anchor" href="#example-4">§</a>Example</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Ideogram;
+<span class="macro">assert_eq!</span>(Ideogram::StressMarking.to_u8(), <span class="number">64</span>);</code></pre></div></div><section id="variant.NoIdeogramAttributes" class="variant"><a href="#variant.NoIdeogramAttributes" class="anchor">§</a><h3 class="code-header">NoIdeogramAttributes</h3></section><div class="docblock"><p>No ideogram attributes (reset) - SGR code 65.</p>
+<p>Resets all ideogram-specific decorations to none, returning to normal
+character display. This doesn’t affect other text attributes like color
+or standard underlines.</p>
+<p>Use this to explicitly clear any previously set ideogram decorations.</p>
+<h4 id="example-5"><a class="doc-anchor" href="#example-5">§</a>Example</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Ideogram;
+<span class="macro">assert_eq!</span>(Ideogram::NoIdeogramAttributes.to_u8(), <span class="number">65</span>);</code></pre></div></div></div><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Ideogram" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#3815-4016">Source</a><a href="#impl-Ideogram" class="anchor">§</a><h3 class="code-header">impl <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.to_u8" class="method"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#3877-3886">Source</a><h4 class="code-header">pub fn <a href="#method.to_u8" class="fn">to_u8</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u8.html">u8</a></h4></section></summary><div class="docblock"><p>Converts the ideogram variant to its corresponding ANSI SGR code.</p>
+<p>This method returns the numeric SGR parameter code used in ANSI escape
+sequences to select this ideogram decoration mode. The codes range from
+60 (underline) to 65 (no attributes).</p>
+<h5 id="returns"><a class="doc-anchor" href="#returns">§</a>Returns</h5>
+<p>The ANSI SGR code as a <code>u8</code>:</p>
+<ul>
+<li><code>Underline</code> → <code>60</code> - Underline or right side line</li>
+<li><code>DoubleUnderline</code> → <code>61</code> - Double underline or double right side line</li>
+<li><code>Overline</code> → <code>62</code> - Overline or left side line</li>
+<li><code>DoubleOverline</code> → <code>63</code> - Double overline or double left side line</li>
+<li><code>StressMarking</code> → <code>64</code> - Stress marking</li>
+<li><code>NoIdeogramAttributes</code> → <code>65</code> - Reset ideogram attributes</li>
+</ul>
+<h5 id="examples-1"><a class="doc-anchor" href="#examples-1">§</a>Examples</h5>
+<p>Basic conversion:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Ideogram;
+
+<span class="macro">assert_eq!</span>(Ideogram::Underline.to_u8(), <span class="number">60</span>);
+<span class="macro">assert_eq!</span>(Ideogram::DoubleUnderline.to_u8(), <span class="number">61</span>);
+<span class="macro">assert_eq!</span>(Ideogram::Overline.to_u8(), <span class="number">62</span>);
+<span class="macro">assert_eq!</span>(Ideogram::DoubleOverline.to_u8(), <span class="number">63</span>);
+<span class="macro">assert_eq!</span>(Ideogram::StressMarking.to_u8(), <span class="number">64</span>);
+<span class="macro">assert_eq!</span>(Ideogram::NoIdeogramAttributes.to_u8(), <span class="number">65</span>);</code></pre></div>
+<p>Building ANSI sequences:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Ideogram;
+
+<span class="kw">let </span>ideogram = Ideogram::StressMarking;
+<span class="kw">let </span>code = ideogram.to_u8();
+<span class="kw">let </span>ansi_sequence = <span class="macro">format!</span>(<span class="string">"\x1b[{}m"</span>, code);
+<span class="macro">assert_eq!</span>(ansi_sequence, <span class="string">"\x1b[64m"</span>);</code></pre></div><h5 id="use-in-ansi-sequences"><a class="doc-anchor" href="#use-in-ansi-sequences">§</a>Use in ANSI Sequences</h5>
+<p>The returned code is used directly in ANSI escape sequences:</p>
+<div class="example-wrap"><pre class="language-text"><code>\x1b[&lt;code&gt;m</code></pre></div>
+<p>For example, <code>Ideogram::Underline.to_u8()</code> returns <code>60</code>, which generates
+the sequence <code>\x1b[60m</code>.</p>
+<h5 id="performance"><a class="doc-anchor" href="#performance">§</a>Performance</h5>
+<p>This is a simple constant-time operation that performs a single pattern match.</p>
+<h5 id="see-also-1"><a class="doc-anchor" href="#see-also-1">§</a>See Also</h5>
+<ul>
+<li><a href="../enum.Ideogram.html#method.from_u8" title="associated function termionix_ansicodec::Ideogram::from_u8"><code>from_u8</code></a> - Converts SGR code to <code>Ideogram</code> variant</li>
+<li><a href="struct.AnsiSelectGraphicRendition.html#method.write" title="method termionix_ansicodec::ansi::AnsiSelectGraphicRendition::write"><code>AnsiSelectGraphicRendition::write</code></a> - Uses this method when rendering ideogram codes</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.from_u8" class="method"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#4005-4015">Source</a><h4 class="code-header">pub fn <a href="#method.from_u8" class="fn">from_u8</a>(value: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u8.html">u8</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;Self&gt;</h4></section></summary><div class="docblock"><p>Converts an ANSI SGR code to its corresponding <code>Ideogram</code> variant.</p>
+<p>This method attempts to parse a numeric ANSI SGR code into an <code>Ideogram</code> value.
+It recognizes the standard ideogram decoration codes from 60 through 65.</p>
+<h5 id="arguments"><a class="doc-anchor" href="#arguments">§</a>Arguments</h5>
+<ul>
+<li><code>value</code> - The ANSI SGR code to convert</li>
+</ul>
+<h5 id="returns-1"><a class="doc-anchor" href="#returns-1">§</a>Returns</h5>
+<ul>
+<li><code>Some(Ideogram::Underline)</code> if <code>value</code> is <code>60</code></li>
+<li><code>Some(Ideogram::DoubleUnderline)</code> if <code>value</code> is <code>61</code></li>
+<li><code>Some(Ideogram::Overline)</code> if <code>value</code> is <code>62</code></li>
+<li><code>Some(Ideogram::DoubleOverline)</code> if <code>value</code> is <code>63</code></li>
+<li><code>Some(Ideogram::StressMarking)</code> if <code>value</code> is <code>64</code></li>
+<li><code>Some(Ideogram::NoIdeogramAttributes)</code> if <code>value</code> is <code>65</code></li>
+<li><code>None</code> for any other value</li>
+</ul>
+<h5 id="examples-2"><a class="doc-anchor" href="#examples-2">§</a>Examples</h5>
+<p>Basic usage:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Ideogram;
+
+<span class="macro">assert_eq!</span>(Ideogram::from_u8(<span class="number">60</span>), <span class="prelude-val">Some</span>(Ideogram::Underline));
+<span class="macro">assert_eq!</span>(Ideogram::from_u8(<span class="number">61</span>), <span class="prelude-val">Some</span>(Ideogram::DoubleUnderline));
+<span class="macro">assert_eq!</span>(Ideogram::from_u8(<span class="number">62</span>), <span class="prelude-val">Some</span>(Ideogram::Overline));
+<span class="macro">assert_eq!</span>(Ideogram::from_u8(<span class="number">63</span>), <span class="prelude-val">Some</span>(Ideogram::DoubleOverline));
+<span class="macro">assert_eq!</span>(Ideogram::from_u8(<span class="number">64</span>), <span class="prelude-val">Some</span>(Ideogram::StressMarking));
+<span class="macro">assert_eq!</span>(Ideogram::from_u8(<span class="number">65</span>), <span class="prelude-val">Some</span>(Ideogram::NoIdeogramAttributes));</code></pre></div>
+<p>Handling invalid codes:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Ideogram;
+
+<span class="macro">assert_eq!</span>(Ideogram::from_u8(<span class="number">0</span>), <span class="prelude-val">None</span>);
+<span class="macro">assert_eq!</span>(Ideogram::from_u8(<span class="number">59</span>), <span class="prelude-val">None</span>);
+<span class="macro">assert_eq!</span>(Ideogram::from_u8(<span class="number">66</span>), <span class="prelude-val">None</span>);
+<span class="macro">assert_eq!</span>(Ideogram::from_u8(<span class="number">99</span>), <span class="prelude-val">None</span>);</code></pre></div>
+<p>Parsing ANSI sequences:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Ideogram;
+
+<span class="comment">// Parse a code from an ANSI sequence parameter
+</span><span class="kw">let </span>sgr_params: Vec&lt;u8&gt; = <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">64</span>, <span class="number">31</span>]; <span class="comment">// Bold, StressMarking, Red
+
+</span><span class="kw">for </span>param <span class="kw">in </span>sgr_params {
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(ideogram) = Ideogram::from_u8(param) {
+        <span class="macro">println!</span>(<span class="string">"Found ideogram decoration: {:?}"</span>, ideogram);
+    }
+}</code></pre></div>
+<p>Round-trip conversion:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Ideogram;
+
+<span class="kw">let </span>original = Ideogram::StressMarking;
+<span class="kw">let </span>code = original.to_u8();
+<span class="kw">let </span>parsed = Ideogram::from_u8(code);
+
+<span class="macro">assert_eq!</span>(parsed, <span class="prelude-val">Some</span>(original));</code></pre></div>
+<p>Using in a parser:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Ideogram;
+
+<span class="kw">fn </span>parse_sgr_code(code: u8) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
+    Ideogram::from_u8(code).map(|ideogram| {
+        <span class="macro">format!</span>(<span class="string">"Ideogram decoration: {:?}"</span>, ideogram)
+    })
+}
+
+<span class="macro">assert_eq!</span>(
+    parse_sgr_code(<span class="number">64</span>),
+    <span class="prelude-val">Some</span>(<span class="string">"Ideogram decoration: StressMarking"</span>.to_string())
+);
+<span class="macro">assert_eq!</span>(parse_sgr_code(<span class="number">99</span>), <span class="prelude-val">None</span>);</code></pre></div><h5 id="use-in-ansi-parsing"><a class="doc-anchor" href="#use-in-ansi-parsing">§</a>Use in ANSI Parsing</h5>
+<p>This method is primarily used when parsing ANSI escape sequences to detect
+ideogram decoration codes:</p>
+<div class="example-wrap"><pre class="language-text"><code>Input:  &quot;\x1b[64m&quot;
+Parsed: [64]
+Result: Ideogram::from_u8(64) → Some(Ideogram::StressMarking)</code></pre></div><h5 id="performance-1"><a class="doc-anchor" href="#performance-1">§</a>Performance</h5>
+<p>O(1) - Constant-time pattern matching with 6 branches.</p>
+<h5 id="notes-1"><a class="doc-anchor" href="#notes-1">§</a>Notes</h5>
+<ul>
+<li>This method only recognizes ideogram decoration codes (60-65)</li>
+<li>Other SGR codes (like 0 for reset, 1 for bold, etc.) return <code>None</code></li>
+<li>The method is used internally by <a href="struct.AnsiSelectGraphicRendition.html#method.parse" title="associated function termionix_ansicodec::ansi::AnsiSelectGraphicRendition::parse"><code>AnsiSelectGraphicRendition::parse</code></a> when processing SGR parameters</li>
+</ul>
+<h5 id="see-also-2"><a class="doc-anchor" href="#see-also-2">§</a>See Also</h5>
+<ul>
+<li><a href="../enum.Ideogram.html#method.to_u8" title="method termionix_ansicodec::Ideogram::to_u8"><code>to_u8()</code></a> - Converts an <code>Ideogram</code> to its SGR code</li>
+<li><a href="struct.AnsiSelectGraphicRendition.html#method.parse" title="associated function termionix_ansicodec::ansi::AnsiSelectGraphicRendition::parse"><code>AnsiSelectGraphicRendition::parse</code></a> - Parses complete SGR sequences including ideogram codes</li>
+<li><a href="../enum.Font.html#method.from_u8" title="associated function termionix_ansicodec::Font::from_u8"><code>Font::from_u8</code></a> - Similar conversion for font codes</li>
+<li><a href="../enum.Script.html#method.from_u8" title="associated function termionix_ansicodec::Script::from_u8"><code>Script::from_u8</code></a> - Similar conversion for script positioning codes</li>
+</ul>
+</div></details></div></details></div><h2 id="trait-implementations" class="section-header">Trait Implementations<a href="#trait-implementations" class="anchor">§</a></h2><div id="trait-implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Clone-for-Ideogram" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#3714">Source</a><a href="#impl-Clone-for-Ideogram" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone" class="method trait-impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#3714">Source</a><a href="#method.clone" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#tymethod.clone" class="fn">clone</a>(&amp;self) -&gt; <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h4></section></summary><div class='docblock'>Returns a duplicate of the value. <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#tymethod.clone">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_from" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/clone.rs.html#245-247">Source</a></span><a href="#method.clone_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#method.clone_from" class="fn">clone_from</a>(&amp;mut self, source: &amp;Self)</h4></section></summary><div class='docblock'>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#method.clone_from">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Debug-for-Ideogram" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#3714">Source</a><a href="#impl-Debug-for-Ideogram" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt" class="method trait-impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#3714">Source</a><a href="#method.fmt" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Debug.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="type" href="https://doc.rust-lang.org/1.93.0/core/fmt/type.Result.html" title="type core::fmt::Result">Result</a></h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Debug.html#tymethod.fmt">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Default-for-Ideogram" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#3714">Source</a><a href="#impl-Default-for-Ideogram" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/default/trait.Default.html" title="trait core::default::Default">Default</a> for <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.default" class="method trait-impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#3714">Source</a><a href="#method.default" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/default/trait.Default.html#tymethod.default" class="fn">default</a>() -&gt; <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h4></section></summary><div class='docblock'>Returns the “default value” for a type. <a href="https://doc.rust-lang.org/1.93.0/core/default/trait.Default.html#tymethod.default">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Hash-for-Ideogram" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#3714">Source</a><a href="#impl-Hash-for-Ideogram" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a> for <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.hash" class="method trait-impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#3714">Source</a><a href="#method.hash" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hash.html#tymethod.hash" class="fn">hash</a>&lt;__H: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hasher.html" title="trait core::hash::Hasher">Hasher</a>&gt;(&amp;self, state: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;mut __H</a>)</h4></section></summary><div class='docblock'>Feeds this value into the given <a href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hasher.html" title="trait core::hash::Hasher"><code>Hasher</code></a>. <a href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hash.html#tymethod.hash">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.hash_slice" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.3.0">1.3.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/hash/mod.rs.html#235-237">Source</a></span><a href="#method.hash_slice" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hash.html#method.hash_slice" class="fn">hash_slice</a>&lt;H&gt;(data: &amp;[Self], state: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;mut H</a>)<div class="where">where
+    H: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hasher.html" title="trait core::hash::Hasher">Hasher</a>,
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h4></section></summary><div class='docblock'>Feeds a slice of this type into the given <a href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hasher.html" title="trait core::hash::Hasher"><code>Hasher</code></a>. <a href="https://doc.rust-lang.org/1.93.0/core/hash/trait.Hash.html#method.hash_slice">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-PartialEq-for-Ideogram" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#3714">Source</a><a href="#impl-PartialEq-for-Ideogram" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialEq.html" title="trait core::cmp::PartialEq">PartialEq</a> for <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.eq" class="method trait-impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#3714">Source</a><a href="#method.eq" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialEq.html#tymethod.eq" class="fn">eq</a>(&amp;self, other: &amp;<a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class='docblock'>Tests for <code>self</code> and <code>other</code> values to be equal, and is used by <code>==</code>.</div></details><details class="toggle method-toggle" open><summary><section id="method.ne" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/cmp.rs.html#264">Source</a></span><a href="#method.ne" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialEq.html#method.ne" class="fn">ne</a>(&amp;self, other: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;Rhs</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class='docblock'>Tests for <code>!=</code>. The default implementation is almost always sufficient,
+and should not be overridden without very good reason.</div></details></div></details><section id="impl-Copy-for-Ideogram" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#3714">Source</a><a href="#impl-Copy-for-Ideogram" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Copy.html" title="trait core::marker::Copy">Copy</a> for <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h3></section><section id="impl-Eq-for-Ideogram" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#3714">Source</a><a href="#impl-Eq-for-Ideogram" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.Eq.html" title="trait core::cmp::Eq">Eq</a> for <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h3></section><section id="impl-StructuralPartialEq-for-Ideogram" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/style.rs.html#3714">Source</a><a href="#impl-StructuralPartialEq-for-Ideogram" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.StructuralPartialEq.html" title="trait core::marker::StructuralPartialEq">StructuralPartialEq</a> for <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h3></section></div><h2 id="synthetic-implementations" class="section-header">Auto Trait Implementations<a href="#synthetic-implementations" class="anchor">§</a></h2><div id="synthetic-implementations-list"><section id="impl-Freeze-for-Ideogram" class="impl"><a href="#impl-Freeze-for-Ideogram" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Freeze.html" title="trait core::marker::Freeze">Freeze</a> for <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h3></section><section id="impl-RefUnwindSafe-for-Ideogram" class="impl"><a href="#impl-RefUnwindSafe-for-Ideogram" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/panic/unwind_safe/trait.RefUnwindSafe.html" title="trait core::panic::unwind_safe::RefUnwindSafe">RefUnwindSafe</a> for <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h3></section><section id="impl-Send-for-Ideogram" class="impl"><a href="#impl-Send-for-Ideogram" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> for <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h3></section><section id="impl-Sync-for-Ideogram" class="impl"><a href="#impl-Sync-for-Ideogram" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> for <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h3></section><section id="impl-Unpin-for-Ideogram" class="impl"><a href="#impl-Unpin-for-Ideogram" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Unpin.html" title="trait core::marker::Unpin">Unpin</a> for <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h3></section><section id="impl-UnwindSafe-for-Ideogram" class="impl"><a href="#impl-UnwindSafe-for-Ideogram" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/panic/unwind_safe/trait.UnwindSafe.html" title="trait core::panic::unwind_safe::UnwindSafe">UnwindSafe</a> for <a class="enum" href="../enum.Ideogram.html" title="enum termionix_ansicodec::Ideogram">Ideogram</a></h3></section></div><h2 id="blanket-implementations" class="section-header">Blanket Implementations<a href="#blanket-implementations" class="anchor">§</a></h2><div id="blanket-implementations-list"><details class="toggle implementors-toggle"><summary><section id="impl-Any-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/any.rs.html#138">Source</a><a href="#impl-Any-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/any/trait.Any.html" title="trait core::any::Any">Any</a> for T<div class="where">where
+    T: 'static + ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.type_id" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/any.rs.html#139">Source</a><a href="#method.type_id" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/any/trait.Any.html#tymethod.type_id" class="fn">type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></h4></section></summary><div class='docblock'>Gets the <code>TypeId</code> of <code>self</code>. <a href="https://doc.rust-lang.org/1.93.0/core/any/trait.Any.html#tymethod.type_id">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Borrow%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#212">Source</a><a href="#impl-Borrow%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#214">Source</a><a href="#method.borrow" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html#tymethod.borrow" class="fn">borrow</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;T</a></h4></section></summary><div class='docblock'>Immutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html#tymethod.borrow">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-BorrowMut%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#221">Source</a><a href="#impl-BorrowMut%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.BorrowMut.html" title="trait core::borrow::BorrowMut">BorrowMut</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow_mut" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#222">Source</a><a href="#method.borrow_mut" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut" class="fn">borrow_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;mut T</a></h4></section></summary><div class='docblock'>Mutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-CloneToUninit-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/clone.rs.html#547">Source</a><a href="#impl-CloneToUninit-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.CloneToUninit.html" title="trait core::clone::CloneToUninit">CloneToUninit</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone_to_uninit" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/clone.rs.html#549">Source</a><a href="#method.clone_to_uninit" class="anchor">§</a><h4 class="code-header">unsafe fn <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit" class="fn">clone_to_uninit</a>(&amp;self, dest: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.pointer.html">*mut </a><a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u8.html">u8</a>)</h4></section></summary><span class="item-info"><div class="stab unstable"><span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>clone_to_uninit</code>)</span></div></span><div class='docblock'>Performs copy-assignment from <code>self</code> to <code>dest</code>. <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-From%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#785">Source</a><a href="#impl-From%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#788">Source</a><a href="#method.from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html#tymethod.from" class="fn">from</a>(t: T) -&gt; T</h4></section></summary><div class="docblock"><p>Returns the argument unchanged.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Instrument-for-T" class="impl"><a href="#impl-Instrument-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; Instrument for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.instrument" class="method trait-impl"><a href="#method.instrument" class="anchor">§</a><h4 class="code-header">fn <a class="fn">instrument</a>(self, span: Span) -&gt; Instrumented&lt;Self&gt;</h4></section></summary><div class='docblock'>Instruments this type with the provided [<code>Span</code>], returning an
+<code>Instrumented</code> wrapper. <a>Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.in_current_span" class="method trait-impl"><a href="#method.in_current_span" class="anchor">§</a><h4 class="code-header">fn <a class="fn">in_current_span</a>(self) -&gt; Instrumented&lt;Self&gt;</h4></section></summary><div class='docblock'>Instruments this type with the <a href="super::Span::current()">current</a> <a href="crate::Span"><code>Span</code></a>, returning an
+<code>Instrumented</code> wrapper. <a>Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Into%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#767-769">Source</a><a href="#impl-Into%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#777">Source</a><a href="#method.into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html#tymethod.into" class="fn">into</a>(self) -&gt; U</h4></section></summary><div class="docblock"><p>Calls <code>U::from(self)</code>.</p>
+<p>That is, this conversion is whatever the implementation of
+<code><a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for U</code> chooses to do.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-ToOwned-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#85-87">Source</a><a href="#impl-ToOwned-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html" title="trait alloc::borrow::ToOwned">ToOwned</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Owned" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#89">Source</a><a href="#associatedtype.Owned" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#associatedtype.Owned" class="associatedtype">Owned</a> = T</h4></section></summary><div class='docblock'>The resulting type after obtaining ownership.</div></details><details class="toggle method-toggle" open><summary><section id="method.to_owned" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#90">Source</a><a href="#method.to_owned" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned" class="fn">to_owned</a>(&amp;self) -&gt; T</h4></section></summary><div class='docblock'>Creates owned data from borrowed data, usually by cloning. <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#94">Source</a><a href="#method.clone_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#method.clone_into" class="fn">clone_into</a>(&amp;self, target: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;mut T</a>)</h4></section></summary><div class='docblock'>Uses borrowed data to replace owned data, usually by cloning. <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#method.clone_into">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryFrom%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#827-829">Source</a><a href="#impl-TryFrom%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error-1" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#831">Source</a><a href="#associatedtype.Error-1" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" class="associatedtype">Error</a> = <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/convert/enum.Infallible.html" title="enum core::convert::Infallible">Infallible</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#834">Source</a><a href="#method.try_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#tymethod.try_from" class="fn">try_from</a>(value: U) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;T, &lt;T as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryInto%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#811-813">Source</a><a href="#impl-TryInto%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryInto.html" title="trait core::convert::TryInto">TryInto</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#815">Source</a><a href="#associatedtype.Error" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryInto.html#associatedtype.Error" class="associatedtype">Error</a> = &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#818">Source</a><a href="#method.try_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryInto.html#tymethod.try_into" class="fn">try_into</a>(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;U, &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-WithSubscriber-for-T" class="impl"><a href="#impl-WithSubscriber-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; WithSubscriber for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.with_subscriber" class="method trait-impl"><a href="#method.with_subscriber" class="anchor">§</a><h4 class="code-header">fn <a class="fn">with_subscriber</a>&lt;S&gt;(self, subscriber: S) -&gt; WithDispatch&lt;Self&gt;<div class="where">where
+    S: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;Dispatch&gt;,</div></h4></section></summary><div class='docblock'>Attaches the provided <a href="super::Subscriber"><code>Subscriber</code></a> to this type, returning a
+[<code>WithDispatch</code>] wrapper. <a>Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.with_current_subscriber" class="method trait-impl"><a href="#method.with_current_subscriber" class="anchor">§</a><h4 class="code-header">fn <a class="fn">with_current_subscriber</a>(self) -&gt; WithDispatch&lt;Self&gt;</h4></section></summary><div class='docblock'>Attaches the current <a href="dispatcher#setting-the-default-subscriber">default</a> <a href="super::Subscriber"><code>Subscriber</code></a> to this type, returning a
+[<code>WithDispatch</code>] wrapper. <a>Read more</a></div></details></div></details></div></section></div></main></body></html>

@@ -1,0 +1,1471 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A mix of ASCII text, Unicode text, ANSI escape sequences/control codes, and Telnet Commands. Unlike `StyledString` which stores styling metadata separately, `SegmentedString` stores the raw segments themselves, making it ideal for:"><title>SegmentedString in termionix_server - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-ca0dd0c4.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="termionix_server" data-themes="" data-resource-suffix="" data-rustdoc-version="1.93.0 (254b59607 2026-01-19)" data-channel="1.93.0" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-a3946164.js" data-settings-js="settings-c38705f0.js" ><script src="../static.files/storage-e2aeef58.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-a410ff4d.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-263c88ec.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc struct"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">SegmentedString</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../termionix_server/index.html">termionix_<wbr>server</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Segmented<wbr>String</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#structure" title="Structure">Structure</a></li><li><a href="#segment-types" title="Segment Types">Segment Types</a></li><li><a href="#examples" title="Examples">Examples</a></li><li><a href="#segment-merging" title="Segment Merging">Segment Merging</a></li><li><a href="#length-calculation" title="Length Calculation">Length Calculation</a></li><li><a href="#comparison-with-other-types" title="Comparison with Other Types">Comparison with Other Types</a></li><li><a href="#performance-considerations" title="Performance Considerations">Performance Considerations</a></li><li><a href="#see-also" title="See Also">See Also</a></li></ul><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.as_slice" title="as_slice">as_slice</a></li><li><a href="#method.clear" title="clear">clear</a></li><li><a href="#method.empty" title="empty">empty</a></li><li><a href="#method.encode" title="encode">encode</a></li><li><a href="#method.first" title="first">first</a></li><li><a href="#method.first_mut" title="first_mut">first_mut</a></li><li><a href="#method.get" title="get">get</a></li><li><a href="#method.get_mut" title="get_mut">get_mut</a></li><li><a href="#method.indexed_segments" title="indexed_segments">indexed_segments</a></li><li><a href="#method.into_vec" title="into_vec">into_vec</a></li><li><a href="#method.is_empty" title="is_empty">is_empty</a></li><li><a href="#method.last" title="last">last</a></li><li><a href="#method.last_mut" title="last_mut">last_mut</a></li><li><a href="#method.len" title="len">len</a></li><li><a href="#method.parse" title="parse">parse</a></li><li><a href="#method.pop" title="pop">pop</a></li><li><a href="#method.push_ansi_apc" title="push_ansi_apc">push_ansi_apc</a></li><li><a href="#method.push_ansi_control" title="push_ansi_control">push_ansi_control</a></li><li><a href="#method.push_ansi_csi" title="push_ansi_csi">push_ansi_csi</a></li><li><a href="#method.push_ansi_dcs" title="push_ansi_dcs">push_ansi_dcs</a></li><li><a href="#method.push_ansi_escape" title="push_ansi_escape">push_ansi_escape</a></li><li><a href="#method.push_ansi_osc" title="push_ansi_osc">push_ansi_osc</a></li><li><a href="#method.push_ansi_pm" title="push_ansi_pm">push_ansi_pm</a></li><li><a href="#method.push_ansi_sgr" title="push_ansi_sgr">push_ansi_sgr</a></li><li><a href="#method.push_ansi_sos" title="push_ansi_sos">push_ansi_sos</a></li><li><a href="#method.push_ansi_st" title="push_ansi_st">push_ansi_st</a></li><li><a href="#method.push_char" title="push_char">push_char</a></li><li><a href="#method.push_segment" title="push_segment">push_segment</a></li><li><a href="#method.push_str" title="push_str">push_str</a></li><li><a href="#method.push_style" title="push_style">push_style</a></li><li><a href="#method.push_telnet_command" title="push_telnet_command">push_telnet_command</a></li><li><a href="#method.segment_count" title="segment_count">segment_count</a></li><li><a href="#method.segments" title="segments">segments</a></li><li><a href="#method.stripped" title="stripped">stripped</a></li><li><a href="#method.text_segments" title="text_segments">text_segments</a></li><li><a href="#method.write" title="write">write</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block trait-implementation"><li><a href="#impl-Clone-for-SegmentedString" title="Clone">Clone</a></li><li><a href="#impl-Debug-for-SegmentedString" title="Debug">Debug</a></li><li><a href="#impl-Default-for-SegmentedString" title="Default">Default</a></li><li><a href="#impl-Display-for-SegmentedString" title="Display">Display</a></li><li><a href="#impl-Eq-for-SegmentedString" title="Eq">Eq</a></li><li><a href="#impl-From%3C%26str%3E-for-SegmentedString" title="From&#60;&#38;str&#62;">From&#60;&#38;str&#62;</a></li><li><a href="#impl-Index%3Cusize%3E-for-SegmentedString" title="Index&#60;usize&#62;">Index&#60;usize&#62;</a></li><li><a href="#impl-IntoIterator-for-%26SegmentedString" title="IntoIterator">IntoIterator</a></li><li><a href="#impl-IntoIterator-for-%26mut+SegmentedString" title="IntoIterator">IntoIterator</a></li><li><a href="#impl-IntoIterator-for-SegmentedString" title="IntoIterator">IntoIterator</a></li><li><a href="#impl-PartialEq-for-SegmentedString" title="PartialEq">PartialEq</a></li><li><a href="#impl-StructuralPartialEq-for-SegmentedString" title="StructuralPartialEq">StructuralPartialEq</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-Freeze-for-SegmentedString" title="Freeze">Freeze</a></li><li><a href="#impl-RefUnwindSafe-for-SegmentedString" title="RefUnwindSafe">RefUnwindSafe</a></li><li><a href="#impl-Send-for-SegmentedString" title="Send">Send</a></li><li><a href="#impl-Sync-for-SegmentedString" title="Sync">Sync</a></li><li><a href="#impl-Unpin-for-SegmentedString" title="Unpin">Unpin</a></li><li><a href="#impl-UnwindSafe-for-SegmentedString" title="UnwindSafe">UnwindSafe</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-Any-for-T" title="Any">Any</a></li><li><a href="#impl-Borrow%3CT%3E-for-T" title="Borrow&#60;T&#62;">Borrow&#60;T&#62;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-T" title="BorrowMut&#60;T&#62;">BorrowMut&#60;T&#62;</a></li><li><a href="#impl-CloneToUninit-for-T" title="CloneToUninit">CloneToUninit</a></li><li><a href="#impl-Equivalent%3CK%3E-for-Q" title="Equivalent&#60;K&#62;">Equivalent&#60;K&#62;</a></li><li><a href="#impl-From%3CT%3E-for-T" title="From&#60;T&#62;">From&#60;T&#62;</a></li><li><a href="#impl-Instrument-for-T" title="Instrument">Instrument</a></li><li><a href="#impl-Into%3CU%3E-for-T" title="Into&#60;U&#62;">Into&#60;U&#62;</a></li><li><a href="#impl-ToOwned-for-T" title="ToOwned">ToOwned</a></li><li><a href="#impl-ToString-for-T" title="ToString">ToString</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T" title="TryFrom&#60;U&#62;">TryFrom&#60;U&#62;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T" title="TryInto&#60;U&#62;">TryInto&#60;U&#62;</a></li><li><a href="#impl-WithSubscriber-for-T" title="WithSubscriber">WithSubscriber</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="index.html">In crate termionix_<wbr>server</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="index.html">termionix_server</a></div><h1>Struct <span class="struct">Segmented<wbr>String</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"></span></div><pre class="rust item-decl"><code>pub struct SegmentedString(<span class="comment">/* private fields */</span>);</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A mix of ASCII text, Unicode text, ANSI escape sequences/control codes, and Telnet Commands.
+Unlike <a href="struct.StyledString.html" title="struct termionix_server::StyledString"><code>StyledString</code></a> which stores styling metadata separately,
+<code>SegmentedString</code> stores the raw segments themselves, making it ideal for:</p>
+<ul>
+<li>Parsing and preserving the exact structure of ANSI-formatted strings</li>
+<li>Building terminal output incrementally</li>
+<li>Precise control over ANSI sequence placement</li>
+<li>Converting between different terminal representations</li>
+</ul>
+<h2 id="structure"><a class="doc-anchor" href="#structure">§</a>Structure</h2>
+<p>Internally, <code>SegmentedString</code> is a wrapper around <code>Vec&lt;Segment&gt;</code>, where each <a href="enum.Segment.html" title="enum termionix_server::Segment"><code>Segment</code></a>
+represents a distinct piece of content with its specific type (ASCII text, Unicode text,
+control codes, CSI sequences, etc.). This design allows:</p>
+<ul>
+<li>Efficient appending of content without parsing</li>
+<li>Preservation of original ANSI sequence structure</li>
+<li>Direct manipulation of individual segments</li>
+<li>Conversion to other formats while maintaining semantic meaning</li>
+</ul>
+<h2 id="segment-types"><a class="doc-anchor" href="#segment-types">§</a>Segment Types</h2>
+<p>A <code>SegmentedString</code> can contain the following types of segments:</p>
+<ul>
+<li><strong>ASCII</strong>: ASCII text (0x20-0x7E, excluding ESC and control codes)</li>
+<li><strong>Unicode</strong>: Multi-byte Unicode text</li>
+<li><strong>Control</strong>: C0 or C1 control characters (e.g., newline, tab)</li>
+<li><strong>Escape</strong>: Standalone ESC character</li>
+<li><strong>CSI</strong>: Control Sequence Introducer commands (cursor movement, erasing, etc.)</li>
+<li><strong>SGR</strong>: Select Graphic Rendition (text styling like colors, bold, underline)</li>
+<li><strong>OSC</strong>: Operating System Commands (terminal title, etc.)</li>
+<li><strong>DCS, SOS, ST, PM, APC</strong>: Other ANSI escape sequence types</li>
+</ul>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<p>Creating an empty segmented string:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+<span class="macro">assert!</span>(segmented.is_empty());</code></pre></div>
+<p>Building a string with mixed content:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Style, Color, ControlCode, Intensity};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+
+<span class="comment">// Add styled text
+</span>segmented.push_style(Style {
+    foreground: <span class="prelude-val">Some</span>(Color::Red),
+    intensity: <span class="prelude-val">Some</span>(Intensity::Bold),
+    ..Default::default()
+});
+segmented.push_str(<span class="string">"Error: "</span>);
+
+<span class="comment">// Add plain text
+</span>segmented.push_str(<span class="string">"File not found"</span>);
+
+<span class="comment">// Add a control character
+</span>segmented.push_ansi_control(ControlCode::LF);</code></pre></div>
+<p>Building terminal output character by character:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+<span class="kw">for </span>ch <span class="kw">in </span><span class="string">"Hello"</span>.chars() {
+    segmented.push_char(ch);
+}</code></pre></div><h2 id="segment-merging"><a class="doc-anchor" href="#segment-merging">§</a>Segment Merging</h2>
+<p><code>SegmentedString</code> intelligently merges consecutive compatible segments:</p>
+<ul>
+<li>Consecutive ASCII characters are merged into a single ASCII segment</li>
+<li>Consecutive Unicode characters are merged into a single Unicode segment</li>
+<li>ASCII and Unicode segments are merged when adjacent (promoted to Unicode)</li>
+<li>Control codes, escape sequences, and style changes create new segments</li>
+</ul>
+<p>This optimization reduces memory usage while preserving semantic meaning.</p>
+<h2 id="length-calculation"><a class="doc-anchor" href="#length-calculation">§</a>Length Calculation</h2>
+<p>The <a href="struct.SegmentedString.html#method.len" title="method termionix_server::SegmentedString::len"><code>len()</code></a> method calculates the display length based on
+the provided <a href="struct.AnsiConfig.html" title="struct termionix_server::AnsiConfig"><code>AnsiConfig</code></a>. This takes into account which segments contribute to
+visible output versus terminal control. Most ANSI escape sequences do not contribute
+to display length.</p>
+<h2 id="comparison-with-other-types"><a class="doc-anchor" href="#comparison-with-other-types">§</a>Comparison with Other Types</h2>
+<ul>
+<li><a href="struct.SpannedString.html" title="struct termionix_server::SpannedString"><code>SpannedString</code></a>: For parsing ANSI strings and extracting
+byte ranges of each segment type. Returns immutable parse results with ranges.</li>
+<li><a href="struct.StyledString.html" title="struct termionix_server::StyledString"><code>StyledString</code></a>: For building styled text with automatic
+ANSI code generation. Stores text and styling separately.</li>
+<li><code>SegmentedString</code>: For building terminal output with explicit control over
+segments and ANSI sequences. Stores raw segments.</li>
+</ul>
+<h2 id="performance-considerations"><a class="doc-anchor" href="#performance-considerations">§</a>Performance Considerations</h2>
+<ul>
+<li>Adding characters/strings: O(1) amortized (may merge with last segment)</li>
+<li>Counting segments: O(1)</li>
+<li>Calculating length: O(n) where n is the number of segments</li>
+<li>Memory: One allocation per segment (merged when possible)</li>
+</ul>
+<h2 id="see-also"><a class="doc-anchor" href="#see-also">§</a>See Also</h2>
+<ul>
+<li><a href="enum.Segment.html" title="enum termionix_server::Segment"><code>Segment</code></a> - The individual segment enum</li>
+<li><a href="struct.SpannedString.html" title="struct termionix_server::SpannedString"><code>SpannedString</code></a> - For parsing ANSI strings</li>
+<li><a href="struct.StyledString.html" title="struct termionix_server::StyledString"><code>StyledString</code></a> - For building styled text</li>
+</ul>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-SegmentedString" class="impl"><a href="#impl-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.empty" class="method"><h4 class="code-header">pub fn <a href="#method.empty" class="fn">empty</a>() -&gt; <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Creates a new empty <code>SegmentedString</code> with no segments.</p>
+<h5 id="examples-1"><a class="doc-anchor" href="#examples-1">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span>segmented = SegmentedString::empty();
+<span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">0</span>);
+<span class="macro">assert!</span>(segmented.is_empty());</code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.segment_count" class="method"><h4 class="code-header">pub fn <a href="#method.segment_count" class="fn">segment_count</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a></h4></section></summary><div class="docblock"><p>Returns the number of segments in this <code>SegmentedString</code>.</p>
+<p>Each segment represents a contiguous piece of content with the same type
+(ASCII text, Unicode text, control sequence, etc.). Consecutive compatible
+segments are automatically merged, so the count reflects the minimal number
+of segments needed to represent the string.</p>
+<h5 id="examples-2"><a class="doc-anchor" href="#examples-2">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+<span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">0</span>);
+
+segmented.push_str(<span class="string">"Hello"</span>); <span class="comment">// 1 ASCII segment
+</span><span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">1</span>);
+
+segmented.push_str(<span class="string">" World"</span>); <span class="comment">// Merged into same ASCII segment
+</span><span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">1</span>);</code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.is_empty" class="method"><h4 class="code-header">pub fn <a href="#method.is_empty" class="fn">is_empty</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class="docblock"><p>Returns <code>true</code> if the segmented string contains no segments.</p>
+<h5 id="examples-3"><a class="doc-anchor" href="#examples-3">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+<span class="macro">assert!</span>(segmented.is_empty());
+
+segmented.push_char(<span class="string">'A'</span>);
+<span class="macro">assert!</span>(!segmented.is_empty());</code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.push_char" class="method"><h4 class="code-header">pub fn <a href="#method.push_char" class="fn">push_char</a>(&amp;mut self, ch: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.char.html">char</a>) -&gt; &amp;mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Appends a single character to the segmented string.</p>
+<p>This method intelligently handles both ASCII and Unicode characters, merging
+them with the last segment when possible. Characters are classified as:</p>
+<ul>
+<li><strong>ASCII</strong>: Characters in range 0x20-0x7E (excluding ESC and control codes)</li>
+<li><strong>Unicode</strong>: All other printable characters</li>
+</ul>
+<p>If the last segment is compatible (same type or can be promoted), the character
+is appended to it. Otherwise, a new segment is created.</p>
+<h5 id="segment-merging-rules"><a class="doc-anchor" href="#segment-merging-rules">§</a>Segment Merging Rules</h5>
+<ul>
+<li>ASCII + ASCII → merged ASCII segment</li>
+<li>ASCII segment + Unicode character → promoted to Unicode segment</li>
+<li>Unicode + any character → merged Unicode segment</li>
+<li>After control/style → new text segment created</li>
+</ul>
+<h5 id="arguments"><a class="doc-anchor" href="#arguments">§</a>Arguments</h5>
+<ul>
+<li><code>ch</code> - The character to append</li>
+</ul>
+<h5 id="examples-4"><a class="doc-anchor" href="#examples-4">§</a>Examples</h5>
+<p>Basic usage:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_char(<span class="string">'H'</span>);
+segmented.push_char(<span class="string">'i'</span>);</code></pre></div>
+<p>Unicode characters:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_char(<span class="string">'世'</span>);
+segmented.push_char(<span class="string">'界'</span>);</code></pre></div>
+<p>Mixing ASCII and Unicode (promotes to Unicode):</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_char(<span class="string">'A'</span>);   <span class="comment">// ASCII segment
+</span>segmented.push_char(<span class="string">'世'</span>);  <span class="comment">// Promoted to Unicode segment
+</span><span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">1</span>); <span class="comment">// Merged into one Unicode segment</span></code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.push_str" class="method"><h4 class="code-header">pub fn <a href="#method.push_str" class="fn">push_str</a>(&amp;mut self, str: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.str.html">str</a>) -&gt; &amp;mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Appends a string slice to the segmented string.</p>
+<p>This method efficiently handles both ASCII and Unicode strings, merging them
+with the last segment when possible. If the string is empty, this is a no-op.</p>
+<p>The entire string is classified as either ASCII or Unicode:</p>
+<ul>
+<li><strong>ASCII</strong>: All characters are in range 0x20-0x7E</li>
+<li><strong>Unicode</strong>: Contains any character outside the ASCII range</li>
+</ul>
+<h5 id="segment-merging-rules-1"><a class="doc-anchor" href="#segment-merging-rules-1">§</a>Segment Merging Rules</h5>
+<ul>
+<li>ASCII segment + ASCII string → merged ASCII segment</li>
+<li>ASCII segment + Unicode string → promoted to Unicode segment</li>
+<li>Unicode segment + any string → merged Unicode segment</li>
+<li>After control/style segment → new text segment created</li>
+</ul>
+<h5 id="arguments-1"><a class="doc-anchor" href="#arguments-1">§</a>Arguments</h5>
+<ul>
+<li><code>str</code> - The string slice to append</li>
+</ul>
+<h5 id="examples-5"><a class="doc-anchor" href="#examples-5">§</a>Examples</h5>
+<p>Basic usage:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Hello"</span>);
+segmented.push_str(<span class="string">" World"</span>);
+<span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">1</span>); <span class="comment">// Merged into one segment</span></code></pre></div>
+<p>Unicode strings:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"こんにちは"</span>);</code></pre></div>
+<p>Mixed content:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Hello"</span>);  <span class="comment">// ASCII segment
+</span>segmented.push_str(<span class="string">"世界"</span>);   <span class="comment">// Promoted to Unicode, merged
+</span><span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">1</span>);</code></pre></div>
+<p>Empty strings are ignored:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">""</span>);
+<span class="macro">assert!</span>(segmented.is_empty());</code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.push_ansi_control" class="method"><h4 class="code-header">pub fn <a href="#method.push_ansi_control" class="fn">push_ansi_control</a>(
+    &amp;mut self,
+    control: <a class="enum" href="enum.AnsiControlCode.html" title="enum termionix_server::AnsiControlCode">AnsiControlCode</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Appends a control code segment to the segmented string.</p>
+<p>Control codes represent non-printable characters that control terminal behavior,
+such as line feeds, carriage returns, tabs, and bell sounds. These always create
+a new segment and do not merge with adjacent segments.</p>
+<h5 id="arguments-2"><a class="doc-anchor" href="#arguments-2">§</a>Arguments</h5>
+<ul>
+<li><code>control</code> - The control code to append</li>
+</ul>
+<h5 id="examples-6"><a class="doc-anchor" href="#examples-6">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, ControlCode};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Line 1"</span>);
+segmented.push_ansi_control(ControlCode::LF);
+segmented.push_str(<span class="string">"Line 2"</span>);
+<span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">3</span>); <span class="comment">// Text, Control, Text</span></code></pre></div>
+<p>Multiple control codes:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, ControlCode};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_ansi_control(ControlCode::CR);
+segmented.push_ansi_control(ControlCode::LF);
+<span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">2</span>); <span class="comment">// Each control is a separate segment</span></code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.push_ansi_escape" class="method"><h4 class="code-header">pub fn <a href="#method.push_ansi_escape" class="fn">push_ansi_escape</a>(&amp;mut self) -&gt; &amp;mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Appends a standalone ANSI Escape character (ESC, 0x1B) to the segmented string.</p>
+<p>This pushes a raw ESC character without any following sequence. This is rarely
+used directly as most ANSI sequences include ESC as part of a larger sequence
+(CSI, OSC, etc.).</p>
+<h5 id="returns"><a class="doc-anchor" href="#returns">§</a>Returns</h5>
+<p>Returns <code>&amp;mut Self</code> to allow method chaining.</p>
+<h5 id="examples-7"><a class="doc-anchor" href="#examples-7">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_str(<span class="string">"Text"</span>)
+   .push_ansi_escape()
+   .push_str(<span class="string">"More text"</span>);</code></pre></div><h5 id="see-also-1"><a class="doc-anchor" href="#see-also-1">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SegmentedString.html#method.push_ansi_csi" title="method termionix_server::SegmentedString::push_ansi_csi"><code>push_ansi_csi()</code></a> - For CSI sequences (ESC [)</li>
+<li><a href="enum.Segment.html#variant.Escape" title="variant termionix_server::Segment::Escape"><code>Segment::Escape</code></a> - The segment type this creates</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.push_ansi_csi" class="method"><h4 class="code-header">pub fn <a href="#method.push_ansi_csi" class="fn">push_ansi_csi</a>(
+    &amp;mut self,
+    csi: <a class="enum" href="enum.AnsiControlSequenceIntroducer.html" title="enum termionix_server::AnsiControlSequenceIntroducer">AnsiControlSequenceIntroducer</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Appends an ANSI Control Sequence Introducer (CSI) to the segmented string.</p>
+<p>CSI sequences control cursor movement, erasing, scrolling, and other terminal
+operations. They begin with ESC [ and end with a command letter.</p>
+<h5 id="arguments-3"><a class="doc-anchor" href="#arguments-3">§</a>Arguments</h5>
+<ul>
+<li><code>csi</code> - The CSI command to append</li>
+</ul>
+<h5 id="returns-1"><a class="doc-anchor" href="#returns-1">§</a>Returns</h5>
+<p>Returns <code>&amp;mut Self</code> to allow method chaining.</p>
+<h5 id="examples-8"><a class="doc-anchor" href="#examples-8">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, AnsiControlSequenceIntroducer};
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_str(<span class="string">"Line 1"</span>)
+   .push_ansi_csi(AnsiControlSequenceIntroducer::CursorDown(<span class="number">2</span>))
+   .push_str(<span class="string">"Line 3"</span>);</code></pre></div><h5 id="see-also-2"><a class="doc-anchor" href="#see-also-2">§</a>See Also</h5>
+<ul>
+<li><a href="enum.AnsiControlSequenceIntroducer.html" title="enum termionix_server::AnsiControlSequenceIntroducer"><code>AnsiControlSequenceIntroducer</code></a> - Available CSI commands</li>
+<li><a href="enum.Segment.html#variant.CSI" title="variant termionix_server::Segment::CSI"><code>Segment::CSI</code></a> - The segment type this creates</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.push_ansi_sgr" class="method"><h4 class="code-header">pub fn <a href="#method.push_ansi_sgr" class="fn">push_ansi_sgr</a>(
+    &amp;mut self,
+    sgr: <a class="struct" href="struct.AnsiSelectGraphicRendition.html" title="struct termionix_server::AnsiSelectGraphicRendition">AnsiSelectGraphicRendition</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Appends a raw ANSI Select Graphic Rendition (SGR) sequence to the segmented string.</p>
+<p>This is a low-level method that directly pushes an SGR sequence. For most use cases,
+prefer <a href="struct.SegmentedString.html#method.push_style" title="method termionix_server::SegmentedString::push_style"><code>push_style()</code></a> which is a more ergonomic convenience wrapper.</p>
+<p>SGR sequences control text styling including colors, bold, underline, italic, etc.</p>
+<h5 id="arguments-4"><a class="doc-anchor" href="#arguments-4">§</a>Arguments</h5>
+<ul>
+<li><code>sgr</code> - The SGR styling to append</li>
+</ul>
+<h5 id="returns-2"><a class="doc-anchor" href="#returns-2">§</a>Returns</h5>
+<p>Returns <code>&amp;mut Self</code> to allow method chaining.</p>
+<h5 id="examples-9"><a class="doc-anchor" href="#examples-9">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Style, Color};
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_ansi_sgr(Style {
+       foreground: <span class="prelude-val">Some</span>(Color::Red),
+       ..Default::default()
+   })
+   .push_str(<span class="string">"Red text"</span>);</code></pre></div><h5 id="see-also-3"><a class="doc-anchor" href="#see-also-3">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SegmentedString.html#method.push_style" title="method termionix_server::SegmentedString::push_style"><code>push_style()</code></a> - Convenience wrapper (recommended)</li>
+<li><a href="struct.AnsiSelectGraphicRendition.html" title="struct termionix_server::AnsiSelectGraphicRendition"><code>AnsiSelectGraphicRendition</code></a> - Style configuration</li>
+<li><a href="enum.Segment.html#variant.SGR" title="variant termionix_server::Segment::SGR"><code>Segment::SGR</code></a> - The segment type this creates</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.push_ansi_osc" class="method"><h4 class="code-header">pub fn <a href="#method.push_ansi_osc" class="fn">push_ansi_osc</a>(
+    &amp;mut self,
+    osc: <a class="enum" href="enum.AnsiOperatingSystemCommand.html" title="enum termionix_server::AnsiOperatingSystemCommand">AnsiOperatingSystemCommand</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Appends an ANSI Operating System Command (OSC) to the segmented string.</p>
+<p>OSC sequences communicate with the terminal’s operating system layer,
+typically for setting window titles, changing color palettes, or other
+system-level operations. They begin with ESC ] and end with ST or BEL.</p>
+<h5 id="arguments-5"><a class="doc-anchor" href="#arguments-5">§</a>Arguments</h5>
+<ul>
+<li><code>osc</code> - The OSC command to append</li>
+</ul>
+<h5 id="returns-3"><a class="doc-anchor" href="#returns-3">§</a>Returns</h5>
+<p>Returns <code>&amp;mut Self</code> to allow method chaining.</p>
+<h5 id="examples-10"><a class="doc-anchor" href="#examples-10">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, AnsiOperatingSystemCommand};
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_ansi_osc(AnsiOperatingSystemCommand::SetWindowTitle(<span class="string">"My App"</span>.to_string()))
+   .push_str(<span class="string">"Content"</span>);</code></pre></div><h5 id="see-also-4"><a class="doc-anchor" href="#see-also-4">§</a>See Also</h5>
+<ul>
+<li><a href="enum.AnsiOperatingSystemCommand.html" title="enum termionix_server::AnsiOperatingSystemCommand"><code>AnsiOperatingSystemCommand</code></a> - Available OSC commands</li>
+<li><a href="enum.Segment.html#variant.OSC" title="variant termionix_server::Segment::OSC"><code>Segment::OSC</code></a> - The segment type this creates</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.push_ansi_dcs" class="method"><h4 class="code-header">pub fn <a href="#method.push_ansi_dcs" class="fn">push_ansi_dcs</a>(
+    &amp;mut self,
+    dcs: <a class="enum" href="enum.AnsiDeviceControlString.html" title="enum termionix_server::AnsiDeviceControlString">AnsiDeviceControlString</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Appends an ANSI Device Control String (DCS) to the segmented string.</p>
+<p>DCS sequences are used for device-specific control operations. They begin
+with ESC P and end with ST (String Terminator).</p>
+<h5 id="arguments-6"><a class="doc-anchor" href="#arguments-6">§</a>Arguments</h5>
+<ul>
+<li><code>dcs</code> - The DCS command to append</li>
+</ul>
+<h5 id="returns-4"><a class="doc-anchor" href="#returns-4">§</a>Returns</h5>
+<p>Returns <code>&amp;mut Self</code> to allow method chaining.</p>
+<h5 id="examples-11"><a class="doc-anchor" href="#examples-11">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, AnsiDeviceControlString};
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_ansi_dcs(AnsiDeviceControlString::new(<span class="macro">vec!</span>[]))
+   .push_str(<span class="string">"Text"</span>);</code></pre></div><h5 id="see-also-5"><a class="doc-anchor" href="#see-also-5">§</a>See Also</h5>
+<ul>
+<li><a href="enum.AnsiDeviceControlString.html" title="enum termionix_server::AnsiDeviceControlString"><code>AnsiDeviceControlString</code></a> - DCS command structure</li>
+<li><a href="enum.Segment.html#variant.DCS" title="variant termionix_server::Segment::DCS"><code>Segment::DCS</code></a> - The segment type this creates</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.push_ansi_sos" class="method"><h4 class="code-header">pub fn <a href="#method.push_ansi_sos" class="fn">push_ansi_sos</a>(&amp;mut self, sos: <a class="enum" href="enum.AnsiStartOfString.html" title="enum termionix_server::AnsiStartOfString">AnsiStartOfString</a>) -&gt; &amp;mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Appends an ANSI Start of String (SOS) sequence to the segmented string.</p>
+<p>SOS sequences mark the beginning of a control string. They begin with ESC X
+and end with ST (String Terminator).</p>
+<h5 id="arguments-7"><a class="doc-anchor" href="#arguments-7">§</a>Arguments</h5>
+<ul>
+<li><code>sos</code> - The SOS sequence to append</li>
+</ul>
+<h5 id="returns-5"><a class="doc-anchor" href="#returns-5">§</a>Returns</h5>
+<p>Returns <code>&amp;mut Self</code> to allow method chaining.</p>
+<h5 id="examples-12"><a class="doc-anchor" href="#examples-12">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, AnsiStartOfString};
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_ansi_sos(AnsiStartOfString::new(<span class="macro">vec!</span>[]))
+   .push_str(<span class="string">"Text"</span>);</code></pre></div><h5 id="see-also-6"><a class="doc-anchor" href="#see-also-6">§</a>See Also</h5>
+<ul>
+<li><a href="enum.AnsiStartOfString.html" title="enum termionix_server::AnsiStartOfString"><code>AnsiStartOfString</code></a> - SOS sequence structure</li>
+<li><a href="enum.Segment.html#variant.SOS" title="variant termionix_server::Segment::SOS"><code>Segment::SOS</code></a> - The segment type this creates</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.push_ansi_st" class="method"><h4 class="code-header">pub fn <a href="#method.push_ansi_st" class="fn">push_ansi_st</a>(&amp;mut self) -&gt; &amp;mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Appends an ANSI String Terminator (ST) to the segmented string.</p>
+<p>ST sequences mark the end of control strings started by DCS, SOS, OSC, PM,
+or APC. The sequence is ESC .</p>
+<h5 id="returns-6"><a class="doc-anchor" href="#returns-6">§</a>Returns</h5>
+<p>Returns <code>&amp;mut Self</code> to allow method chaining.</p>
+<h5 id="examples-13"><a class="doc-anchor" href="#examples-13">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_str(<span class="string">"Text"</span>)
+   .push_ansi_st();</code></pre></div><h5 id="see-also-7"><a class="doc-anchor" href="#see-also-7">§</a>See Also</h5>
+<ul>
+<li><a href="enum.Segment.html#variant.ST" title="variant termionix_server::Segment::ST"><code>Segment::ST</code></a> - The segment type this creates</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.push_ansi_pm" class="method"><h4 class="code-header">pub fn <a href="#method.push_ansi_pm" class="fn">push_ansi_pm</a>(&amp;mut self, pm: <a class="enum" href="enum.AnsiPrivacyMessage.html" title="enum termionix_server::AnsiPrivacyMessage">AnsiPrivacyMessage</a>) -&gt; &amp;mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Appends an ANSI Privacy Message (PM) to the segmented string.</p>
+<p>PM sequences are used for privacy-related terminal operations. They begin
+with ESC ^ and end with ST (String Terminator).</p>
+<h5 id="arguments-8"><a class="doc-anchor" href="#arguments-8">§</a>Arguments</h5>
+<ul>
+<li><code>pm</code> - The PM sequence to append</li>
+</ul>
+<h5 id="returns-7"><a class="doc-anchor" href="#returns-7">§</a>Returns</h5>
+<p>Returns <code>&amp;mut Self</code> to allow method chaining.</p>
+<h5 id="examples-14"><a class="doc-anchor" href="#examples-14">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, AnsiPrivacyMessage};
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_ansi_pm(AnsiPrivacyMessage::new(<span class="macro">vec!</span>[]))
+   .push_str(<span class="string">"Text"</span>);</code></pre></div><h5 id="see-also-8"><a class="doc-anchor" href="#see-also-8">§</a>See Also</h5>
+<ul>
+<li><a href="enum.AnsiPrivacyMessage.html" title="enum termionix_server::AnsiPrivacyMessage"><code>AnsiPrivacyMessage</code></a> - PM sequence structure</li>
+<li><a href="enum.Segment.html#variant.PM" title="variant termionix_server::Segment::PM"><code>Segment::PM</code></a> - The segment type this creates</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.push_ansi_apc" class="method"><h4 class="code-header">pub fn <a href="#method.push_ansi_apc" class="fn">push_ansi_apc</a>(
+    &amp;mut self,
+    apc: <a class="enum" href="enum.AnsiApplicationProgramCommand.html" title="enum termionix_server::AnsiApplicationProgramCommand">AnsiApplicationProgramCommand</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Appends an ANSI Application Program Command (APC) to the segmented string.</p>
+<p>APC sequences are used for application-specific commands. They begin with
+ESC _ and end with ST (String Terminator).</p>
+<h5 id="arguments-9"><a class="doc-anchor" href="#arguments-9">§</a>Arguments</h5>
+<ul>
+<li><code>apc</code> - The APC command to append</li>
+</ul>
+<h5 id="returns-8"><a class="doc-anchor" href="#returns-8">§</a>Returns</h5>
+<p>Returns <code>&amp;mut Self</code> to allow method chaining.</p>
+<h5 id="examples-15"><a class="doc-anchor" href="#examples-15">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, AnsiApplicationProgramCommand};
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_ansi_apc(AnsiApplicationProgramCommand::new(<span class="macro">vec!</span>[]))
+   .push_str(<span class="string">"Text"</span>);</code></pre></div><h5 id="see-also-9"><a class="doc-anchor" href="#see-also-9">§</a>See Also</h5>
+<ul>
+<li><a href="enum.AnsiApplicationProgramCommand.html" title="enum termionix_server::AnsiApplicationProgramCommand"><code>AnsiApplicationProgramCommand</code></a> - APC command structure</li>
+<li><a href="enum.Segment.html#variant.APC" title="variant termionix_server::Segment::APC"><code>Segment::APC</code></a> - The segment type this creates</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.push_telnet_command" class="method"><h4 class="code-header">pub fn <a href="#method.push_telnet_command" class="fn">push_telnet_command</a>(&amp;mut self, tc: <a class="enum" href="enum.TelnetCommand.html" title="enum termionix_server::TelnetCommand">TelnetCommand</a>) -&gt; &amp;mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Appends a Telnet protocol command to the segmented string.</p>
+<p>Telnet commands are part of the Telnet protocol (RFC 854) and handle
+protocol negotiation, options, and control. These are distinct from
+ANSI escape sequences and are used in network communication.</p>
+<h5 id="arguments-10"><a class="doc-anchor" href="#arguments-10">§</a>Arguments</h5>
+<ul>
+<li><code>tc</code> - The Telnet command to append</li>
+</ul>
+<h5 id="returns-9"><a class="doc-anchor" href="#returns-9">§</a>Returns</h5>
+<p>Returns <code>&amp;mut Self</code> to allow method chaining.</p>
+<h5 id="examples-16"><a class="doc-anchor" href="#examples-16">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, TelnetCommand};
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_str(<span class="string">"Hello"</span>)
+   .push_telnet_command(TelnetCommand::IAC)
+   .push_str(<span class="string">"World"</span>);</code></pre></div><h5 id="see-also-10"><a class="doc-anchor" href="#see-also-10">§</a>See Also</h5>
+<ul>
+<li><a href="enum.TelnetCommand.html" title="enum termionix_server::TelnetCommand"><code>TelnetCommand</code></a> - Available Telnet commands</li>
+<li><a href="enum.Segment.html#variant.TelnetCommand" title="variant termionix_server::Segment::TelnetCommand"><code>Segment::TelnetCommand</code></a> - The segment type this creates</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.push_style" class="method"><h4 class="code-header">pub fn <a href="#method.push_style" class="fn">push_style</a>(
+    &amp;mut self,
+    style: <a class="struct" href="struct.AnsiSelectGraphicRendition.html" title="struct termionix_server::AnsiSelectGraphicRendition">AnsiSelectGraphicRendition</a>,
+) -&gt; &amp;mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Appends a style (SGR - Select Graphic Rendition) segment to the segmented string.</p>
+<p>This is a convienence method and adds an ANSI SGR sequence that changes text styling
+attributes such as colors, bold, underline, italic, etc. The style segment does not merge
+with adjacent segments and serves as a formatting delimiter between text segments.</p>
+<h5 id="arguments-11"><a class="doc-anchor" href="#arguments-11">§</a>Arguments</h5>
+<ul>
+<li><code>style</code> - The style to apply to subsequent text</li>
+</ul>
+<h5 id="examples-17"><a class="doc-anchor" href="#examples-17">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Style, Color, Intensity};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+
+<span class="comment">// Add red bold text
+</span>segmented.push_style(Style {
+    foreground: <span class="prelude-val">Some</span>(Color::Red),
+    intensity: <span class="prelude-val">Some</span>(Intensity::Bold),
+    ..Default::default()
+});
+segmented.push_str(<span class="string">"Error"</span>);
+
+<span class="comment">// Reset and add normal text
+</span>segmented.push_style(Style::default());
+segmented.push_str(<span class="string">" occurred"</span>);</code></pre></div>
+<p>Multiple styles:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Style, Color};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_style(Style {
+    foreground: <span class="prelude-val">Some</span>(Color::Red),
+    ..Default::default()
+});
+segmented.push_str(<span class="string">"Red "</span>);
+
+segmented.push_style(Style {
+    foreground: <span class="prelude-val">Some</span>(Color::Blue),
+    ..Default::default()
+});
+segmented.push_str(<span class="string">"Blue"</span>);</code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.push_segment" class="method"><h4 class="code-header">pub fn <a href="#method.push_segment" class="fn">push_segment</a>(&amp;mut self, segment: <a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a>) -&gt; &amp;mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class="docblock"><p>Appends an arbitrary segment to the segmented string.</p>
+<p>This is a low-level method that allows direct insertion of any <a href="enum.Segment.html" title="enum termionix_server::Segment"><code>Segment</code></a> variant
+without automatic merging or type checking. Unlike <a href="struct.SegmentedString.html#method.push_char" title="method termionix_server::SegmentedString::push_char"><code>push_char</code></a>
+or <a href="struct.SegmentedString.html#method.push_str" title="method termionix_server::SegmentedString::push_str"><code>push_str</code></a> which intelligently merge compatible text
+segments, this method always creates a new segment regardless of the previous segment type.</p>
+<p>This method is useful when you need precise control over segment boundaries or when
+working with pre-constructed segments from parsing operations.</p>
+<h5 id="arguments-12"><a class="doc-anchor" href="#arguments-12">§</a>Arguments</h5>
+<ul>
+<li><code>segment</code> - The segment to append to the segmented string</li>
+</ul>
+<h5 id="examples-18"><a class="doc-anchor" href="#examples-18">§</a>Examples</h5>
+<p>Adding a custom CSI command:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Segment, CSICommand};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Before"</span>);
+segmented.push_segment(Segment::CSI(CSICommand::CursorUp(<span class="number">5</span>)));
+segmented.push_str(<span class="string">"After"</span>);</code></pre></div>
+<p>Manually creating text segments:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Segment};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_segment(Segment::ASCII(<span class="string">"Hello"</span>.to_string()));
+segmented.push_segment(Segment::Unicode(<span class="string">"世界"</span>.to_string()));
+<span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">2</span>); <span class="comment">// Not merged because using push_segment</span></code></pre></div>
+<p>Building from parsed segments:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Segment, ControlCode};
+
+<span class="kw">let </span>segments = <span class="macro">vec!</span>[
+    Segment::ASCII(<span class="string">"Line 1"</span>.to_string()),
+    Segment::Control(ControlCode::LF),
+    Segment::ASCII(<span class="string">"Line 2"</span>.to_string()),
+];
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+<span class="kw">for </span>segment <span class="kw">in </span>segments {
+    segmented.push_segment(segment);
+}
+<span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">3</span>);</code></pre></div><h5 id="note"><a class="doc-anchor" href="#note">§</a>Note</h5>
+<p>This method does not perform any segment merging. If you push consecutive ASCII or
+Unicode segments using this method, they will remain as separate segments. For
+automatic merging behavior, use <a href="struct.SegmentedString.html#method.push_char" title="method termionix_server::SegmentedString::push_char"><code>push_char</code></a> or
+<a href="struct.SegmentedString.html#method.push_str" title="method termionix_server::SegmentedString::push_str"><code>push_str</code></a> instead.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.segments" class="method"><h4 class="code-header">pub fn <a href="#method.segments" class="fn">segments</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/slice/iter/struct.Iter.html" title="struct core::slice::iter::Iter">Iter</a>&lt;'_, <a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a>&gt;</h4></section></summary><div class="docblock"><p>Returns an iterator over the segments in this segmented string.</p>
+<p>The iterator yields references to each <a href="enum.Segment.html" title="enum termionix_server::Segment"><code>Segment</code></a> in order, from the
+beginning to the end of the string. Each segment represents a contiguous
+piece of content with a specific type (ASCII text, Unicode text, control
+codes, ANSI sequences, etc.).</p>
+<h5 id="returns-10"><a class="doc-anchor" href="#returns-10">§</a>Returns</h5>
+<p>A slice iterator over the internal segment collection.</p>
+<h5 id="examples-19"><a class="doc-anchor" href="#examples-19">§</a>Examples</h5>
+<p>Basic iteration:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Hello"</span>);
+segmented.push_str(<span class="string">" World"</span>);
+
+<span class="kw">for </span>segment <span class="kw">in </span>segmented.segments() {
+    <span class="comment">// Process each segment
+</span>}</code></pre></div>
+<p>Filtering specific segment types:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Segment, Style, Color};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_style(Style {
+    foreground: <span class="prelude-val">Some</span>(Color::Red),
+    ..Default::default()
+});
+segmented.push_str(<span class="string">"Error"</span>);
+
+<span class="kw">let </span>text_segments: Vec&lt;<span class="kw">_</span>&gt; = segmented.segments()
+    .filter(|s| <span class="macro">matches!</span>(s, Segment::ASCII(<span class="kw">_</span>) | Segment::Unicode(<span class="kw">_</span>)))
+    .collect();</code></pre></div>
+<p>Counting specific segment types:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Segment, ControlCode};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Line 1"</span>);
+segmented.push_ansi_control(ControlCode::LF);
+segmented.push_str(<span class="string">"Line 2"</span>);
+
+<span class="kw">let </span>control_count = segmented.segments()
+    .filter(|s| <span class="macro">matches!</span>(s, Segment::Control(<span class="kw">_</span>)))
+    .count();
+<span class="macro">assert_eq!</span>(control_count, <span class="number">1</span>);</code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.get" class="method"><h4 class="code-header">pub fn <a href="#method.get" class="fn">get</a>(&amp;self, index: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;<a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a>&gt;</h4></section></summary><div class="docblock"><p>Returns a reference to the segment at the given index, or <code>None</code> if out of bounds.</p>
+<p>This provides safe, bounds-checked access to individual segments without panicking.</p>
+<h5 id="arguments-13"><a class="doc-anchor" href="#arguments-13">§</a>Arguments</h5>
+<ul>
+<li><code>index</code> - The zero-based index of the segment to retrieve</li>
+</ul>
+<h5 id="returns-11"><a class="doc-anchor" href="#returns-11">§</a>Returns</h5>
+<p>Returns <code>Some(&amp;Segment)</code> if the index is valid, or <code>None</code> if out of bounds.</p>
+<h5 id="examples-20"><a class="doc-anchor" href="#examples-20">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_str(<span class="string">"Hello"</span>);
+seg.push_str(<span class="string">" World"</span>);
+
+<span class="macro">assert!</span>(seg.get(<span class="number">0</span>).is_some());
+<span class="macro">assert!</span>(seg.get(<span class="number">10</span>).is_none());</code></pre></div><h5 id="see-also-11"><a class="doc-anchor" href="#see-also-11">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SegmentedString.html#method.get_mut" title="method termionix_server::SegmentedString::get_mut"><code>get_mut()</code></a> - For mutable access</li>
+<li><a href="https://doc.rust-lang.org/1.93.0/core/ops/index/trait.Index.html" title="trait core::ops::index::Index"><code>Index</code></a> - For panicking access via <code>seg[index]</code></li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.get_mut" class="method"><h4 class="code-header">pub fn <a href="#method.get_mut" class="fn">get_mut</a>(&amp;mut self, index: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;mut <a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a>&gt;</h4></section></summary><div class="docblock"><p>Returns a mutable reference to the segment at the given index, or <code>None</code> if out of bounds.</p>
+<p>This provides safe, bounds-checked mutable access to individual segments.</p>
+<h5 id="arguments-14"><a class="doc-anchor" href="#arguments-14">§</a>Arguments</h5>
+<ul>
+<li><code>index</code> - The zero-based index of the segment to retrieve</li>
+</ul>
+<h5 id="returns-12"><a class="doc-anchor" href="#returns-12">§</a>Returns</h5>
+<p>Returns <code>Some(&amp;mut Segment)</code> if the index is valid, or <code>None</code> if out of bounds.</p>
+<h5 id="examples-21"><a class="doc-anchor" href="#examples-21">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Segment};
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_str(<span class="string">"Hello"</span>);
+
+<span class="kw">if let </span><span class="prelude-val">Some</span>(Segment::ASCII(text)) = seg.get_mut(<span class="number">0</span>) {
+    text.push_str(<span class="string">" World"</span>);
+}</code></pre></div><h5 id="see-also-12"><a class="doc-anchor" href="#see-also-12">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SegmentedString.html#method.get" title="method termionix_server::SegmentedString::get"><code>get()</code></a> - For immutable access</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.first" class="method"><h4 class="code-header">pub fn <a href="#method.first" class="fn">first</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;<a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a>&gt;</h4></section></summary><div class="docblock"><p>Returns a reference to the first segment, or <code>None</code> if empty.</p>
+<h5 id="examples-22"><a class="doc-anchor" href="#examples-22">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Segment};
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+<span class="macro">assert!</span>(seg.first().is_none());
+
+seg.push_str(<span class="string">"Hello"</span>);
+<span class="macro">assert!</span>(<span class="macro">matches!</span>(seg.first(), <span class="prelude-val">Some</span>(Segment::ASCII(<span class="kw">_</span>))));</code></pre></div><h5 id="see-also-13"><a class="doc-anchor" href="#see-also-13">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SegmentedString.html#method.last" title="method termionix_server::SegmentedString::last"><code>last()</code></a> - Get the last segment</li>
+<li><a href="struct.SegmentedString.html#method.first_mut" title="method termionix_server::SegmentedString::first_mut"><code>first_mut()</code></a> - For mutable access</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.first_mut" class="method"><h4 class="code-header">pub fn <a href="#method.first_mut" class="fn">first_mut</a>(&amp;mut self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;mut <a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a>&gt;</h4></section></summary><div class="docblock"><p>Returns a mutable reference to the first segment, or <code>None</code> if empty.</p>
+<h5 id="examples-23"><a class="doc-anchor" href="#examples-23">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Segment};
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_str(<span class="string">"Hello"</span>);
+
+<span class="kw">if let </span><span class="prelude-val">Some</span>(Segment::ASCII(text)) = seg.first_mut() {
+    <span class="kw-2">*</span>text = <span class="string">"Goodbye"</span>.to_string();
+}</code></pre></div><h5 id="see-also-14"><a class="doc-anchor" href="#see-also-14">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SegmentedString.html#method.first" title="method termionix_server::SegmentedString::first"><code>first()</code></a> - For immutable access</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.last" class="method"><h4 class="code-header">pub fn <a href="#method.last" class="fn">last</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;<a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a>&gt;</h4></section></summary><div class="docblock"><p>Returns a reference to the last segment, or <code>None</code> if empty.</p>
+<h5 id="examples-24"><a class="doc-anchor" href="#examples-24">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Segment};
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_str(<span class="string">"Hello"</span>);
+seg.push_str(<span class="string">" World"</span>);
+
+<span class="macro">assert!</span>(<span class="macro">matches!</span>(seg.last(), <span class="prelude-val">Some</span>(Segment::ASCII(<span class="kw">_</span>))));</code></pre></div><h5 id="see-also-15"><a class="doc-anchor" href="#see-also-15">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SegmentedString.html#method.first" title="method termionix_server::SegmentedString::first"><code>first()</code></a> - Get the first segment</li>
+<li><a href="struct.SegmentedString.html#method.last_mut" title="method termionix_server::SegmentedString::last_mut"><code>last_mut()</code></a> - For mutable access</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.last_mut" class="method"><h4 class="code-header">pub fn <a href="#method.last_mut" class="fn">last_mut</a>(&amp;mut self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;mut <a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a>&gt;</h4></section></summary><div class="docblock"><p>Returns a mutable reference to the last segment, or <code>None</code> if empty.</p>
+<h5 id="examples-25"><a class="doc-anchor" href="#examples-25">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Segment};
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_str(<span class="string">"Hello"</span>);
+
+<span class="kw">if let </span><span class="prelude-val">Some</span>(Segment::ASCII(text)) = seg.last_mut() {
+    text.push_str(<span class="string">" World"</span>);
+}</code></pre></div><h5 id="see-also-16"><a class="doc-anchor" href="#see-also-16">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SegmentedString.html#method.last" title="method termionix_server::SegmentedString::last"><code>last()</code></a> - For immutable access</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.text_segments" class="method"><h4 class="code-header">pub fn <a href="#method.text_segments" class="fn">text_segments</a>(&amp;self) -&gt; impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/iter/traits/iterator/trait.Iterator.html" title="trait core::iter::traits::iterator::Iterator">Iterator</a>&lt;Item = &amp;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.str.html">str</a>&gt;</h4></section></summary><div class="docblock"><p>Returns an iterator over text content only (ASCII and Unicode segments).</p>
+<p>This iterator skips all control codes, ANSI sequences, and other non-text segments,
+yielding only the visible text content as string slices.</p>
+<h5 id="examples-26"><a class="doc-anchor" href="#examples-26">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Style, Color};
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_style(Style { foreground: <span class="prelude-val">Some</span>(Color::Red), ..Default::default() });
+seg.push_str(<span class="string">"Hello"</span>);
+seg.push_str(<span class="string">" World"</span>);
+
+<span class="kw">let </span>text: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = seg.text_segments().collect();
+<span class="macro">assert_eq!</span>(text, <span class="macro">vec!</span>[<span class="string">"Hello World"</span>]);</code></pre></div><h5 id="see-also-17"><a class="doc-anchor" href="#see-also-17">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SegmentedString.html#method.segments" title="method termionix_server::SegmentedString::segments"><code>segments()</code></a> - Iterate over all segments</li>
+<li><a href="struct.SegmentedString.html#method.stripped" title="method termionix_server::SegmentedString::stripped"><code>stripped()</code></a> - Get all text as a single String</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.indexed_segments" class="method"><h4 class="code-header">pub fn <a href="#method.indexed_segments" class="fn">indexed_segments</a>(&amp;self) -&gt; impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/iter/traits/iterator/trait.Iterator.html" title="trait core::iter::traits::iterator::Iterator">Iterator</a>&lt;Item = (<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>, &amp;<a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a>)&gt;</h4></section></summary><div class="docblock"><p>Returns an iterator over segments with their indices.</p>
+<p>Each item is a tuple of <code>(index, &amp;Segment)</code> where index is the position
+in the internal segment vector.</p>
+<h5 id="examples-27"><a class="doc-anchor" href="#examples-27">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_str(<span class="string">"Hello"</span>);
+seg.push_str(<span class="string">" World"</span>);
+
+<span class="kw">for </span>(i, segment) <span class="kw">in </span>seg.indexed_segments() {
+    <span class="macro">println!</span>(<span class="string">"Segment {}: {:?}"</span>, i, segment);
+}</code></pre></div><h5 id="see-also-18"><a class="doc-anchor" href="#see-also-18">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SegmentedString.html#method.segments" title="method termionix_server::SegmentedString::segments"><code>segments()</code></a> - Iterate without indices</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.into_vec" class="method"><h4 class="code-header">pub fn <a href="#method.into_vec" class="fn">into_vec</a>(self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a>&gt;</h4></section></summary><div class="docblock"><p>Consumes the <code>SegmentedString</code> and returns the underlying vector of segments.</p>
+<p>This is useful when you need to take ownership of the segments or pass them
+to another function that expects a <code>Vec&lt;Segment&gt;</code>.</p>
+<h5 id="examples-28"><a class="doc-anchor" href="#examples-28">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_str(<span class="string">"Hello"</span>);
+seg.push_str(<span class="string">" World"</span>);
+
+<span class="kw">let </span>segments = seg.into_vec();
+<span class="macro">assert_eq!</span>(segments.len(), <span class="number">1</span>);</code></pre></div><h5 id="see-also-19"><a class="doc-anchor" href="#see-also-19">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SegmentedString.html#method.as_slice" title="method termionix_server::SegmentedString::as_slice"><code>as_slice()</code></a> - For borrowing without consuming</li>
+<li><a href="struct.SegmentedString.html#method.segments" title="method termionix_server::SegmentedString::segments"><code>segments()</code></a> - For iterating without consuming</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.as_slice" class="method"><h4 class="code-header">pub fn <a href="#method.as_slice" class="fn">as_slice</a>(&amp;self) -&gt; &amp;[<a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a>]</h4></section></summary><div class="docblock"><p>Returns a slice view of the internal segments.</p>
+<p>This provides direct access to the underlying segment storage without
+copying or consuming the <code>SegmentedString</code>.</p>
+<h5 id="examples-29"><a class="doc-anchor" href="#examples-29">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_str(<span class="string">"Hello"</span>);
+
+<span class="kw">let </span>slice = seg.as_slice();
+<span class="macro">assert_eq!</span>(slice.len(), <span class="number">1</span>);</code></pre></div><h5 id="see-also-20"><a class="doc-anchor" href="#see-also-20">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SegmentedString.html#method.into_vec" title="method termionix_server::SegmentedString::into_vec"><code>into_vec()</code></a> - For taking ownership</li>
+<li><a href="struct.SegmentedString.html#method.segments" title="method termionix_server::SegmentedString::segments"><code>segments()</code></a> - For iterating</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.stripped" class="method"><h4 class="code-header">pub fn <a href="#method.stripped" class="fn">stripped</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a></h4></section></summary><div class="docblock"><p>Returns the plain text content without any ANSI escape sequences or control codes.</p>
+<p>This method extracts only the visible text content from ASCII and Unicode segments,
+discarding all ANSI control sequences, styling codes, and terminal commands. The
+result is a plain <code>String</code> containing only the displayable characters that would
+appear on screen, without any formatting information.</p>
+<h5 id="returns-13"><a class="doc-anchor" href="#returns-13">§</a>Returns</h5>
+<p>A <code>String</code> containing only the text content from ASCII and Unicode segments,
+concatenated in order. All other segment types (Control, Escape, CSI, SGR,
+OSC, DCS, SOS, ST, PM, APC) are omitted from the output.</p>
+<h5 id="segment-processing"><a class="doc-anchor" href="#segment-processing">§</a>Segment Processing</h5>
+<p>The method processes segments as follows:</p>
+<ul>
+<li><strong>ASCII segments</strong>: Text content is included</li>
+<li><strong>Unicode segments</strong>: Text content is included</li>
+<li><strong>All other segments</strong>: Completely omitted (Control, Escape, CSI, SGR, etc.)</li>
+</ul>
+<h5 id="examples-30"><a class="doc-anchor" href="#examples-30">§</a>Examples</h5>
+<p>Basic text stripping:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Hello World"</span>);
+
+<span class="macro">assert_eq!</span>(segmented.stripped(), <span class="string">"Hello World"</span>);</code></pre></div>
+<p>Removing style codes:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Style, Color, Intensity};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_style(Style {
+    foreground: <span class="prelude-val">Some</span>(Color::Red),
+    intensity: <span class="prelude-val">Some</span>(Intensity::Bold),
+    ..Default::default()
+});
+segmented.push_str(<span class="string">"Error"</span>);
+segmented.push_style(Style::default());
+segmented.push_str(<span class="string">": File not found"</span>);
+
+<span class="macro">assert_eq!</span>(segmented.stripped(), <span class="string">"Error: File not found"</span>);</code></pre></div>
+<p>Removing control codes:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, ControlCode};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Line 1"</span>);
+segmented.push_ansi_control(ControlCode::LF);
+segmented.push_str(<span class="string">"Line 2"</span>);
+
+<span class="comment">// Control codes are removed, only text remains
+</span><span class="macro">assert_eq!</span>(segmented.stripped(), <span class="string">"Line 1Line 2"</span>);</code></pre></div>
+<p>Mixed ASCII and Unicode:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Hello"</span>);
+segmented.push_str(<span class="string">" 世界"</span>);
+
+<span class="macro">assert_eq!</span>(segmented.stripped(), <span class="string">"Hello 世界"</span>);</code></pre></div>
+<p>Complex example with multiple segment types:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Style, Color, ControlCode, CSICommand};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Status: "</span>);
+segmented.push_style(Style {
+    foreground: <span class="prelude-val">Some</span>(Color::Green),
+    ..Default::default()
+});
+segmented.push_str(<span class="string">"OK"</span>);
+segmented.push_ansi_control(ControlCode::LF);
+segmented.push_str(<span class="string">"Progress: 100%"</span>);
+
+<span class="comment">// All styling and control codes removed
+</span><span class="macro">assert_eq!</span>(segmented.stripped(), <span class="string">"Status: OKProgress: 100%"</span>);</code></pre></div><h5 id="performance"><a class="doc-anchor" href="#performance">§</a>Performance</h5>
+<p>This operation is O(n) where n is the number of segments. It allocates a new
+<code>String</code> and concatenates only the text segments, making it efficient for
+extracting plain text from styled terminal output.</p>
+<h5 id="use-cases"><a class="doc-anchor" href="#use-cases">§</a>Use Cases</h5>
+<ul>
+<li><strong>Logging</strong>: Save plain text logs without ANSI codes</li>
+<li><strong>Text processing</strong>: Extract content for analysis or search</li>
+<li><strong>Testing</strong>: Compare expected text content without worrying about styling</li>
+<li><strong>Display</strong>: Show content in environments that don’t support ANSI codes</li>
+<li><strong>Length calculation</strong>: Get accurate character count of visible text</li>
+</ul>
+<h5 id="comparison-with-other-methods"><a class="doc-anchor" href="#comparison-with-other-methods">§</a>Comparison with Other Methods</h5>
+<ul>
+<li><a href="struct.SegmentedString.html#method.len" title="method termionix_server::SegmentedString::len"><code>styled_len()</code></a>: Calculates display length with config</li>
+<li><a href="SegmentedString::write_str"><code>write_str()</code></a>: Outputs with ANSI codes based on color mode</li>
+<li><code>stripped()</code>: Returns only visible text without any formatting</li>
+</ul>
+<h5 id="see-also-21"><a class="doc-anchor" href="#see-also-21">§</a>See Also</h5>
+<ul>
+<li><a href="struct.StyledString.html#method.stripped" title="method termionix_server::StyledString::stripped"><code>StyledString::stripped()</code></a> - Similar method for <code>StyledString</code></li>
+<li><a href="struct.SegmentedString.html#method.len" title="method termionix_server::SegmentedString::len"><code>styled_len()</code></a> - Calculate display length</li>
+<li><a href="struct.SegmentedString.html#method.segments" title="method termionix_server::SegmentedString::segments"><code>iter()</code></a> - Iterate over all segments including non-text</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.clear" class="method"><h4 class="code-header">pub fn <a href="#method.clear" class="fn">clear</a>(&amp;mut self)</h4></section></summary><div class="docblock"><p>Clears all segments from the <code>SegmentedString</code>, removing all content.</p>
+<p>This method resets the segmented string to an empty state, equivalent to creating
+a new <code>SegmentedString</code> with <a href="struct.SegmentedString.html#method.empty" title="associated function termionix_server::SegmentedString::empty"><code>SegmentedString::empty()</code></a>. All segments are removed,
+including text content (ASCII and Unicode), control codes, ANSI escape sequences,
+and styling information.</p>
+<p>After calling this method:</p>
+<ul>
+<li><a href="struct.SegmentedString.html#method.segment_count" title="method termionix_server::SegmentedString::segment_count"><code>segment_count()</code></a> will return 0</li>
+<li><a href="struct.SegmentedString.html#method.is_empty" title="method termionix_server::SegmentedString::is_empty"><code>is_empty()</code></a> will return <code>true</code></li>
+<li><a href="struct.SegmentedString.html#method.stripped" title="method termionix_server::SegmentedString::stripped"><code>stripped()</code></a> will return an empty string</li>
+<li><a href="struct.SegmentedString.html#method.len" title="method termionix_server::SegmentedString::len"><code>styled_len()</code></a> will return 0</li>
+<li>All internal segments are removed</li>
+</ul>
+<h5 id="performance-1"><a class="doc-anchor" href="#performance-1">§</a>Performance</h5>
+<p>This is an efficient O(1) operation that clears the internal segment vector.
+The underlying memory capacity is retained, making subsequent operations
+potentially more efficient if the <code>SegmentedString</code> is reused for building
+new content.</p>
+<h5 id="examples-31"><a class="doc-anchor" href="#examples-31">§</a>Examples</h5>
+<p>Basic usage:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, AnsiConfig};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Hello World"</span>);
+<span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">1</span>);
+
+segmented.clear();
+<span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">0</span>);
+<span class="macro">assert!</span>(segmented.is_empty());
+<span class="macro">assert_eq!</span>(segmented.stripped(), <span class="string">""</span>);</code></pre></div>
+<p>Clearing styled content:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Style, Color, Intensity};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_style(Style {
+    foreground: <span class="prelude-val">Some</span>(Color::Red),
+    intensity: <span class="prelude-val">Some</span>(Intensity::Bold),
+    ..Default::default()
+});
+segmented.push_str(<span class="string">"Bold Red Text"</span>);
+
+segmented.clear();
+<span class="macro">assert_eq!</span>(segmented.stripped(), <span class="string">""</span>);
+<span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">0</span>);</code></pre></div>
+<p>Clearing mixed segment types:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Style, Color, ControlCode};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Line 1"</span>);
+segmented.push_ansi_control(ControlCode::LF);
+segmented.push_style(Style {
+    foreground: <span class="prelude-val">Some</span>(Color::Green),
+    ..Default::default()
+});
+segmented.push_str(<span class="string">"Line 2"</span>);
+segmented.push_ansi_control(ControlCode::LF);
+
+<span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">5</span>);
+
+segmented.clear();
+<span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">0</span>);</code></pre></div>
+<p>Reusing after clear:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"First message"</span>);
+segmented.clear();
+
+<span class="comment">// Reuse the same SegmentedString
+</span>segmented.push_str(<span class="string">"Second message"</span>);
+<span class="macro">assert_eq!</span>(segmented.stripped(), <span class="string">"Second message"</span>);
+<span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">1</span>);</code></pre></div>
+<p>Clearing in a loop (efficient memory reuse):</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Style, Color};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+
+<span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">10 </span>{
+    segmented.push_style(Style {
+        foreground: <span class="prelude-val">Some</span>(Color::Blue),
+        ..Default::default()
+    });
+    segmented.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Iteration {}"</span>, i));
+
+    <span class="comment">// Process the segmented string...
+
+    // Clear for next iteration (retains capacity)
+    </span>segmented.clear();
+}</code></pre></div>
+<p>Clearing complex terminal output:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Style, Color, ControlCode, Intensity};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Status: "</span>);
+segmented.push_style(Style {
+    foreground: <span class="prelude-val">Some</span>(Color::Green),
+    intensity: <span class="prelude-val">Some</span>(Intensity::Bold),
+    ..Default::default()
+});
+segmented.push_str(<span class="string">"OK"</span>);
+segmented.push_style(Style::default());
+segmented.push_ansi_control(ControlCode::LF);
+segmented.push_str(<span class="string">"Progress: 100%"</span>);
+
+<span class="comment">// All segments removed, including text, styles, and control codes
+</span>segmented.clear();
+<span class="macro">assert!</span>(segmented.is_empty());</code></pre></div><h5 id="use-cases-1"><a class="doc-anchor" href="#use-cases-1">§</a>Use Cases</h5>
+<ul>
+<li><strong>Buffer reuse</strong>: Clear between operations to avoid reallocations</li>
+<li><strong>Terminal screen clearing</strong>: Reset buffer state for new screen content</li>
+<li><strong>Error recovery</strong>: Clear corrupted or incomplete segment sequences</li>
+<li><strong>Memory management</strong>: Release segments while retaining the container</li>
+<li><strong>State reset</strong>: Return to initial empty state between processing cycles</li>
+</ul>
+<h5 id="comparison-with-other-operations"><a class="doc-anchor" href="#comparison-with-other-operations">§</a>Comparison with Other Operations</h5>
+<ul>
+<li><a href="struct.SegmentedString.html#method.empty" title="associated function termionix_server::SegmentedString::empty"><code>SegmentedString::empty()</code></a>: Creates a new empty instance (allocation)</li>
+<li><code>clear()</code>: Removes all segments from existing instance (reuses allocation)</li>
+<li><a href="struct.SegmentedString.html#method.pop" title="method termionix_server::SegmentedString::pop"><code>pop()</code></a>: Removes one character at a time</li>
+<li><code>clear()</code>: Removes all content at once</li>
+</ul>
+<h5 id="see-also-22"><a class="doc-anchor" href="#see-also-22">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SegmentedString.html#method.empty" title="associated function termionix_server::SegmentedString::empty"><code>SegmentedString::empty()</code></a> - Create a new empty segmented string</li>
+<li><a href="struct.SegmentedString.html#method.is_empty" title="method termionix_server::SegmentedString::is_empty"><code>SegmentedString::is_empty()</code></a> - Check if the string is empty</li>
+<li><a href="struct.SegmentedString.html#method.segment_count" title="method termionix_server::SegmentedString::segment_count"><code>SegmentedString::segment_count()</code></a> - Get the number of segments</li>
+<li><a href="struct.SegmentedString.html#method.stripped" title="method termionix_server::SegmentedString::stripped"><code>SegmentedString::stripped()</code></a> - Get text content without formatting</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.pop" class="method"><h4 class="code-header">pub fn <a href="#method.pop" class="fn">pop</a>(&amp;mut self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.char.html">char</a>&gt;</h4></section></summary><div class="docblock"><p>Removes and returns the last character from the segmented string.</p>
+<p>This method removes the last character from the last text segment (ASCII or Unicode)
+in the segmented string. If removing the character leaves the segment empty, the
+entire segment is removed. Returns <code>None</code> if the segmented string is empty or if
+the last segment is not a text segment.</p>
+<h5 id="non-text-segments"><a class="doc-anchor" href="#non-text-segments">§</a>Non-Text Segments</h5>
+<p>If the last segment is not a text segment (Control, Escape, CSI, SGR, OSC, etc.),
+the entire segment is removed and returned as <code>None</code>. This ensures that control
+sequences and styling information are treated as atomic units.</p>
+<h5 id="returns-14"><a class="doc-anchor" href="#returns-14">§</a>Returns</h5>
+<ul>
+<li><code>Some(char)</code> - The last character if the last segment contains text</li>
+<li><code>None</code> - If the string is empty or the last segment is not text</li>
+</ul>
+<h5 id="examples-32"><a class="doc-anchor" href="#examples-32">§</a>Examples</h5>
+<p>Basic usage:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Hello"</span>);
+
+<span class="macro">assert_eq!</span>(segmented.pop(), <span class="prelude-val">Some</span>(<span class="string">'o'</span>));
+<span class="macro">assert_eq!</span>(segmented.pop(), <span class="prelude-val">Some</span>(<span class="string">'l'</span>));
+<span class="macro">assert_eq!</span>(segmented.stripped(), <span class="string">"Hel"</span>);</code></pre></div>
+<p>Popping from an empty string:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+<span class="macro">assert_eq!</span>(segmented.pop(), <span class="prelude-val">None</span>);</code></pre></div>
+<p>Unicode character support:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_char(<span class="string">'🦀'</span>); <span class="comment">// Rust crab emoji (4 bytes)
+</span>segmented.push_char(<span class="string">'日'</span>); <span class="comment">// Japanese character (3 bytes)
+
+</span><span class="macro">assert_eq!</span>(segmented.pop(), <span class="prelude-val">Some</span>(<span class="string">'日'</span>));
+<span class="macro">assert_eq!</span>(segmented.pop(), <span class="prelude-val">Some</span>(<span class="string">'🦀'</span>));
+<span class="macro">assert_eq!</span>(segmented.pop(), <span class="prelude-val">None</span>);</code></pre></div>
+<p>Handling non-text segments:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, ControlCode};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Hello"</span>);
+segmented.push_ansi_control(ControlCode::LF);
+
+<span class="comment">// Control code is removed as a whole, returns None
+</span><span class="macro">assert_eq!</span>(segmented.pop(), <span class="prelude-val">None</span>);
+<span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">1</span>);
+
+<span class="comment">// Now we can pop from the text segment
+</span><span class="macro">assert_eq!</span>(segmented.pop(), <span class="prelude-val">Some</span>(<span class="string">'o'</span>));</code></pre></div>
+<p>Mixed ASCII and Unicode segments:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Hello"</span>);
+segmented.push_str(<span class="string">"世界"</span>);
+
+<span class="macro">assert_eq!</span>(segmented.pop(), <span class="prelude-val">Some</span>(<span class="string">'界'</span>));
+<span class="macro">assert_eq!</span>(segmented.pop(), <span class="prelude-val">Some</span>(<span class="string">'世'</span>));
+<span class="macro">assert_eq!</span>(segmented.pop(), <span class="prelude-val">Some</span>(<span class="string">'o'</span>));</code></pre></div>
+<p>Segment removal when empty:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"AB"</span>);
+segmented.push_str(<span class="string">"C"</span>);
+
+<span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">1</span>); <span class="comment">// Merged
+</span>segmented.pop(); <span class="comment">// Remove 'C'
+</span><span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">1</span>); <span class="comment">// Still has "AB"</span></code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.len" class="method"><h4 class="code-header">pub fn <a href="#method.len" class="fn">len</a>(&amp;self, config: <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;<a class="struct" href="struct.AnsiConfig.html" title="struct termionix_server::AnsiConfig">AnsiConfig</a>&gt;) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>, <a class="enum" href="enum.AnsiCodecError.html" title="enum termionix_server::AnsiCodecError">AnsiCodecError</a>&gt;</h4></section></summary><div class="docblock"><p>Returns the display length of the segmented string based on the provided configuration.</p>
+<p>This calculates how many visible character positions the string occupies on screen,
+taking into account the ANSI configuration settings. Most ANSI escape sequences
+(control codes, CSI sequences, style changes) do not contribute to display length
+as they only affect formatting or cursor positioning.</p>
+<h5 id="arguments-15"><a class="doc-anchor" href="#arguments-15">§</a>Arguments</h5>
+<ul>
+<li><code>config</code> - The ANSI configuration that determines how segments are interpreted</li>
+</ul>
+<h5 id="returns-15"><a class="doc-anchor" href="#returns-15">§</a>Returns</h5>
+<p>The number of visible character positions the string occupies. This is the sum
+of the lengths of all text segments (ASCII and Unicode), excluding control
+sequences and formatting codes.</p>
+<h5 id="examples-33"><a class="doc-anchor" href="#examples-33">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, AnsiConfig};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Hello"</span>);
+
+<span class="kw">let </span>config = AnsiConfig::default();
+<span class="macro">assert_eq!</span>(segmented.len(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>config)).unwrap(), <span class="number">5</span>);</code></pre></div>
+<p>With control codes (which don’t contribute to display length):</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, AnsiConfig, ControlCode};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Hello"</span>);
+segmented.push_ansi_control(ControlCode::LF);
+segmented.push_str(<span class="string">"World"</span>);
+
+<span class="kw">let </span>config = AnsiConfig::strip_all();
+<span class="macro">assert_eq!</span>(segmented.len(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>config)).unwrap(), <span class="number">10</span>); <span class="comment">// Only counts "HelloWorld"</span></code></pre></div></div></details><details class="toggle method-toggle" open><summary><section id="method.encode" class="method"><h4 class="code-header">pub fn <a href="#method.encode" class="fn">encode</a>&lt;T&gt;(
+    &amp;self,
+    dst: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;mut T</a>,
+    config: <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;<a class="struct" href="struct.AnsiConfig.html" title="struct termionix_server::AnsiConfig">AnsiConfig</a>&gt;,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>, <a class="enum" href="enum.AnsiCodecError.html" title="enum termionix_server::AnsiCodecError">AnsiCodecError</a>&gt;<div class="where">where
+    T: BufMut,</div></h4></section></summary><div class="docblock"><p>Encodes the segmented string into a buffer using the specified ANSI configuration.</p>
+<p>This method writes the segmented string to a <code>BufMut</code> buffer, applying the
+color mode and other settings from the provided configuration. This is useful
+when working with byte buffers in network protocols or file I/O.</p>
+<h5 id="arguments-16"><a class="doc-anchor" href="#arguments-16">§</a>Arguments</h5>
+<ul>
+<li><code>dst</code> - The buffer to write to (must implement <code>BufMut</code>)</li>
+<li><code>config</code> - Optional ANSI configuration controlling color mode and output format</li>
+</ul>
+<h5 id="returns-16"><a class="doc-anchor" href="#returns-16">§</a>Returns</h5>
+<p>Returns <code>Ok(bytes_written)</code> on success, or an error if encoding fails.</p>
+<h5 id="examples-34"><a class="doc-anchor" href="#examples-34">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, AnsiConfig, ColorMode};
+<span class="kw">use </span>bytes::BytesMut;
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_str(<span class="string">"Hello World"</span>);
+
+<span class="kw">let </span><span class="kw-2">mut </span>buf = BytesMut::new();
+<span class="kw">let </span>config = AnsiConfig::new(ColorMode::TrueColor);
+<span class="kw">let </span>bytes_written = seg.encode(<span class="kw-2">&amp;mut </span>buf, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>config))<span class="question-mark">?</span>;</code></pre></div><h5 id="see-also-23"><a class="doc-anchor" href="#see-also-23">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SegmentedString.html#method.write" title="method termionix_server::SegmentedString::write"><code>write()</code></a> - Write to any <code>std::io::Write</code> implementation</li>
+<li><a href="struct.AnsiConfig.html" title="struct termionix_server::AnsiConfig"><code>AnsiConfig</code></a> - Configuration options</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.write" class="method"><h4 class="code-header">pub fn <a href="#method.write" class="fn">write</a>&lt;W&gt;(
+    &amp;self,
+    writer: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;mut W</a>,
+    config: <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;<a class="struct" href="struct.AnsiConfig.html" title="struct termionix_server::AnsiConfig">AnsiConfig</a>&gt;,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>, <a class="struct" href="https://doc.rust-lang.org/1.93.0/std/io/error/struct.Error.html" title="struct std::io::error::Error">Error</a>&gt;<div class="where">where
+    W: <a class="trait" href="https://doc.rust-lang.org/1.93.0/std/io/trait.Write.html" title="trait std::io::Write">Write</a>,</div></h4></section></summary><div class="docblock"><p>Writes the segmented string with appropriate ANSI escape codes to a writer.</p>
+<p>This method processes each segment and outputs it according to the specified
+color mode. Text segments (ASCII and Unicode) are written directly, while
+control sequences and style changes are converted to their ANSI representations
+based on the color mode settings.</p>
+<h5 id="segment-processing-1"><a class="doc-anchor" href="#segment-processing-1">§</a>Segment Processing</h5>
+<p>Different segment types are handled as follows:</p>
+<ul>
+<li><strong>ASCII/Unicode</strong>: Text content is written directly</li>
+<li><strong>Control</strong>: Converted to their control character representation</li>
+<li><strong>Escape</strong>: Written as ESC character (<code>\x1b</code>)</li>
+<li><strong>CSI</strong>: Formatted as CSI sequence (<code>ESC [ ... </code>)</li>
+<li><strong>SGR</strong>: Style information written as SGR codes (if color mode allows)</li>
+<li><strong>OSC/DCS/SOS/ST/PM/APC</strong>: Written as appropriate ANSI sequences</li>
+</ul>
+<h5 id="color-mode-behavior"><a class="doc-anchor" href="#color-mode-behavior">§</a>Color Mode Behavior</h5>
+<p>The <code>mode</code> parameter determines how styling segments are rendered:</p>
+<ul>
+<li>[<code>ColorMode::None</code>]: No ANSI escape codes are generated (text only)</li>
+<li>[<code>ColorMode::Basic</code>]: Basic 16-color ANSI codes</li>
+<li>[<code>ColorMode::Extended</code>]: 256-color ANSI codes</li>
+<li>[<code>ColorMode::TrueColor</code>]: 24-bit RGB ANSI codes</li>
+</ul>
+<h5 id="arguments-17"><a class="doc-anchor" href="#arguments-17">§</a>Arguments</h5>
+<ul>
+<li><code>mode</code> - The color mode determining which ANSI codes to generate</li>
+<li><code>writer</code> - The writer to output the formatted string to</li>
+</ul>
+<h5 id="returns-17"><a class="doc-anchor" href="#returns-17">§</a>Returns</h5>
+<p>Returns <code>Ok(())</code> on success, or a <a href="https://doc.rust-lang.org/1.93.0/core/fmt/struct.Error.html" title="struct core::fmt::Error"><code>std::fmt::Error</code></a> if writing fails.</p>
+<h5 id="examples-35"><a class="doc-anchor" href="#examples-35">§</a>Examples</h5>
+<p>Writing plain text:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, ColorMode, AnsiConfig};
+<span class="kw">let </span>config = AnsiConfig::default();
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Hello World"</span>);
+
+<span class="kw">let </span><span class="kw-2">mut </span>output = String::new();
+segmented.write_str(<span class="kw-2">&amp;mut </span>output, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>config)).unwrap();
+<span class="macro">assert_eq!</span>(output, <span class="string">"Hello World"</span>);</code></pre></div>
+<p>Writing styled text with color mode:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Style, Color, ColorMode, Intensity, AnsiConfig};
+
+<span class="kw">let </span>config = AnsiConfig::default();
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_style(Style {
+    foreground: <span class="prelude-val">Some</span>(Color::Red),
+    intensity: <span class="prelude-val">Some</span>(Intensity::Bold),
+    ..Default::default()
+});
+segmented.push_str(<span class="string">"Error"</span>);
+
+<span class="kw">let </span><span class="kw-2">mut </span>output = String::new();
+segmented.write_str(<span class="kw-2">&amp;mut </span>output, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>config)).unwrap();
+<span class="comment">// Output contains ANSI codes: "\x1b[1;31mError"</span></code></pre></div>
+<p>Writing with control codes:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, ControlCode, ColorMode, AnsiConfig};
+
+<span class="kw">let </span>config = AnsiConfig::default();
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_str(<span class="string">"Line 1"</span>);
+segmented.push_ansi_control(ControlCode::LF);
+segmented.push_str(<span class="string">"Line 2"</span>);
+
+<span class="kw">let </span><span class="kw-2">mut </span>output = String::new();
+segmented.write_str(<span class="kw-2">&amp;mut </span>output, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>config)).unwrap();
+<span class="macro">assert_eq!</span>(output, <span class="string">"Line 1\nLine 2"</span>);</code></pre></div>
+<p>Different color modes produce different output:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Style, Color, ColorMode, AnsiConfig};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::empty();
+segmented.push_style(Style {
+    foreground: <span class="prelude-val">Some</span>(Color::Red),
+    ..Default::default()
+});
+segmented.push_str(<span class="string">"Red"</span>);
+
+<span class="comment">// No ANSI codes
+</span><span class="kw">let </span>config_none = AnsiConfig::strip_all();
+<span class="kw">let </span><span class="kw-2">mut </span>output_none = String::new();
+segmented.write_str(<span class="kw-2">&amp;mut </span>output_none, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>config_none)).unwrap();
+<span class="macro">assert_eq!</span>(output_none, <span class="string">"Red"</span>);
+
+<span class="comment">// With ANSI codes
+</span><span class="kw">let </span>config_basic = AnsiConfig::default();
+<span class="kw">let </span><span class="kw-2">mut </span>output_basic = String::new();
+segmented.write_str(<span class="kw-2">&amp;mut </span>output_basic, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>config_basic)).unwrap();
+<span class="macro">assert!</span>(output_basic.starts_with(<span class="string">"\x1b["</span>));</code></pre></div><h5 id="performance-2"><a class="doc-anchor" href="#performance-2">§</a>Performance</h5>
+<p>This operation is O(n) where n is the number of segments. Each segment
+is processed once, and ANSI codes are generated inline without additional
+allocations beyond what the writer requires.</p>
+<h5 id="use-cases-2"><a class="doc-anchor" href="#use-cases-2">§</a>Use Cases</h5>
+<ul>
+<li><strong>Terminal output</strong>: Display formatted text in terminals</li>
+<li><strong>File generation</strong>: Create ANSI-formatted text files</li>
+<li><strong>Network protocols</strong>: Send styled text over network connections</li>
+<li><strong>Logging</strong>: Output colored logs to terminal or file</li>
+<li><strong>Testing</strong>: Verify ANSI output formatting</li>
+</ul>
+<h5 id="see-also-24"><a class="doc-anchor" href="#see-also-24">§</a>See Also</h5>
+<ul>
+<li>[<code>ColorMode</code>] - Controls ANSI code generation</li>
+<li><a href="struct.AnsiSelectGraphicRendition.html#method.write" title="method termionix_server::AnsiSelectGraphicRendition::write"><code>Style::write_style()</code></a> - Used internally for SGR segments</li>
+<li><a href="struct.StyledString.html#method.write_str" title="method termionix_server::StyledString::write_str"><code>StyledString::write_str()</code></a> - Similar method for <code>StyledString</code></li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.parse" class="method"><h4 class="code-header">pub fn <a href="#method.parse" class="fn">parse</a>&lt;S&gt;(str: S) -&gt; <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a><div class="where">where
+    S: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.str.html">str</a>&gt;,</div></h4></section></summary><div class="docblock"><p>Parses a string containing ANSI escape sequences into a <code>SegmentedString</code>.</p>
+<p>This method performs a complete analysis of the input string, identifying and
+converting all content into distinct owned segments. It handles ASCII text,
+Unicode characters, control codes, and all ANSI escape sequences (CSI, OSC, DCS, etc.),
+producing a <code>SegmentedString</code> ready for manipulation or rendering.</p>
+<h5 id="how-it-works"><a class="doc-anchor" href="#how-it-works">§</a>How It Works</h5>
+<p>The parsing process occurs in two stages:</p>
+<ol>
+<li>
+<p><strong>Parse into spans</strong>: Uses <a href="struct.SpannedString.html#method.parse" title="associated function termionix_server::SpannedString::parse"><code>SpannedString::parse</code></a> to analyze the input and
+create lightweight byte range references to each segment type.</p>
+</li>
+<li>
+<p><strong>Extract and own content</strong>: Converts the spans into owned segments by extracting
+the actual content from the source string using <a href="struct.SpannedString.html#method.into_segmented_string" title="method termionix_server::SpannedString::into_segmented_string"><code>SpannedString::into_segmented_string</code></a>.</p>
+</li>
+</ol>
+<p>This approach leverages existing, well-tested parsing infrastructure while producing
+a <code>SegmentedString</code> with fully owned data suitable for further manipulation.</p>
+<h5 id="arguments-18"><a class="doc-anchor" href="#arguments-18">§</a>Arguments</h5>
+<ul>
+<li><code>str</code> - A string-like value that can be converted to <code>&amp;str</code> via <code>AsRef&lt;str&gt;</code>.
+This includes <code>&amp;str</code>, <code>String</code>, <code>Cow&lt;str&gt;</code>, and other string types.</li>
+</ul>
+<h5 id="returns-18"><a class="doc-anchor" href="#returns-18">§</a>Returns</h5>
+<p>A <code>SegmentedString</code> containing owned segments representing all content from the input:</p>
+<ul>
+<li><strong>ASCII/Unicode segments</strong>: Text content merged intelligently</li>
+<li><strong>Control segments</strong>: Individual control codes (newlines, tabs, etc.)</li>
+<li><strong>CSI segments</strong>: Parsed cursor/erase/scroll commands</li>
+<li><strong>SGR segments</strong>: Style and color information (extracted from CSI sequences)</li>
+<li><strong>OSC/DCS/etc.</strong>: Other escape sequence types with their data</li>
+</ul>
+<h5 id="segment-types-produced"><a class="doc-anchor" href="#segment-types-produced">§</a>Segment Types Produced</h5>
+<p>The parser identifies and creates the following segment types:</p>
+<h6 id="text-segments"><a class="doc-anchor" href="#text-segments">§</a>Text Segments</h6>
+<ul>
+<li><strong>ASCII</strong>: Printable ASCII characters (0x20-0x7E)</li>
+<li><strong>Unicode</strong>: Multi-byte UTF-8 characters</li>
+</ul>
+<p>These are automatically merged when adjacent for efficiency. For example,
+“Hello World” becomes a single ASCII segment, and “Hello世界” becomes a single
+Unicode segment.</p>
+<h6 id="control-segments"><a class="doc-anchor" href="#control-segments">§</a>Control Segments</h6>
+<ul>
+<li><strong>Control</strong>: Terminal control characters like LF (<code>\n</code>), CR (<code>\r</code>), HT (<code>\t</code>), etc.</li>
+<li><strong>Escape</strong>: Standalone ESC character or unrecognized escape sequences</li>
+</ul>
+<h6 id="ansi-escape-sequences"><a class="doc-anchor" href="#ansi-escape-sequences">§</a>ANSI Escape Sequences</h6>
+<ul>
+<li><strong>CSI</strong>: Control Sequence Introducer (cursor movement, erasing, scrolling)</li>
+<li><strong>SGR</strong>: Select Graphic Rendition (colors, bold, underline, etc.)</li>
+<li><strong>OSC</strong>: Operating System Commands (window title, etc.)</li>
+<li><strong>DCS</strong>: Device Control String</li>
+<li><strong>SOS</strong>: Start of String</li>
+<li><strong>ST</strong>: String Terminator</li>
+<li><strong>PM</strong>: Privacy Message</li>
+<li><strong>APC</strong>: Application Program Command</li>
+</ul>
+<h5 id="parsing-features"><a class="doc-anchor" href="#parsing-features">§</a>Parsing Features</h5><h6 id="greedy-segment-merging"><a class="doc-anchor" href="#greedy-segment-merging">§</a>Greedy Segment Merging</h6>
+<p>The parser merges consecutive compatible segments to minimize memory usage:</p>
+<ul>
+<li>Consecutive ASCII characters → Single ASCII segment</li>
+<li>Consecutive Unicode characters → Single Unicode segment</li>
+<li>ASCII + Unicode → Promoted to single Unicode segment</li>
+<li>Consecutive identical control codes → Single Control segment</li>
+</ul>
+<h6 id="sgr-extraction"><a class="doc-anchor" href="#sgr-extraction">§</a>SGR Extraction</h6>
+<p>CSI sequences with the <code>m</code> command (SGR - Select Graphic Rendition) are
+automatically converted into <code>SGR</code> segments with parsed <a href="struct.AnsiSelectGraphicRendition.html" title="struct termionix_server::AnsiSelectGraphicRendition"><code>AnsiSelectGraphicRendition</code></a> information,
+making it easy to work with colors and text formatting.</p>
+<h6 id="utf-8-support"><a class="doc-anchor" href="#utf-8-support">§</a>UTF-8 Support</h6>
+<p>Full Unicode support with proper UTF-8 character boundary detection. Multi-byte
+characters are handled correctly and merged into Unicode segments.</p>
+<h6 id="escape-sequence-termination"><a class="doc-anchor" href="#escape-sequence-termination">§</a>Escape Sequence Termination</h6>
+<p>String-type sequences (OSC, DCS, etc.) are properly terminated by:</p>
+<ul>
+<li>ST (String Terminator): ESC \ or 0x9C</li>
+<li>BEL (Bell): 0x07 (for OSC only)</li>
+</ul>
+<h5 id="performance-3"><a class="doc-anchor" href="#performance-3">§</a>Performance</h5>
+<ul>
+<li><strong>Time Complexity</strong>: O(n) where n is the length of the input string</li>
+<li><strong>Space Complexity</strong>: O(m) where m is the number of segments produced</li>
+<li><strong>Allocations</strong>: One allocation per segment for text/data content</li>
+<li><strong>Single Pass</strong>: The string is scanned once during the span parsing phase</li>
+</ul>
+<p>The two-stage approach (parse spans, then extract content) is efficient because
+span parsing is fast (just tracking byte ranges), and content extraction happens
+only once per segment.</p>
+<h5 id="examples-36"><a class="doc-anchor" href="#examples-36">§</a>Examples</h5><h6 id="plain-text"><a class="doc-anchor" href="#plain-text">§</a>Plain Text</h6>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span>segmented = SegmentedString::parse(<span class="string">"Hello World"</span>);
+<span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">1</span>);
+<span class="macro">assert_eq!</span>(segmented.stripped(), <span class="string">"Hello World"</span>);</code></pre></div><h6 id="ansi-colors"><a class="doc-anchor" href="#ansi-colors">§</a>ANSI Colors</h6>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span>input = <span class="string">"\x1b[31mRed Text\x1b[0m"</span>;
+<span class="kw">let </span>segmented = SegmentedString::parse(input);
+
+<span class="comment">// Produces: SGR(red) → "Red Text" → SGR(reset)
+</span><span class="macro">assert!</span>(segmented.segment_count() &gt;= <span class="number">3</span>);
+<span class="macro">assert_eq!</span>(segmented.stripped(), <span class="string">"Red Text"</span>);</code></pre></div><h6 id="mixed-content-with-control-codes"><a class="doc-anchor" href="#mixed-content-with-control-codes">§</a>Mixed Content with Control Codes</h6>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span>input = <span class="string">"Line 1\nLine 2\tTabbed"</span>;
+<span class="kw">let </span>segmented = SegmentedString::parse(input);
+
+<span class="comment">// Produces: "Line 1" → LF → "Line 2" → HT → "Tabbed"
+</span><span class="macro">assert_eq!</span>(segmented.stripped(), <span class="string">"Line 1Line 2Tabbed"</span>);</code></pre></div><h6 id="unicode-content"><a class="doc-anchor" href="#unicode-content">§</a>Unicode Content</h6>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span>input = <span class="string">"Hello 世界"</span>;
+<span class="kw">let </span>segmented = SegmentedString::parse(input);
+
+<span class="comment">// ASCII and Unicode merged into single segment
+</span><span class="macro">assert_eq!</span>(segmented.segment_count(), <span class="number">1</span>);
+<span class="macro">assert_eq!</span>(segmented.stripped(), <span class="string">"Hello 世界"</span>);</code></pre></div><h6 id="complex-ansi-sequences"><a class="doc-anchor" href="#complex-ansi-sequences">§</a>Complex ANSI Sequences</h6>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span>input = <span class="string">"\x1b[1;32mBold Green\x1b[0m Normal\n"</span>;
+<span class="kw">let </span>segmented = SegmentedString::parse(input);
+
+<span class="comment">// Produces multiple segments with styles, text, and control codes
+</span><span class="macro">assert!</span>(segmented.segment_count() &gt; <span class="number">3</span>);</code></pre></div><h6 id="building-from-parse"><a class="doc-anchor" href="#building-from-parse">§</a>Building from Parse</h6>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, ControlCode};
+
+<span class="kw">let </span><span class="kw-2">mut </span>segmented = SegmentedString::parse(<span class="string">"\x1b[31mError:\x1b[0m "</span>);
+segmented.push_str(<span class="string">"File not found"</span>);
+segmented.push_ansi_control(ControlCode::LF);</code></pre></div><h6 id="generic-string-types"><a class="doc-anchor" href="#generic-string-types">§</a>Generic String Types</h6>
+<p>The method accepts any type implementing <code>AsRef&lt;str&gt;</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="comment">// From &amp;str
+</span><span class="kw">let </span>s1 = SegmentedString::parse(<span class="string">"text"</span>);
+
+<span class="comment">// From String
+</span><span class="kw">let </span>s2 = SegmentedString::parse(String::from(<span class="string">"text"</span>));
+
+<span class="comment">// From Cow&lt;str&gt;
+</span><span class="kw">use </span>std::borrow::Cow;
+<span class="kw">let </span>s3 = SegmentedString::parse(Cow::from(<span class="string">"text"</span>));</code></pre></div><h5 id="edge-cases"><a class="doc-anchor" href="#edge-cases">§</a>Edge Cases</h5>
+<ul>
+<li><strong>Empty String</strong>: Returns an empty <code>SegmentedString</code> with no segments</li>
+<li><strong>Incomplete Sequences</strong>: Treated as Escape segments containing the incomplete bytes</li>
+<li><strong>Invalid UTF-8</strong>: Individual bytes may create invalid segments (not validated)</li>
+<li><strong>Malformed CSI</strong>: Parsed as CSICommand::Unknown with available parameters</li>
+<li><strong>Unterminated Strings</strong>: OSC/DCS/etc. without ST extend to end of input</li>
+</ul>
+<h5 id="use-cases-3"><a class="doc-anchor" href="#use-cases-3">§</a>Use Cases</h5>
+<p>This method is ideal for:</p>
+<ul>
+<li><strong>Terminal Output</strong>: Building terminal content from ANSI-formatted strings</li>
+<li><strong>Format Conversion</strong>: Converting ANSI strings to manipulable segments</li>
+<li><strong>Content Filtering</strong>: Extracting or modifying specific segment types</li>
+<li><strong>Testing</strong>: Verifying ANSI string composition and structure</li>
+<li><strong>Rendering</strong>: Preparing content for display with different color modes</li>
+</ul>
+<h5 id="comparison-with-other-parsing"><a class="doc-anchor" href="#comparison-with-other-parsing">§</a>Comparison with Other Parsing</h5>
+<ul>
+<li><strong><a href="struct.SpannedString.html#method.parse" title="associated function termionix_server::SpannedString::parse"><code>SpannedString::parse</code></a></strong>: Returns lightweight byte ranges, no owned data</li>
+<li><strong><code>SegmentedString::parse</code></strong>: Returns owned segments ready for manipulation</li>
+<li><strong><a href="crate::AnsiMapper"><code>AnsiMapper</code></a></strong>: Byte-by-byte stateful parsing for streaming</li>
+</ul>
+<p>Use <code>SegmentedString::parse</code> when you need to:</p>
+<ul>
+<li>Manipulate the parsed content (add, remove, or modify segments)</li>
+<li>Build output incrementally after parsing</li>
+<li>Convert between representations</li>
+<li>Store parsed content for later use</li>
+</ul>
+<p>Use <code>SpannedString::parse</code> when you only need to:</p>
+<ul>
+<li>Analyze structure without copying data</li>
+<li>Extract specific portions by byte range</li>
+<li>Perform read-only operations</li>
+</ul>
+<h5 id="see-also-25"><a class="doc-anchor" href="#see-also-25">§</a>See Also</h5>
+<ul>
+<li><a href="struct.SpannedString.html#method.parse" title="associated function termionix_server::SpannedString::parse"><code>SpannedString::parse</code></a> - Lightweight parsing returning byte ranges</li>
+<li><a href="struct.SegmentedString.html#method.push_str" title="method termionix_server::SegmentedString::push_str"><code>SegmentedString::push_str</code></a> - Add text to an existing segmented string</li>
+<li><a href="struct.SegmentedString.html#method.push_segment" title="method termionix_server::SegmentedString::push_segment"><code>SegmentedString::push_segment</code></a> - Add individual segments</li>
+<li><a href="struct.SegmentedString.html#method.stripped" title="method termionix_server::SegmentedString::stripped"><code>SegmentedString::stripped</code></a> - Extract plain text without ANSI codes</li>
+<li><a href="struct.StyledString.html" title="struct termionix_server::StyledString"><code>StyledString</code></a> - Alternative representation with style metadata</li>
+</ul>
+</div></details></div></details></div><h2 id="trait-implementations" class="section-header">Trait Implementations<a href="#trait-implementations" class="anchor">§</a></h2><div id="trait-implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Clone-for-SegmentedString" class="impl"><a href="#impl-Clone-for-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone" class="method trait-impl"><a href="#method.clone" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#tymethod.clone" class="fn">clone</a>(&amp;self) -&gt; <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class='docblock'>Returns a duplicate of the value. <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#tymethod.clone">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_from" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/clone.rs.html#245-247">Source</a></span><a href="#method.clone_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#method.clone_from" class="fn">clone_from</a>(&amp;mut self, source: &amp;Self)</h4></section></summary><div class='docblock'>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#method.clone_from">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Debug-for-SegmentedString" class="impl"><a href="#impl-Debug-for-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt" class="method trait-impl"><a href="#method.fmt" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Debug.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>, <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/fmt/struct.Error.html" title="struct core::fmt::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Debug.html#tymethod.fmt">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Default-for-SegmentedString" class="impl"><a href="#impl-Default-for-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/default/trait.Default.html" title="trait core::default::Default">Default</a> for <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.default" class="method trait-impl"><a href="#method.default" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/default/trait.Default.html#tymethod.default" class="fn">default</a>() -&gt; <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class='docblock'>Returns the “default value” for a type. <a href="https://doc.rust-lang.org/1.93.0/core/default/trait.Default.html#tymethod.default">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Display-for-SegmentedString" class="impl"><a href="#impl-Display-for-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Display.html" title="trait core::fmt::Display">Display</a> for <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt-1" class="method trait-impl"><a href="#method.fmt-1" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Display.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>, <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/fmt/struct.Error.html" title="struct core::fmt::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Display.html#tymethod.fmt">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-From%3C%26str%3E-for-SegmentedString" class="impl"><a href="#impl-From%3C%26str%3E-for-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;&amp;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.str.html">str</a>&gt; for <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.from" class="method trait-impl"><a href="#method.from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html#tymethod.from" class="fn">from</a>(value: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.str.html">str</a>) -&gt; <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h4></section></summary><div class='docblock'>Converts to this type from the input type.</div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Index%3Cusize%3E-for-SegmentedString" class="impl"><a href="#impl-Index%3Cusize%3E-for-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/ops/index/trait.Index.html" title="trait core::ops::index::Index">Index</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt; for <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Output" class="associatedtype trait-impl"><a href="#associatedtype.Output" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/ops/index/trait.Index.html#associatedtype.Output" class="associatedtype">Output</a> = <a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a></h4></section></summary><div class='docblock'>The returned type after indexing.</div></details><details class="toggle method-toggle" open><summary><section id="method.index" class="method trait-impl"><a href="#method.index" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/ops/index/trait.Index.html#tymethod.index" class="fn">index</a>(&amp;self, index: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>) -&gt; &amp;&lt;<a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a> as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/ops/index/trait.Index.html" title="trait core::ops::index::Index">Index</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/ops/index/trait.Index.html#associatedtype.Output" title="type core::ops::index::Index::Output">Output</a></h4></section></summary><div class='docblock'>Performs the indexing (<code>container[index]</code>) operation. <a href="https://doc.rust-lang.org/1.93.0/core/ops/index/trait.Index.html#tymethod.index">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-IntoIterator-for-%26SegmentedString" class="impl"><a href="#impl-IntoIterator-for-%26SegmentedString" class="anchor">§</a><h3 class="code-header">impl&lt;'a&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator">IntoIterator</a> for &amp;'a <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into_iter-1" class="method trait-impl"><a href="#method.into_iter-1" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html#tymethod.into_iter" class="fn">into_iter</a>(self) -&gt; &lt;&amp;'a <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a> as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator">IntoIterator</a>&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html#associatedtype.IntoIter" title="type core::iter::traits::collect::IntoIterator::IntoIter">IntoIter</a></h4></section></summary><div class="docblock"><p>Returns an iterator over segment references.</p>
+<p>This allows using <code>for segment in &amp;segmented_string</code> syntax.</p>
+<h5 id="examples-38"><a class="doc-anchor" href="#examples-38">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_str(<span class="string">"Hello"</span>);
+
+<span class="kw">for </span>segment <span class="kw">in </span><span class="kw-2">&amp;</span>seg {
+    <span class="comment">// Process segment references
+</span>}</code></pre></div></div></details><details class="toggle" open><summary><section id="associatedtype.Item-1" class="associatedtype trait-impl"><a href="#associatedtype.Item-1" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html#associatedtype.Item" class="associatedtype">Item</a> = &amp;'a <a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a></h4></section></summary><div class='docblock'>The type of the elements being iterated over.</div></details><details class="toggle" open><summary><section id="associatedtype.IntoIter-1" class="associatedtype trait-impl"><a href="#associatedtype.IntoIter-1" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html#associatedtype.IntoIter" class="associatedtype">IntoIter</a> = <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/slice/iter/struct.Iter.html" title="struct core::slice::iter::Iter">Iter</a>&lt;'a, <a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a>&gt;</h4></section></summary><div class='docblock'>Which kind of iterator are we turning this into?</div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-IntoIterator-for-%26mut+SegmentedString" class="impl"><a href="#impl-IntoIterator-for-%26mut+SegmentedString" class="anchor">§</a><h3 class="code-header">impl&lt;'a&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator">IntoIterator</a> for &amp;'a mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into_iter-2" class="method trait-impl"><a href="#method.into_iter-2" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html#tymethod.into_iter" class="fn">into_iter</a>(self) -&gt; &lt;&amp;'a mut <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a> as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator">IntoIterator</a>&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html#associatedtype.IntoIter" title="type core::iter::traits::collect::IntoIterator::IntoIter">IntoIter</a></h4></section></summary><div class="docblock"><p>Returns an iterator over mutable segment references.</p>
+<p>This allows using <code>for segment in &amp;mut segmented_string</code> syntax.</p>
+<h5 id="examples-39"><a class="doc-anchor" href="#examples-39">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SegmentedString, Segment};
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_str(<span class="string">"Hello"</span>);
+
+<span class="kw">for </span>segment <span class="kw">in </span><span class="kw-2">&amp;mut </span>seg {
+    <span class="comment">// Modify segments in place
+    </span><span class="kw">if let </span>Segment::ASCII(text) = segment {
+        <span class="kw-2">*</span>text = text.to_uppercase();
+    }
+}</code></pre></div></div></details><details class="toggle" open><summary><section id="associatedtype.Item-2" class="associatedtype trait-impl"><a href="#associatedtype.Item-2" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html#associatedtype.Item" class="associatedtype">Item</a> = &amp;'a mut <a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a></h4></section></summary><div class='docblock'>The type of the elements being iterated over.</div></details><details class="toggle" open><summary><section id="associatedtype.IntoIter-2" class="associatedtype trait-impl"><a href="#associatedtype.IntoIter-2" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html#associatedtype.IntoIter" class="associatedtype">IntoIter</a> = <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/slice/iter/struct.IterMut.html" title="struct core::slice::iter::IterMut">IterMut</a>&lt;'a, <a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a>&gt;</h4></section></summary><div class='docblock'>Which kind of iterator are we turning this into?</div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-IntoIterator-for-SegmentedString" class="impl"><a href="#impl-IntoIterator-for-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator">IntoIterator</a> for <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into_iter" class="method trait-impl"><a href="#method.into_iter" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html#tymethod.into_iter" class="fn">into_iter</a>(self) -&gt; &lt;<a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a> as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator">IntoIterator</a>&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html#associatedtype.IntoIter" title="type core::iter::traits::collect::IntoIterator::IntoIter">IntoIter</a></h4></section></summary><div class="docblock"><p>Consumes the <code>SegmentedString</code> and returns an iterator over owned segments.</p>
+<h5 id="examples-37"><a class="doc-anchor" href="#examples-37">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SegmentedString;
+
+<span class="kw">let </span><span class="kw-2">mut </span>seg = SegmentedString::empty();
+seg.push_str(<span class="string">"Hello"</span>);
+seg.push_str(<span class="string">" World"</span>);
+
+<span class="kw">for </span>segment <span class="kw">in </span>seg {
+    <span class="comment">// Process owned segments
+</span>}</code></pre></div></div></details><details class="toggle" open><summary><section id="associatedtype.Item" class="associatedtype trait-impl"><a href="#associatedtype.Item" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html#associatedtype.Item" class="associatedtype">Item</a> = <a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a></h4></section></summary><div class='docblock'>The type of the elements being iterated over.</div></details><details class="toggle" open><summary><section id="associatedtype.IntoIter" class="associatedtype trait-impl"><a href="#associatedtype.IntoIter" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/iter/traits/collect/trait.IntoIterator.html#associatedtype.IntoIter" class="associatedtype">IntoIter</a> = <a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/vec/into_iter/struct.IntoIter.html" title="struct alloc::vec::into_iter::IntoIter">IntoIter</a>&lt;<a class="enum" href="enum.Segment.html" title="enum termionix_server::Segment">Segment</a>&gt;</h4></section></summary><div class='docblock'>Which kind of iterator are we turning this into?</div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-PartialEq-for-SegmentedString" class="impl"><a href="#impl-PartialEq-for-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialEq.html" title="trait core::cmp::PartialEq">PartialEq</a> for <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.eq" class="method trait-impl"><a href="#method.eq" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialEq.html#tymethod.eq" class="fn">eq</a>(&amp;self, other: &amp;<a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class='docblock'>Tests for <code>self</code> and <code>other</code> values to be equal, and is used by <code>==</code>.</div></details><details class="toggle method-toggle" open><summary><section id="method.ne" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/cmp.rs.html#264">Source</a></span><a href="#method.ne" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialEq.html#method.ne" class="fn">ne</a>(&amp;self, other: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;Rhs</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class='docblock'>Tests for <code>!=</code>. The default implementation is almost always sufficient,
+and should not be overridden without very good reason.</div></details></div></details><section id="impl-Eq-for-SegmentedString" class="impl"><a href="#impl-Eq-for-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.Eq.html" title="trait core::cmp::Eq">Eq</a> for <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section><section id="impl-StructuralPartialEq-for-SegmentedString" class="impl"><a href="#impl-StructuralPartialEq-for-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.StructuralPartialEq.html" title="trait core::marker::StructuralPartialEq">StructuralPartialEq</a> for <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section></div><h2 id="synthetic-implementations" class="section-header">Auto Trait Implementations<a href="#synthetic-implementations" class="anchor">§</a></h2><div id="synthetic-implementations-list"><section id="impl-Freeze-for-SegmentedString" class="impl"><a href="#impl-Freeze-for-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Freeze.html" title="trait core::marker::Freeze">Freeze</a> for <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section><section id="impl-RefUnwindSafe-for-SegmentedString" class="impl"><a href="#impl-RefUnwindSafe-for-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/panic/unwind_safe/trait.RefUnwindSafe.html" title="trait core::panic::unwind_safe::RefUnwindSafe">RefUnwindSafe</a> for <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section><section id="impl-Send-for-SegmentedString" class="impl"><a href="#impl-Send-for-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> for <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section><section id="impl-Sync-for-SegmentedString" class="impl"><a href="#impl-Sync-for-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> for <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section><section id="impl-Unpin-for-SegmentedString" class="impl"><a href="#impl-Unpin-for-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Unpin.html" title="trait core::marker::Unpin">Unpin</a> for <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section><section id="impl-UnwindSafe-for-SegmentedString" class="impl"><a href="#impl-UnwindSafe-for-SegmentedString" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/panic/unwind_safe/trait.UnwindSafe.html" title="trait core::panic::unwind_safe::UnwindSafe">UnwindSafe</a> for <a class="struct" href="struct.SegmentedString.html" title="struct termionix_server::SegmentedString">SegmentedString</a></h3></section></div><h2 id="blanket-implementations" class="section-header">Blanket Implementations<a href="#blanket-implementations" class="anchor">§</a></h2><div id="blanket-implementations-list"><details class="toggle implementors-toggle"><summary><section id="impl-Any-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/any.rs.html#138">Source</a><a href="#impl-Any-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/any/trait.Any.html" title="trait core::any::Any">Any</a> for T<div class="where">where
+    T: 'static + ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.type_id" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/any.rs.html#139">Source</a><a href="#method.type_id" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/any/trait.Any.html#tymethod.type_id" class="fn">type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></h4></section></summary><div class='docblock'>Gets the <code>TypeId</code> of <code>self</code>. <a href="https://doc.rust-lang.org/1.93.0/core/any/trait.Any.html#tymethod.type_id">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Borrow%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#212">Source</a><a href="#impl-Borrow%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#214">Source</a><a href="#method.borrow" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html#tymethod.borrow" class="fn">borrow</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;T</a></h4></section></summary><div class='docblock'>Immutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html#tymethod.borrow">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-BorrowMut%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#221">Source</a><a href="#impl-BorrowMut%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.BorrowMut.html" title="trait core::borrow::BorrowMut">BorrowMut</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow_mut" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#222">Source</a><a href="#method.borrow_mut" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut" class="fn">borrow_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;mut T</a></h4></section></summary><div class='docblock'>Mutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-CloneToUninit-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/clone.rs.html#547">Source</a><a href="#impl-CloneToUninit-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.CloneToUninit.html" title="trait core::clone::CloneToUninit">CloneToUninit</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone_to_uninit" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/clone.rs.html#549">Source</a><a href="#method.clone_to_uninit" class="anchor">§</a><h4 class="code-header">unsafe fn <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit" class="fn">clone_to_uninit</a>(&amp;self, dest: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.pointer.html">*mut </a><a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u8.html">u8</a>)</h4></section></summary><span class="item-info"><div class="stab unstable"><span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>clone_to_uninit</code>)</span></div></span><div class='docblock'>Performs copy-assignment from <code>self</code> to <code>dest</code>. <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Equivalent%3CK%3E-for-Q" class="impl"><a href="#impl-Equivalent%3CK%3E-for-Q" class="anchor">§</a><h3 class="code-header">impl&lt;Q, K&gt; Equivalent&lt;K&gt; for Q<div class="where">where
+    Q: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.Eq.html" title="trait core::cmp::Eq">Eq</a> + ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,
+    K: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;Q&gt; + ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.equivalent" class="method trait-impl"><a href="#method.equivalent" class="anchor">§</a><h4 class="code-header">fn <a class="fn">equivalent</a>(&amp;self, key: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;K</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class='docblock'>Checks if this value is equivalent to the given key. <a>Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-From%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#785">Source</a><a href="#impl-From%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.from-1" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#788">Source</a><a href="#method.from-1" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html#tymethod.from" class="fn">from</a>(t: T) -&gt; T</h4></section></summary><div class="docblock"><p>Returns the argument unchanged.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Instrument-for-T" class="impl"><a href="#impl-Instrument-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; Instrument for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.instrument" class="method trait-impl"><a href="#method.instrument" class="anchor">§</a><h4 class="code-header">fn <a class="fn">instrument</a>(self, span: Span) -&gt; Instrumented&lt;Self&gt;</h4></section></summary><div class='docblock'>Instruments this type with the provided [<code>Span</code>], returning an
+<code>Instrumented</code> wrapper. <a>Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.in_current_span" class="method trait-impl"><a href="#method.in_current_span" class="anchor">§</a><h4 class="code-header">fn <a class="fn">in_current_span</a>(self) -&gt; Instrumented&lt;Self&gt;</h4></section></summary><div class='docblock'>Instruments this type with the <a href="super::Span::current()">current</a> <a href="crate::Span"><code>Span</code></a>, returning an
+<code>Instrumented</code> wrapper. <a>Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Into%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#767-769">Source</a><a href="#impl-Into%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#777">Source</a><a href="#method.into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html#tymethod.into" class="fn">into</a>(self) -&gt; U</h4></section></summary><div class="docblock"><p>Calls <code>U::from(self)</code>.</p>
+<p>That is, this conversion is whatever the implementation of
+<code><a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for U</code> chooses to do.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-ToOwned-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#85-87">Source</a><a href="#impl-ToOwned-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html" title="trait alloc::borrow::ToOwned">ToOwned</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Owned" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#89">Source</a><a href="#associatedtype.Owned" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#associatedtype.Owned" class="associatedtype">Owned</a> = T</h4></section></summary><div class='docblock'>The resulting type after obtaining ownership.</div></details><details class="toggle method-toggle" open><summary><section id="method.to_owned" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#90">Source</a><a href="#method.to_owned" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned" class="fn">to_owned</a>(&amp;self) -&gt; T</h4></section></summary><div class='docblock'>Creates owned data from borrowed data, usually by cloning. <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#94">Source</a><a href="#method.clone_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#method.clone_into" class="fn">clone_into</a>(&amp;self, target: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;mut T</a>)</h4></section></summary><div class='docblock'>Uses borrowed data to replace owned data, usually by cloning. <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#method.clone_into">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-ToString-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/string.rs.html#2864">Source</a><a href="#impl-ToString-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/alloc/string/trait.ToString.html" title="trait alloc::string::ToString">ToString</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Display.html" title="trait core::fmt::Display">Display</a> + ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.to_string" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/string.rs.html#2866">Source</a><a href="#method.to_string" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/alloc/string/trait.ToString.html#tymethod.to_string" class="fn">to_string</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a></h4></section></summary><div class='docblock'>Converts the given value to a <code>String</code>. <a href="https://doc.rust-lang.org/1.93.0/alloc/string/trait.ToString.html#tymethod.to_string">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryFrom%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#827-829">Source</a><a href="#impl-TryFrom%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error-1" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#831">Source</a><a href="#associatedtype.Error-1" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" class="associatedtype">Error</a> = <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/convert/enum.Infallible.html" title="enum core::convert::Infallible">Infallible</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#834">Source</a><a href="#method.try_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#tymethod.try_from" class="fn">try_from</a>(value: U) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;T, &lt;T as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryInto%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#811-813">Source</a><a href="#impl-TryInto%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryInto.html" title="trait core::convert::TryInto">TryInto</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#815">Source</a><a href="#associatedtype.Error" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryInto.html#associatedtype.Error" class="associatedtype">Error</a> = &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#818">Source</a><a href="#method.try_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryInto.html#tymethod.try_into" class="fn">try_into</a>(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;U, &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-WithSubscriber-for-T" class="impl"><a href="#impl-WithSubscriber-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; WithSubscriber for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.with_subscriber" class="method trait-impl"><a href="#method.with_subscriber" class="anchor">§</a><h4 class="code-header">fn <a class="fn">with_subscriber</a>&lt;S&gt;(self, subscriber: S) -&gt; WithDispatch&lt;Self&gt;<div class="where">where
+    S: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;Dispatch&gt;,</div></h4></section></summary><div class='docblock'>Attaches the provided <a href="super::Subscriber"><code>Subscriber</code></a> to this type, returning a
+[<code>WithDispatch</code>] wrapper. <a>Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.with_current_subscriber" class="method trait-impl"><a href="#method.with_current_subscriber" class="anchor">§</a><h4 class="code-header">fn <a class="fn">with_current_subscriber</a>(self) -&gt; WithDispatch&lt;Self&gt;</h4></section></summary><div class='docblock'>Attaches the current <a href="dispatcher#setting-the-default-subscriber">default</a> <a href="super::Subscriber"><code>Subscriber</code></a> to this type, returning a
+[<code>WithDispatch</code>] wrapper. <a>Read more</a></div></details></div></details></div></section></div></main></body></html>

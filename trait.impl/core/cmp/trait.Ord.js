@@ -1,0 +1,9 @@
+(function() {
+    var implementors = Object.fromEntries([["termionix_ansicodec",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.93.0/core/cmp/trait.Ord.html\" title=\"trait core::cmp::Ord\">Ord</a> for <a class=\"enum\" href=\"termionix_ansicodec/enum.Color.html\" title=\"enum termionix_ansicodec::Color\">Color</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.93.0/core/cmp/trait.Ord.html\" title=\"trait core::cmp::Ord\">Ord</a> for <a class=\"enum\" href=\"termionix_ansicodec/enum.Underline.html\" title=\"enum termionix_ansicodec::Underline\">Underline</a>"]]],["termionix_server",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.93.0/core/cmp/trait.Ord.html\" title=\"trait core::cmp::Ord\">Ord</a> for <a class=\"struct\" href=\"termionix_server/struct.ConnectionId.html\" title=\"struct termionix_server::ConnectionId\">ConnectionId</a>"]]],["termionix_terminal",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.93.0/core/cmp/trait.Ord.html\" title=\"trait core::cmp::Ord\">Ord</a> for <a class=\"struct\" href=\"termionix_terminal/struct.CursorPosition.html\" title=\"struct termionix_terminal::CursorPosition\">CursorPosition</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.93.0/core/cmp/trait.Ord.html\" title=\"trait core::cmp::Ord\">Ord</a> for <a class=\"struct\" href=\"termionix_terminal/struct.TerminalSize.html\" title=\"struct termionix_terminal::TerminalSize\">TerminalSize</a>"]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":57,"fragment_lengths":[541,296,585]}

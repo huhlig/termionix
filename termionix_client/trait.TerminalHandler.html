@@ -1,0 +1,186 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Terminal client handler trait"><title>TerminalHandler in termionix_client - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-ca0dd0c4.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="termionix_client" data-themes="" data-resource-suffix="" data-rustdoc-version="1.93.0 (254b59607 2026-01-19)" data-channel="1.93.0" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-a3946164.js" data-settings-js="settings-c38705f0.js" ><script src="../static.files/storage-e2aeef58.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-a410ff4d.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-263c88ec.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">TerminalHandler</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../termionix_client/index.html">termionix_<wbr>client</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Terminal<wbr>Handler</a></h2><h3><a href="#provided-methods">Provided Methods</a></h3><ul class="block"><li><a href="#method.on_bell" title="on_bell">on_bell</a></li><li><a href="#method.on_character" title="on_character">on_character</a></li><li><a href="#method.on_connect" title="on_connect">on_connect</a></li><li><a href="#method.on_disconnect" title="on_disconnect">on_disconnect</a></li><li><a href="#method.on_error" title="on_error">on_error</a></li><li><a href="#method.on_line" title="on_line">on_line</a></li><li><a href="#method.on_option_changed" title="on_option_changed">on_option_changed</a></li><li><a href="#method.on_reconnect_attempt" title="on_reconnect_attempt">on_reconnect_attempt</a></li><li><a href="#method.on_reconnect_failed" title="on_reconnect_failed">on_reconnect_failed</a></li><li><a href="#method.on_resize" title="on_resize">on_resize</a></li><li><a href="#method.on_subnegotiation" title="on_subnegotiation">on_subnegotiation</a></li></ul><h3><a href="#implementors">Implementors</a></h3></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="index.html">In crate termionix_<wbr>client</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="index.html">termionix_client</a></div><h1>Trait <span class="trait">Terminal<wbr>Handler</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/termionix_client/client.rs.html#47-87">Source</a> </span></div><pre class="rust item-decl"><code>pub trait TerminalHandler:
+    <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a>
+    + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a>
+    + 'static {
+    // Provided methods
+    fn <a href="#method.on_connect" class="fn">on_connect</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 self,
+        _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.on_disconnect" class="fn">on_disconnect</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 self,
+        _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.on_character" class="fn">on_character</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 self,
+        _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+        _ch: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.char.html">char</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.on_line" class="fn">on_line</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+        &amp;'life0 self,
+        _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+        _line: &amp;'life2 <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.str.html">str</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.on_bell" class="fn">on_bell</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 self,
+        _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.on_resize" class="fn">on_resize</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 self,
+        _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+        _width: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>,
+        _height: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.on_option_changed" class="fn">on_option_changed</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 self,
+        _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+        _option: <a class="enum" href="enum.TelnetOption.html" title="enum termionix_client::TelnetOption">TelnetOption</a>,
+        _enabled: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a>,
+        _local: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.on_subnegotiation" class="fn">on_subnegotiation</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 self,
+        _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+        _subneg: <a class="enum" href="enum.TelnetArgument.html" title="enum termionix_client::TelnetArgument">TelnetArgument</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.on_error" class="fn">on_error</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 self,
+        _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+        _error: <a class="enum" href="enum.ClientError.html" title="enum termionix_client::ClientError">ClientError</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.on_reconnect_attempt" class="fn">on_reconnect_attempt</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 self,
+        _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+        _attempt: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u32.html">u32</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.on_reconnect_failed" class="fn">on_reconnect_failed</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 self,
+        _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Terminal client handler trait</p>
+</div></details><h2 id="provided-methods" class="section-header">Provided Methods<a href="#provided-methods" class="anchor">§</a></h2><div class="methods"><section id="method.on_connect" class="method"><a class="src rightside" href="../src/termionix_client/client.rs.html#48">Source</a><h4 class="code-header">fn <a href="#method.on_connect" class="fn">on_connect</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 self,
+    _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section><section id="method.on_disconnect" class="method"><a class="src rightside" href="../src/termionix_client/client.rs.html#49">Source</a><h4 class="code-header">fn <a href="#method.on_disconnect" class="fn">on_disconnect</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 self,
+    _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section><section id="method.on_character" class="method"><a class="src rightside" href="../src/termionix_client/client.rs.html#50">Source</a><h4 class="code-header">fn <a href="#method.on_character" class="fn">on_character</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 self,
+    _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+    _ch: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.char.html">char</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section><section id="method.on_line" class="method"><a class="src rightside" href="../src/termionix_client/client.rs.html#51">Source</a><h4 class="code-header">fn <a href="#method.on_line" class="fn">on_line</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+    &amp;'life0 self,
+    _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+    _line: &amp;'life2 <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.str.html">str</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,</div></h4></section><section id="method.on_bell" class="method"><a class="src rightside" href="../src/termionix_client/client.rs.html#52">Source</a><h4 class="code-header">fn <a href="#method.on_bell" class="fn">on_bell</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 self,
+    _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section><section id="method.on_resize" class="method"><a class="src rightside" href="../src/termionix_client/client.rs.html#53">Source</a><h4 class="code-header">fn <a href="#method.on_resize" class="fn">on_resize</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 self,
+    _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+    _width: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>,
+    _height: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section><details class="toggle method-toggle" open><summary><section id="method.on_option_changed" class="method"><a class="src rightside" href="../src/termionix_client/client.rs.html#66-73">Source</a><h4 class="code-header">fn <a href="#method.on_option_changed" class="fn">on_option_changed</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 self,
+    _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+    _option: <a class="enum" href="enum.TelnetOption.html" title="enum termionix_client::TelnetOption">TelnetOption</a>,
+    _enabled: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a>,
+    _local: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Called when a Telnet option state changes</p>
+<p>This is called when an option negotiation completes successfully,
+whether the option is being enabled or disabled.</p>
+<h5 id="arguments"><a class="doc-anchor" href="#arguments">§</a>Arguments</h5>
+<ul>
+<li><code>conn</code> - The connection handle</li>
+<li><code>option</code> - The Telnet option that changed</li>
+<li><code>enabled</code> - <code>true</code> if the option was enabled, <code>false</code> if disabled</li>
+<li><code>local</code> - <code>true</code> if the option changed locally, <code>false</code> if remotely</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.on_subnegotiation" class="method"><a class="src rightside" href="../src/termionix_client/client.rs.html#80">Source</a><h4 class="code-header">fn <a href="#method.on_subnegotiation" class="fn">on_subnegotiation</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 self,
+    _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+    _subneg: <a class="enum" href="enum.TelnetArgument.html" title="enum termionix_client::TelnetArgument">TelnetArgument</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Called when a Telnet subnegotiation is received</p>
+<p>This is called when a complete subnegotiation sequence is received
+from the server. Subnegotiations provide additional parameters for
+negotiated options.</p>
+</div></details><section id="method.on_error" class="method"><a class="src rightside" href="../src/termionix_client/client.rs.html#82">Source</a><h4 class="code-header">fn <a href="#method.on_error" class="fn">on_error</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 self,
+    _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+    _error: <a class="enum" href="enum.ClientError.html" title="enum termionix_client::ClientError">ClientError</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section><section id="method.on_reconnect_attempt" class="method"><a class="src rightside" href="../src/termionix_client/client.rs.html#83-85">Source</a><h4 class="code-header">fn <a href="#method.on_reconnect_attempt" class="fn">on_reconnect_attempt</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 self,
+    _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+    _attempt: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u32.html">u32</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section><section id="method.on_reconnect_failed" class="method"><a class="src rightside" href="../src/termionix_client/client.rs.html#86">Source</a><h4 class="code-header">fn <a href="#method.on_reconnect_failed" class="fn">on_reconnect_failed</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 self,
+    _conn: &amp;'life1 <a class="struct" href="struct.TerminalConnection.html" title="struct termionix_client::TerminalConnection">TerminalConnection</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.93.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.unit.html">()</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section></div><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"></div><script src="../trait.impl/termionix_client/client/trait.TerminalHandler.js" async></script></section></div></main></body></html>

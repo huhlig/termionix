@@ -1,0 +1,1148 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Represents a parsed segment of an ANSI-formatted string with its byte range."><title>Span in termionix_ansicodec::utility - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-ca0dd0c4.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="termionix_ansicodec" data-themes="" data-resource-suffix="" data-rustdoc-version="1.93.0 (254b59607 2026-01-19)" data-channel="1.93.0" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-a3946164.js" data-settings-js="settings-c38705f0.js" ><script src="../../static.files/storage-e2aeef58.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-a410ff4d.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-263c88ec.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc enum"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Span</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../termionix_ansicodec/index.html">termionix_<wbr>ansicodec</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Span</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#design-philosophy" title="Design Philosophy">Design Philosophy</a></li><li><a href="#variant-categories" title="Variant Categories">Variant Categories</a><ul><li><a href="#text-content-spans" title="Text Content Spans">Text Content Spans</a></li><li><a href="#control-character-spans" title="Control Character Spans">Control Character Spans</a></li><li><a href="#ansi-escape-sequence-spans" title="ANSI Escape Sequence Spans">ANSI Escape Sequence Spans</a></li></ul></li><li><a href="#methods" title="Methods">Methods</a></li><li><a href="#examples" title="Examples">Examples</a><ul><li><a href="#extracting-content-from-spans" title="Extracting Content from Spans">Extracting Content from Spans</a></li><li><a href="#inspecting-span-boundaries" title="Inspecting Span Boundaries">Inspecting Span Boundaries</a></li><li><a href="#working-with-control-codes" title="Working with Control Codes">Working with Control Codes</a></li><li><a href="#filtering-specific-span-types" title="Filtering Specific Span Types">Filtering Specific Span Types</a></li></ul></li><li><a href="#range-semantics" title="Range Semantics">Range Semantics</a></li><li><a href="#memory-layout" title="Memory Layout">Memory Layout</a></li><li><a href="#conversion" title="Conversion">Conversion</a></li><li><a href="#comparison-with-related-types" title="Comparison with Related Types">Comparison with Related Types</a></li><li><a href="#performance-characteristics" title="Performance Characteristics">Performance Characteristics</a></li><li><a href="#see-also" title="See Also">See Also</a></li></ul><h3><a href="#variants">Variants</a></h3><ul class="block variant"><li><a href="#variant.APC" title="APC">APC</a></li><li><a href="#variant.ASCII" title="ASCII">ASCII</a></li><li><a href="#variant.CSI" title="CSI">CSI</a></li><li><a href="#variant.Control" title="Control">Control</a></li><li><a href="#variant.DCS" title="DCS">DCS</a></li><li><a href="#variant.Escape" title="Escape">Escape</a></li><li><a href="#variant.OSC" title="OSC">OSC</a></li><li><a href="#variant.PM" title="PM">PM</a></li><li><a href="#variant.SOS" title="SOS">SOS</a></li><li><a href="#variant.ST" title="ST">ST</a></li><li><a href="#variant.Unicode" title="Unicode">Unicode</a></li></ul><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.end" title="end">end</a></li><li><a href="#method.len" title="len">len</a></li><li><a href="#method.start" title="start">start</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block trait-implementation"><li><a href="#impl-Clone-for-Span" title="Clone">Clone</a></li><li><a href="#impl-Debug-for-Span" title="Debug">Debug</a></li><li><a href="#impl-Eq-for-Span" title="Eq">Eq</a></li><li><a href="#impl-PartialEq-for-Span" title="PartialEq">PartialEq</a></li><li><a href="#impl-StructuralPartialEq-for-Span" title="StructuralPartialEq">StructuralPartialEq</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-Freeze-for-Span" title="Freeze">Freeze</a></li><li><a href="#impl-RefUnwindSafe-for-Span" title="RefUnwindSafe">RefUnwindSafe</a></li><li><a href="#impl-Send-for-Span" title="Send">Send</a></li><li><a href="#impl-Sync-for-Span" title="Sync">Sync</a></li><li><a href="#impl-Unpin-for-Span" title="Unpin">Unpin</a></li><li><a href="#impl-UnwindSafe-for-Span" title="UnwindSafe">UnwindSafe</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-Any-for-T" title="Any">Any</a></li><li><a href="#impl-Borrow%3CT%3E-for-T" title="Borrow&#60;T&#62;">Borrow&#60;T&#62;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-T" title="BorrowMut&#60;T&#62;">BorrowMut&#60;T&#62;</a></li><li><a href="#impl-CloneToUninit-for-T" title="CloneToUninit">CloneToUninit</a></li><li><a href="#impl-From%3CT%3E-for-T" title="From&#60;T&#62;">From&#60;T&#62;</a></li><li><a href="#impl-Instrument-for-T" title="Instrument">Instrument</a></li><li><a href="#impl-Into%3CU%3E-for-T" title="Into&#60;U&#62;">Into&#60;U&#62;</a></li><li><a href="#impl-ToOwned-for-T" title="ToOwned">ToOwned</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T" title="TryFrom&#60;U&#62;">TryFrom&#60;U&#62;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T" title="TryInto&#60;U&#62;">TryInto&#60;U&#62;</a></li><li><a href="#impl-WithSubscriber-for-T" title="WithSubscriber">WithSubscriber</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="index.html">In termionix_<wbr>ansicodec::<wbr>utility</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">termionix_ansicodec</a>::<wbr><a href="index.html">utility</a></div><h1>Enum <span class="enum">Span</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/termionix_ansicodec/utility/spanned.rs.html#1023-1824">Source</a> </span></div><pre class="rust item-decl"><code>pub enum Span {
+    ASCII {
+        range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;,
+    },
+    Unicode {
+        range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;,
+    },
+    Control {
+        range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;,
+        value: <a class="enum" href="../ansi/enum.AnsiControlCode.html" title="enum termionix_ansicodec::ansi::AnsiControlCode">AnsiControlCode</a>,
+    },
+    Escape {
+        range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;,
+    },
+    CSI {
+        range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;,
+        value: <a class="enum" href="../ansi/enum.AnsiControlSequenceIntroducer.html" title="enum termionix_ansicodec::ansi::AnsiControlSequenceIntroducer">AnsiControlSequenceIntroducer</a>,
+    },
+    OSC {
+        range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;,
+    },
+    DCS {
+        range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;,
+    },
+    SOS {
+        range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;,
+    },
+    ST {
+        range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;,
+    },
+    PM {
+        range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;,
+    },
+    APC {
+        range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;,
+    },
+}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Represents a parsed segment of an ANSI-formatted string with its byte range.</p>
+<p><code>Span</code> is the fundamental building block returned by <a href="struct.SpannedString.html#method.parse" title="associated function termionix_ansicodec::utility::SpannedString::parse"><code>SpannedString::parse</code></a>, representing
+a contiguous segment of the input string with a specific type classification. Unlike
+<a href="crate::segment::Segment"><code>Segment</code></a> which stores the actual content, <code>Span</code> only stores
+byte ranges (as <code>Range&lt;usize&gt;</code>) that reference positions in the original source string.</p>
+<p>This lightweight design makes <code>Span</code> ideal for:</p>
+<ul>
+<li><strong>Memory-efficient parsing</strong>: No string allocations during parse operations</li>
+<li><strong>Zero-copy analysis</strong>: Inspect string structure without copying data</li>
+<li><strong>Lazy extraction</strong>: Extract content only when needed</li>
+<li><strong>Range-based operations</strong>: Manipulate strings using byte positions</li>
+</ul>
+<h2 id="design-philosophy"><a class="doc-anchor" href="#design-philosophy">§</a>Design Philosophy</h2>
+<p><code>Span</code> follows a “range-only” design where each variant contains a <code>range: Range&lt;usize&gt;</code>
+field that specifies the byte positions <code>[start..end)</code> in the source string. Some variants
+also include parsed metadata (like <code>CSICommand</code> or <code>ControlCode</code>) to avoid re-parsing.</p>
+<p>This approach enables:</p>
+<ul>
+<li>O(1) span creation during parsing</li>
+<li>Minimal memory overhead (just two <code>usize</code> per span, plus metadata)</li>
+<li>Efficient conversion to other types when needed</li>
+</ul>
+<h2 id="variant-categories"><a class="doc-anchor" href="#variant-categories">§</a>Variant Categories</h2><h3 id="text-content-spans"><a class="doc-anchor" href="#text-content-spans">§</a>Text Content Spans</h3>
+<ul>
+<li><strong><a href="enum.Span.html#variant.ASCII" title="variant termionix_ansicodec::utility::Span::ASCII"><code>ASCII</code></a></strong>: Contiguous ASCII text (0x20-0x7E)</li>
+<li><strong><a href="enum.Span.html#variant.Unicode" title="variant termionix_ansicodec::utility::Span::Unicode"><code>Unicode</code></a></strong>: Multi-byte UTF-8 sequences</li>
+</ul>
+<p>These variants use greedy matching - consecutive compatible characters are merged into
+a single span during parsing for efficiency.</p>
+<h3 id="control-character-spans"><a class="doc-anchor" href="#control-character-spans">§</a>Control Character Spans</h3>
+<ul>
+<li><strong><a href="enum.Span.html#variant.Control" title="variant termionix_ansicodec::utility::Span::Control"><code>Control</code></a></strong>: C0/C1 control codes with parsed [<code>ControlCode</code>] value</li>
+<li><strong><a href="enum.Span.html#variant.Escape" title="variant termionix_ansicodec::utility::Span::Escape"><code>Escape</code></a></strong>: Standalone ESC or unrecognized escape sequences</li>
+</ul>
+<p>Control spans include the parsed control code value to avoid re-parsing when converting
+to other representations.</p>
+<h3 id="ansi-escape-sequence-spans"><a class="doc-anchor" href="#ansi-escape-sequence-spans">§</a>ANSI Escape Sequence Spans</h3>
+<ul>
+<li><strong><a href="enum.Span.html#variant.CSI" title="variant termionix_ansicodec::utility::Span::CSI"><code>CSI</code></a></strong>: Control Sequence Introducer with parsed [<code>CSICommand</code>]</li>
+<li><strong><a href="enum.Span.html#variant.OSC" title="variant termionix_ansicodec::utility::Span::OSC"><code>OSC</code></a></strong>: Operating System Command</li>
+<li><strong><a href="enum.Span.html#variant.DCS" title="variant termionix_ansicodec::utility::Span::DCS"><code>DCS</code></a></strong>: Device Control String</li>
+<li><strong><a href="enum.Span.html#variant.SOS" title="variant termionix_ansicodec::utility::Span::SOS"><code>SOS</code></a></strong>: Start of String</li>
+<li><strong><a href="enum.Span.html#variant.ST" title="variant termionix_ansicodec::utility::Span::ST"><code>ST</code></a></strong>: String Terminator</li>
+<li><strong><a href="enum.Span.html#variant.PM" title="variant termionix_ansicodec::utility::Span::PM"><code>PM</code></a></strong>: Privacy Message</li>
+<li><strong><a href="enum.Span.html#variant.APC" title="variant termionix_ansicodec::utility::Span::APC"><code>APC</code></a></strong>: Application Program Command</li>
+</ul>
+<p>CSI spans include the parsed command structure, while other escape sequences store
+only their byte ranges.</p>
+<h2 id="methods"><a class="doc-anchor" href="#methods">§</a>Methods</h2>
+<p>All span variants support three common operations:</p>
+<ul>
+<li><a href="enum.Span.html#method.len" title="method termionix_ansicodec::utility::Span::len"><code>len()</code></a> - Returns the byte length of the span</li>
+<li><a href="enum.Span.html#method.start" title="method termionix_ansicodec::utility::Span::start"><code>start()</code></a> - Returns the starting byte position</li>
+<li><a href="enum.Span.html#method.end" title="method termionix_ansicodec::utility::Span::end"><code>end()</code></a> - Returns the ending byte position</li>
+</ul>
+<p>These methods provide O(1) access to span boundaries.</p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2><h3 id="extracting-content-from-spans"><a class="doc-anchor" href="#extracting-content-from-spans">§</a>Extracting Content from Spans</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1b[31mRed\x1b[0m"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">for </span>span <span class="kw">in </span>spans.iter() {
+    <span class="kw">match </span>span {
+        Span::CSI { range, value } =&gt; {
+            <span class="macro">println!</span>(<span class="string">"CSI at {}..{}: {:?}"</span>, range.start, range.end, value);
+        }
+        Span::ASCII { range } =&gt; {
+            <span class="kw">let </span>text = <span class="kw-2">&amp;</span>input[range.clone()];
+            <span class="macro">println!</span>(<span class="string">"Text: {:?}"</span>, text);
+        }
+        <span class="kw">_ </span>=&gt; {}
+    }
+}</code></pre></div><h3 id="inspecting-span-boundaries"><a class="doc-anchor" href="#inspecting-span-boundaries">§</a>Inspecting Span Boundaries</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"Hello World"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+<span class="kw">let </span>span = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>];
+
+<span class="macro">assert_eq!</span>(span.start(), <span class="number">0</span>);
+<span class="macro">assert_eq!</span>(span.end(), <span class="number">11</span>);
+<span class="macro">assert_eq!</span>(span.len(), <span class="number">11</span>);</code></pre></div><h3 id="working-with-control-codes"><a class="doc-anchor" href="#working-with-control-codes">§</a>Working with Control Codes</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span, ControlCode};
+
+<span class="kw">let </span>input = <span class="string">"Line 1\nLine 2"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">for </span>span <span class="kw">in </span>spans.iter() {
+    <span class="kw">if let </span>Span::Control { range, value } = span {
+        <span class="kw">if </span><span class="kw-2">*</span>value == ControlCode::LF {
+            <span class="macro">println!</span>(<span class="string">"Newline at byte position {}"</span>, range.start);
+        }
+    }
+}</code></pre></div><h3 id="filtering-specific-span-types"><a class="doc-anchor" href="#filtering-specific-span-types">§</a>Filtering Specific Span Types</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1b[31mRed\x1b[0m Normal"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// Count only text spans
+</span><span class="kw">let </span>text_spans: Vec&lt;<span class="kw">_</span>&gt; = spans.iter()
+    .filter(|s| <span class="macro">matches!</span>(s, Span::ASCII { .. } | Span::Unicode { .. }))
+    .collect();
+
+<span class="macro">println!</span>(<span class="string">"Found {} text spans"</span>, text_spans.len());</code></pre></div><h2 id="range-semantics"><a class="doc-anchor" href="#range-semantics">§</a>Range Semantics</h2>
+<p>All <code>range</code> fields follow Rust’s standard half-open range semantics <code>[start..end)</code>:</p>
+<ul>
+<li><code>start</code> is inclusive (first byte of the span)</li>
+<li><code>end</code> is exclusive (one past the last byte)</li>
+<li>Length is always <code>end - start</code></li>
+</ul>
+<p>This matches the behavior of slice indexing: <code>&amp;string[range]</code> correctly extracts
+the span’s content.</p>
+<h2 id="memory-layout"><a class="doc-anchor" href="#memory-layout">§</a>Memory Layout</h2>
+<p>Each span variant is approximately:</p>
+<ul>
+<li>16-24 bytes for text/escape spans (just the range)</li>
+<li>24-32 bytes for control spans (range + enum discriminant)</li>
+<li>32-48 bytes for CSI spans (range + parsed command structure)</li>
+</ul>
+<p>This is significantly more compact than storing the actual string content.</p>
+<h2 id="conversion"><a class="doc-anchor" href="#conversion">§</a>Conversion</h2>
+<p>Spans can be converted to <a href="crate::segment::Segment"><code>Segment</code></a> instances using
+<a href="struct.SpannedString.html#method.into_segmented_string" title="method termionix_ansicodec::utility::SpannedString::into_segmented_string"><code>SpannedString::into_segmented_string</code></a>, which extracts the actual content from
+the source string and creates owned data structures.</p>
+<h2 id="comparison-with-related-types"><a class="doc-anchor" href="#comparison-with-related-types">§</a>Comparison with Related Types</h2>
+<ul>
+<li><strong><a href="enum.Span.html" title="enum termionix_ansicodec::utility::Span"><code>Span</code></a></strong> (this type): Lightweight parse result with byte ranges only</li>
+<li><strong><a href="crate::segment::Segment"><code>Segment</code></a></strong>: Owned content for building output</li>
+<li><strong><a href="struct.SpannedString.html" title="struct termionix_ansicodec::utility::SpannedString"><code>SpannedString</code></a></strong>: Collection of spans representing a parsed string</li>
+<li><strong><a href="crate::segment::SegmentedString"><code>SegmentedString</code></a></strong>: Collection of segments with owned data</li>
+</ul>
+<h2 id="performance-characteristics"><a class="doc-anchor" href="#performance-characteristics">§</a>Performance Characteristics</h2>
+<ul>
+<li><strong>Creation</strong>: O(1) - just stores two integers</li>
+<li><strong>Size</strong>: 16-48 bytes depending on variant</li>
+<li><strong>Content Access</strong>: O(1) via slice indexing with the range</li>
+<li><strong>Memory</strong>: No allocations, no data copying</li>
+</ul>
+<h2 id="see-also"><a class="doc-anchor" href="#see-also">§</a>See Also</h2>
+<ul>
+<li><a href="struct.SpannedString.html" title="struct termionix_ansicodec::utility::SpannedString"><code>SpannedString</code></a> - Collection of spans from parsing</li>
+<li><a href="struct.SpannedString.html#method.parse" title="associated function termionix_ansicodec::utility::SpannedString::parse"><code>SpannedString::parse</code></a> - Creates spans from ANSI strings</li>
+<li>[<code>CSICommand</code>] - Parsed CSI command types</li>
+<li>[<code>ControlCode</code>] - Control code enumeration</li>
+</ul>
+</div></details><h2 id="variants" class="variants section-header">Variants<a href="#variants" class="anchor">§</a></h2><div class="variants"><section id="variant.ASCII" class="variant"><a href="#variant.ASCII" class="anchor">§</a><h3 class="code-header">ASCII</h3></section><div class="docblock"><p>ASCII text segment containing printable ASCII characters (0x20-0x7E).</p>
+<p>This variant represents a contiguous sequence of standard ASCII characters,
+excluding control codes and the ESC character. ASCII spans are the most
+common type in typical English text and are the most efficient to process.</p>
+<h4 id="greedy-matching"><a class="doc-anchor" href="#greedy-matching">§</a>Greedy Matching</h4>
+<p>During parsing, consecutive ASCII characters are merged into a single span
+for efficiency. This means “Hello World” becomes one ASCII span, not eleven
+separate character spans.</p>
+<h4 id="promotion-to-unicode"><a class="doc-anchor" href="#promotion-to-unicode">§</a>Promotion to Unicode</h4>
+<p>If an ASCII span is followed by Unicode characters, the ASCII span is
+automatically promoted to a Unicode span and merged. This ensures minimal
+span fragmentation while preserving correctness.</p>
+<h4 id="character-range"><a class="doc-anchor" href="#character-range">§</a>Character Range</h4>
+<ul>
+<li>Includes: Space (0x20) through tilde (0x7E)</li>
+<li>Excludes: Control codes (0x00-0x1F, 0x7F), ESC (0x1B)</li>
+</ul>
+<h4 id="examples-1"><a class="doc-anchor" href="#examples-1">§</a>Examples</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"Hello World"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::ASCII { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"Hello World"</span>);
+    <span class="macro">assert_eq!</span>(range.len(), <span class="number">11</span>);
+}</code></pre></div><h4 id="fields-1"><a class="doc-anchor" href="#fields-1">§</a>Fields</h4>
+<ul>
+<li><code>range</code>: Byte range <code>[start..end)</code> in the source string where this ASCII
+text is located. The range is half-open, meaning <code>start</code> is inclusive and
+<code>end</code> is exclusive.</li>
+</ul>
+</div><div class="sub-variant" id="variant.ASCII.fields"><h4>Fields</h4><div class="sub-variant-field"><span id="variant.ASCII.field.range" class="section-header"><a href="#variant.ASCII.field.range" class="anchor field">§</a><code>range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;</code></span><div class="docblock"><p>The byte range in the source string where this ASCII text segment is located.</p>
+<p>This is a half-open range <code>[start..end)</code> where:</p>
+<ul>
+<li><code>start</code> is the byte offset of the first ASCII character (inclusive)</li>
+<li><code>end</code> is the byte offset after the last ASCII character (exclusive)</li>
+</ul>
+<p>The range can be used directly with slice indexing: <code>&amp;source[range.clone()]</code>
+will extract the exact ASCII text represented by this span.</p>
+<h5 id="examples-2"><a class="doc-anchor" href="#examples-2">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"Hello"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::ASCII { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(range.start, <span class="number">0</span>);
+    <span class="macro">assert_eq!</span>(range.end, <span class="number">5</span>);
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"Hello"</span>);
+}</code></pre></div></div></div></div><section id="variant.Unicode" class="variant"><a href="#variant.Unicode" class="anchor">§</a><h3 class="code-header">Unicode</h3></section><div class="docblock"><p>Unicode text segment containing multi-byte UTF-8 characters.</p>
+<p>This variant represents a contiguous sequence of non-ASCII UTF-8 characters,
+which includes most international text, emoji, and special symbols. Unicode
+spans may also contain ASCII characters that were merged during parsing.</p>
+<h4 id="greedy-matching-1"><a class="doc-anchor" href="#greedy-matching-1">§</a>Greedy Matching</h4>
+<p>During parsing, consecutive Unicode characters are merged into a single span.
+Additionally, ASCII characters adjacent to Unicode are promoted and merged
+into the Unicode span, creating fewer, larger spans.</p>
+<h4 id="merging-behavior"><a class="doc-anchor" href="#merging-behavior">§</a>Merging Behavior</h4>
+<ul>
+<li><code>Unicode + Unicode</code> → merged Unicode span</li>
+<li><code>ASCII + Unicode</code> → promoted to Unicode span</li>
+<li><code>Unicode + ASCII</code> → merged into Unicode span</li>
+</ul>
+<p>This means “Hello世界World” becomes a single Unicode span, not three separate
+spans (ASCII, Unicode, ASCII).</p>
+<h4 id="utf-8-encoding"><a class="doc-anchor" href="#utf-8-encoding">§</a>UTF-8 Encoding</h4>
+<p>The range includes all bytes of the UTF-8 encoded characters:</p>
+<ul>
+<li>2-byte sequences: U+0080 to U+07FF</li>
+<li>3-byte sequences: U+0800 to U+FFFF</li>
+<li>4-byte sequences: U+10000 to U+10FFFF</li>
+</ul>
+<h4 id="examples-3"><a class="doc-anchor" href="#examples-3">§</a>Examples</h4>
+<p>Pure Unicode:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"世界"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::Unicode { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"世界"</span>);
+    <span class="macro">assert_eq!</span>(range.len(), <span class="number">6</span>); <span class="comment">// Each character is 3 bytes
+</span>}</code></pre></div>
+<p>Mixed ASCII and Unicode (merged):</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"Hello世界"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// Parsed as a single Unicode span due to merging
+</span><span class="macro">assert_eq!</span>(spans.count(), <span class="number">1</span>);
+<span class="kw">if let </span>Span::Unicode { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"Hello世界"</span>);
+}</code></pre></div><h4 id="fields-2"><a class="doc-anchor" href="#fields-2">§</a>Fields</h4>
+<ul>
+<li><code>range</code>: Byte range <code>[start..end)</code> in the source string where this Unicode
+text is located. The range spans all bytes of all UTF-8 encoded characters.</li>
+</ul>
+</div><div class="sub-variant" id="variant.Unicode.fields"><h4>Fields</h4><div class="sub-variant-field"><span id="variant.Unicode.field.range" class="section-header"><a href="#variant.Unicode.field.range" class="anchor field">§</a><code>range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;</code></span><div class="docblock"><p>The byte range in the source string where this Unicode text segment is located.</p>
+<p>This is a half-open range <code>[start..end)</code> where:</p>
+<ul>
+<li><code>start</code> is the byte offset of the first character (inclusive)</li>
+<li><code>end</code> is the byte offset after the last character (exclusive)</li>
+</ul>
+<p>The range includes all bytes of the UTF-8 encoded characters. For example,
+a 3-byte character like “世” (U+4E16) occupies 3 bytes, and the range
+length reflects this.</p>
+<h5 id="examples-4"><a class="doc-anchor" href="#examples-4">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"こんにちは"</span>; <span class="comment">// 5 characters, 15 bytes
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::Unicode { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(range.start, <span class="number">0</span>);
+    <span class="macro">assert_eq!</span>(range.end, <span class="number">15</span>);
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"こんにちは"</span>);
+}</code></pre></div></div></div></div><section id="variant.Control" class="variant"><a href="#variant.Control" class="anchor">§</a><h3 class="code-header">Control</h3></section><div class="docblock"><p>Control character segment (C0 or C1 control codes).</p>
+<p>This variant represents terminal control characters that affect cursor
+position, output behavior, or terminal state, but are not ANSI escape
+sequences. Common examples include line feeds, tabs, and carriage returns.</p>
+<h4 id="control-code-categories"><a class="doc-anchor" href="#control-code-categories">§</a>Control Code Categories</h4>
+<ul>
+<li>
+<p><strong>C0 codes</strong> (0x00-0x1F, 0x7F): Basic control characters</p>
+<ul>
+<li><code>LF</code> (0x0A): Line feed/newline</li>
+<li><code>CR</code> (0x0D): Carriage return</li>
+<li><code>HT</code> (0x09): Horizontal tab</li>
+<li><code>BEL</code> (0x07): Bell/alert</li>
+<li><code>BS</code> (0x08): Backspace</li>
+<li><code>DEL</code> (0x7F): Delete</li>
+</ul>
+</li>
+<li>
+<p><strong>C1 codes</strong> (0x80-0x9F): Extended control characters</p>
+<ul>
+<li>Rarely used in modern terminals</li>
+<li>Include <code>NEL</code> (Next Line), <code>IND</code> (Index), etc.</li>
+</ul>
+</li>
+</ul>
+<h4 id="greedy-matching-2"><a class="doc-anchor" href="#greedy-matching-2">§</a>Greedy Matching</h4>
+<p>Consecutive <em>identical</em> control codes are merged into a single Control span.
+For example, three consecutive newlines (<code>\n\n\n</code>) become one Control span
+with a 3-byte range. Different control codes create separate spans.</p>
+<h4 id="examples-5"><a class="doc-anchor" href="#examples-5">§</a>Examples</h4>
+<p>Single control code:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span, ControlCode};
+
+<span class="kw">let </span>input = <span class="string">"Hello\nWorld"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::Control { range, value } = <span class="kw-2">&amp;</span>spans[<span class="number">1</span>] {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>value, ControlCode::LF);
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"\n"</span>);
+}</code></pre></div>
+<p>Multiple consecutive control codes (merged):</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span, ControlCode};
+
+<span class="kw">let </span>input = <span class="string">"\n\n\n"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// Three newlines merged into one span
+</span><span class="macro">assert_eq!</span>(spans.count(), <span class="number">1</span>);
+<span class="kw">if let </span>Span::Control { range, value } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>value, ControlCode::LF);
+    <span class="macro">assert_eq!</span>(range.len(), <span class="number">3</span>);
+}</code></pre></div>
+<p>Different control codes (not merged):</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\n\t"</span>; <span class="comment">// Newline followed by tab
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// Different control codes create separate spans
+</span><span class="macro">assert_eq!</span>(spans.count(), <span class="number">2</span>);</code></pre></div><h4 id="fields-3"><a class="doc-anchor" href="#fields-3">§</a>Fields</h4>
+<ul>
+<li><code>range</code>: Byte range where the control code(s) are located</li>
+<li><code>value</code>: The parsed control code type (see [<code>ControlCode</code>])</li>
+</ul>
+</div><div class="sub-variant" id="variant.Control.fields"><h4>Fields</h4><div class="sub-variant-field"><span id="variant.Control.field.range" class="section-header"><a href="#variant.Control.field.range" class="anchor field">§</a><code>range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;</code></span><div class="docblock"><p>The byte range in the source string where this control code segment is located.</p>
+<p>This is a half-open range <code>[start..end)</code>. For a single control code, the
+range length is 1 byte. For consecutive identical control codes that have
+been merged, the range length equals the number of occurrences.</p>
+<h5 id="examples-6"><a class="doc-anchor" href="#examples-6">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"A\nB"</span>; <span class="comment">// 'A', newline, 'B'
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::Control { range, .. } = <span class="kw-2">&amp;</span>spans[<span class="number">1</span>] {
+    <span class="macro">assert_eq!</span>(range.start, <span class="number">1</span>);
+    <span class="macro">assert_eq!</span>(range.end, <span class="number">2</span>);
+    <span class="macro">assert_eq!</span>(range.len(), <span class="number">1</span>);
+}</code></pre></div></div></div><div class="sub-variant-field"><span id="variant.Control.field.value" class="section-header"><a href="#variant.Control.field.value" class="anchor field">§</a><code>value: <a class="enum" href="../ansi/enum.AnsiControlCode.html" title="enum termionix_ansicodec::ansi::AnsiControlCode">AnsiControlCode</a></code></span><div class="docblock"><p>The specific control code represented by this span.</p>
+<p>This field contains the parsed control code type, avoiding the need to
+re-parse when converting to other representations. All consecutive
+identical control codes in the range share this same value.</p>
+<p>See [<code>ControlCode</code>] for the complete list of supported control codes.</p>
+<h5 id="examples-7"><a class="doc-anchor" href="#examples-7">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span, ControlCode};
+
+<span class="kw">let </span>input = <span class="string">"Line 1\rLine 2"</span>; <span class="comment">// Carriage return
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::Control { value, .. } = <span class="kw-2">&amp;</span>spans[<span class="number">1</span>] {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>value, ControlCode::CR);
+}</code></pre></div></div></div></div><section id="variant.Escape" class="variant"><a href="#variant.Escape" class="anchor">§</a><h3 class="code-header">Escape</h3></section><div class="docblock"><p>Standalone escape character or unrecognized escape sequence.</p>
+<p>This variant represents either:</p>
+<ol>
+<li>A lone ESC character (0x1B) at the end of input</li>
+<li>An ESC character followed by an unrecognized sequence</li>
+<li>A 2-byte escape sequence that doesn’t match known patterns</li>
+</ol>
+<h4 id="common-cases"><a class="doc-anchor" href="#common-cases">§</a>Common Cases</h4>
+<ul>
+<li><strong>Incomplete sequences</strong>: ESC at end of string or followed by invalid bytes</li>
+<li><strong>Unknown sequences</strong>: ESC followed by characters that don’t form a valid
+CSI, OSC, DCS, or other recognized sequence</li>
+<li><strong>Legacy sequences</strong>: Older or terminal-specific escape codes</li>
+</ul>
+<h4 id="examples-8"><a class="doc-anchor" href="#examples-8">§</a>Examples</h4>
+<p>Lone escape at end:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"Hello\x1b"</span>; <span class="comment">// ESC at end
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::Escape { range } = <span class="kw-2">&amp;</span>spans[<span class="number">1</span>] {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"\x1b"</span>);
+    <span class="macro">assert_eq!</span>(range.len(), <span class="number">1</span>);
+}</code></pre></div>
+<p>Unknown escape sequence:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1bZ"</span>; <span class="comment">// ESC followed by 'Z' (not a recognized sequence)
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::Escape { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"\x1bZ"</span>);
+    <span class="macro">assert_eq!</span>(range.len(), <span class="number">2</span>);
+}</code></pre></div><h4 id="fields-4"><a class="doc-anchor" href="#fields-4">§</a>Fields</h4>
+<ul>
+<li><code>range</code>: Byte range of the escape character and any following bytes</li>
+</ul>
+</div><div class="sub-variant" id="variant.Escape.fields"><h4>Fields</h4><div class="sub-variant-field"><span id="variant.Escape.field.range" class="section-header"><a href="#variant.Escape.field.range" class="anchor field">§</a><code>range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;</code></span><div class="docblock"><p>The byte range in the source string where this escape sequence is located.</p>
+<p>This is a half-open range <code>[start..end)</code> that includes:</p>
+<ul>
+<li>The ESC character (0x1B) at position <code>start</code></li>
+<li>Any following byte(s) that don’t form a recognized sequence</li>
+</ul>
+<p>The range length is typically 1 (lone ESC) or 2 (ESC + one character).</p>
+<h5 id="examples-9"><a class="doc-anchor" href="#examples-9">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"Text\x1b"</span>; <span class="comment">// Incomplete escape at end
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::Escape { range } = <span class="kw-2">&amp;</span>spans[<span class="number">1</span>] {
+    <span class="macro">assert_eq!</span>(range.start, <span class="number">4</span>);
+    <span class="macro">assert_eq!</span>(range.end, <span class="number">5</span>);
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"\x1b"</span>);
+}</code></pre></div></div></div></div><section id="variant.CSI" class="variant"><a href="#variant.CSI" class="anchor">§</a><h3 class="code-header">CSI</h3></section><div class="docblock"><p>CSI (Control Sequence Introducer) command segment.</p>
+<p>This variant represents a complete CSI sequence used for cursor control,
+erasing, scrolling, and other terminal operations. CSI sequences have the
+format: <code>ESC [ &lt;parameters&gt; &lt;final_byte&gt;</code></p>
+<h4 id="structure"><a class="doc-anchor" href="#structure">§</a>Structure</h4>
+<ul>
+<li><strong>Introducer</strong>: ESC [ (or 0x9B in 8-bit mode)</li>
+<li><strong>Parameters</strong>: Optional numeric parameters separated by semicolons</li>
+<li><strong>Final byte</strong>: A character in range 0x40-0x7E that determines the command</li>
+</ul>
+<h4 id="command-categories"><a class="doc-anchor" href="#command-categories">§</a>Command Categories</h4>
+<ul>
+<li><strong>Cursor movement</strong>: CursorUp, CursorDown, CursorPosition, etc.</li>
+<li><strong>Erasing</strong>: EraseInDisplay, EraseInLine</li>
+<li><strong>Scrolling</strong>: ScrollUp, ScrollDown</li>
+<li><strong>Modes</strong>: SetMode, ResetMode, DECPrivateModeSet</li>
+<li><strong>Insertion/Deletion</strong>: InsertCharacter, DeleteLine, etc.</li>
+</ul>
+<h4 id="examples-10"><a class="doc-anchor" href="#examples-10">§</a>Examples</h4>
+<p>Cursor positioning:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span, CSICommand};
+
+<span class="kw">let </span>input = <span class="string">"\x1b[10;20H"</span>; <span class="comment">// Move cursor to row 10, column 20
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::CSI { range, value } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"\x1b[10;20H"</span>);
+    <span class="macro">assert!</span>(<span class="macro">matches!</span>(value, CSICommand::CursorPosition { row: <span class="number">10</span>, col: <span class="number">20 </span>}));
+}</code></pre></div>
+<p>Erase screen:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span, CSICommand, EraseInDisplayMode};
+
+<span class="kw">let </span>input = <span class="string">"\x1b[2J"</span>; <span class="comment">// Clear entire screen
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::CSI { range, value } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"\x1b[2J"</span>);
+    <span class="macro">assert!</span>(<span class="macro">matches!</span>(
+        value,
+        CSICommand::EraseInDisplay(EraseInDisplayMode::EraseEntireScreen)
+    ));
+}</code></pre></div><h4 id="fields-5"><a class="doc-anchor" href="#fields-5">§</a>Fields</h4>
+<ul>
+<li><code>range</code>: Byte range of the complete CSI sequence</li>
+<li><code>value</code>: The parsed CSI command with its parameters (see [<code>CSICommand</code>])</li>
+</ul>
+</div><div class="sub-variant" id="variant.CSI.fields"><h4>Fields</h4><div class="sub-variant-field"><span id="variant.CSI.field.range" class="section-header"><a href="#variant.CSI.field.range" class="anchor field">§</a><code>range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;</code></span><div class="docblock"><p>The byte range in the source string where this CSI sequence is located.</p>
+<p>This is a half-open range <code>[start..end)</code> that includes:</p>
+<ul>
+<li>The introducer: <code>ESC [</code> (2 bytes)</li>
+<li>Parameter bytes: numeric values and semicolons</li>
+<li>The final byte: command identifier (0x40-0x7E)</li>
+</ul>
+<h5 id="examples-11"><a class="doc-anchor" href="#examples-11">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"Before\x1b[31mRed\x1b[0mAfter"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// First CSI: "\x1b[31m" at bytes 6-11
+</span><span class="kw">if let </span>Span::CSI { range, .. } = <span class="kw-2">&amp;</span>spans[<span class="number">1</span>] {
+    <span class="macro">assert_eq!</span>(range.start, <span class="number">6</span>);
+    <span class="macro">assert_eq!</span>(range.end, <span class="number">11</span>);
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"\x1b[31m"</span>);
+}</code></pre></div></div></div><div class="sub-variant-field"><span id="variant.CSI.field.value" class="section-header"><a href="#variant.CSI.field.value" class="anchor field">§</a><code>value: <a class="enum" href="../ansi/enum.AnsiControlSequenceIntroducer.html" title="enum termionix_ansicodec::ansi::AnsiControlSequenceIntroducer">AnsiControlSequenceIntroducer</a></code></span><div class="docblock"><p>The parsed CSI command with its parameters.</p>
+<p>This field contains the fully parsed command structure, so you don’t need
+to re-parse the raw bytes. The command type and parameters are extracted
+during initial parsing for efficient access.</p>
+<p>See [<code>CSICommand</code>] for all supported command types.</p>
+<h5 id="examples-12"><a class="doc-anchor" href="#examples-12">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span, CSICommand};
+
+<span class="kw">let </span>input = <span class="string">"\x1b[5A"</span>; <span class="comment">// Move cursor up 5 lines
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::CSI { value, .. } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="kw">if let </span>CSICommand::CursorUp(lines) = value {
+        <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>lines, <span class="number">5</span>);
+    }
+}</code></pre></div></div></div></div><section id="variant.OSC" class="variant"><a href="#variant.OSC" class="anchor">§</a><h3 class="code-header">OSC</h3></section><div class="docblock"><p>OSC (Operating System Command) segment.</p>
+<p>This variant represents Operating System Commands used to set terminal
+properties like window title, icon name, and other OS-level features.
+OSC sequences have the format: <code>ESC ] &lt;command&gt; ; &lt;data&gt; BEL</code> or <code>ESC ] &lt;command&gt; ; &lt;data&gt; ST</code></p>
+<h4 id="structure-1"><a class="doc-anchor" href="#structure-1">§</a>Structure</h4>
+<ul>
+<li><strong>Introducer</strong>: ESC ] (or 0x9D in 8-bit mode)</li>
+<li><strong>Command</strong>: Numeric code (e.g., 0 for icon + title, 2 for title only)</li>
+<li><strong>Separator</strong>: Semicolon</li>
+<li><strong>Data</strong>: The actual command data (text, color specs, etc.)</li>
+<li><strong>Terminator</strong>: BEL (0x07) or ST (ESC )</li>
+</ul>
+<h4 id="common-osc-commands"><a class="doc-anchor" href="#common-osc-commands">§</a>Common OSC Commands</h4>
+<ul>
+<li><code>ESC ] 0 ; title BEL</code> - Set window title and icon name</li>
+<li><code>ESC ] 2 ; title BEL</code> - Set window title only</li>
+<li><code>ESC ] 4 ; index ; color BEL</code> - Set color palette entry</li>
+<li><code>ESC ] 10 ; color BEL</code> - Set default foreground color</li>
+<li><code>ESC ] 11 ; color BEL</code> - Set default background color</li>
+</ul>
+<h4 id="examples-13"><a class="doc-anchor" href="#examples-13">§</a>Examples</h4>
+<p>Setting window title:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1b]0;My Window\x07"</span>; <span class="comment">// Set title with BEL terminator
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::OSC { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"\x1b]0;My Window\x07"</span>);
+}</code></pre></div>
+<p>With ST terminator:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1b]2;Title\x1b\\"</span>; <span class="comment">// Set title with ST terminator
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::OSC { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"\x1b]2;Title\x1b\\"</span>);
+}</code></pre></div><h4 id="fields-6"><a class="doc-anchor" href="#fields-6">§</a>Fields</h4>
+<ul>
+<li><code>range</code>: Byte range of the complete OSC sequence including terminators</li>
+</ul>
+</div><div class="sub-variant" id="variant.OSC.fields"><h4>Fields</h4><div class="sub-variant-field"><span id="variant.OSC.field.range" class="section-header"><a href="#variant.OSC.field.range" class="anchor field">§</a><code>range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;</code></span><div class="docblock"><p>The byte range in the source string where this OSC sequence is located.</p>
+<p>This is a half-open range <code>[start..end)</code> that includes:</p>
+<ul>
+<li>The introducer: <code>ESC ]</code> (2 bytes)</li>
+<li>The command number and data</li>
+<li>The terminator: BEL (1 byte) or ST (2 bytes: <code>ESC \</code>)</li>
+</ul>
+<p>If no terminator is found, the range extends to the end of the input.</p>
+<h5 id="examples-14"><a class="doc-anchor" href="#examples-14">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1b]0;Window Title\x07"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::OSC { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(range.start, <span class="number">0</span>);
+    <span class="macro">assert_eq!</span>(range.len(), <span class="number">17</span>); <span class="comment">// Full sequence including terminators
+</span>}</code></pre></div></div></div></div><section id="variant.DCS" class="variant"><a href="#variant.DCS" class="anchor">§</a><h3 class="code-header">DCS</h3></section><div class="docblock"><p>DCS (Device Control String) segment.</p>
+<p>This variant represents Device Control Strings used for advanced terminal
+features and device-specific commands. DCS sequences are less common than
+CSI or OSC in modern terminals but are used for features like sixel graphics,
+terminal queries, and programmable keys.</p>
+<h4 id="structure-2"><a class="doc-anchor" href="#structure-2">§</a>Structure</h4>
+<ul>
+<li><strong>Introducer</strong>: ESC P (or 0x90 in 8-bit mode)</li>
+<li><strong>Parameters</strong>: Optional parameters similar to CSI</li>
+<li><strong>Data</strong>: Device-specific command data</li>
+<li><strong>Terminator</strong>: ST (ESC ) or 0x9C</li>
+</ul>
+<h4 id="common-uses"><a class="doc-anchor" href="#common-uses">§</a>Common Uses</h4>
+<ul>
+<li>Sixel graphics: <code>ESC P &lt;sixel_data&gt; ST</code></li>
+<li>Terminal ID queries and responses</li>
+<li>Programmable function keys</li>
+<li>User-defined keys (DECUDK)</li>
+</ul>
+<h4 id="examples-15"><a class="doc-anchor" href="#examples-15">§</a>Examples</h4>
+<p>Simple DCS sequence:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1bP1$tx\x1b\\"</span>; <span class="comment">// Request terminal ID
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::DCS { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"\x1bP1$tx\x1b\\"</span>);
+}</code></pre></div><h4 id="fields-7"><a class="doc-anchor" href="#fields-7">§</a>Fields</h4>
+<ul>
+<li><code>range</code>: Byte range of the complete DCS sequence including terminators</li>
+</ul>
+</div><div class="sub-variant" id="variant.DCS.fields"><h4>Fields</h4><div class="sub-variant-field"><span id="variant.DCS.field.range" class="section-header"><a href="#variant.DCS.field.range" class="anchor field">§</a><code>range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;</code></span><div class="docblock"><p>The byte range in the source string where this DCS sequence is located.</p>
+<p>This is a half-open range <code>[start..end)</code> that includes:</p>
+<ul>
+<li>The introducer: <code>ESC P</code> (2 bytes)</li>
+<li>Parameters and data (variable length)</li>
+<li>The terminator: ST (<code>ESC \</code>, 2 bytes) or 0x9C (1 byte)</li>
+</ul>
+<p>If no ST terminator is found, the range extends to the end of the input.</p>
+<h5 id="examples-16"><a class="doc-anchor" href="#examples-16">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1bPData\x1b\\"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::DCS { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(range.start, <span class="number">0</span>);
+    <span class="macro">assert_eq!</span>(range.end, <span class="number">8</span>); <span class="comment">// Full sequence
+</span>}</code></pre></div></div></div></div><section id="variant.SOS" class="variant"><a href="#variant.SOS" class="anchor">§</a><h3 class="code-header">SOS</h3></section><div class="docblock"><p>SOS (Start of String) segment.</p>
+<p>This variant represents Start of String sequences, which are rarely used in
+modern terminals. SOS is part of the C1 control set and is used to introduce
+a control string whose purpose depends on the application or terminal.</p>
+<h4 id="structure-3"><a class="doc-anchor" href="#structure-3">§</a>Structure</h4>
+<ul>
+<li><strong>Introducer</strong>: ESC X (or 0x98 in 8-bit mode)</li>
+<li><strong>Data</strong>: Application-defined string data</li>
+<li><strong>Terminator</strong>: ST (ESC ) or 0x9C</li>
+</ul>
+<h4 id="usage"><a class="doc-anchor" href="#usage">§</a>Usage</h4>
+<p>SOS sequences are application-specific and their interpretation depends on
+the terminal or application context. They are rarely encountered in typical
+terminal output.</p>
+<h4 id="examples-17"><a class="doc-anchor" href="#examples-17">§</a>Examples</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1bXsome data\x1b\\"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::SOS { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"\x1bXsome data\x1b\\"</span>);
+}</code></pre></div><h4 id="fields-8"><a class="doc-anchor" href="#fields-8">§</a>Fields</h4>
+<ul>
+<li><code>range</code>: Byte range of the complete SOS sequence including terminators</li>
+</ul>
+</div><div class="sub-variant" id="variant.SOS.fields"><h4>Fields</h4><div class="sub-variant-field"><span id="variant.SOS.field.range" class="section-header"><a href="#variant.SOS.field.range" class="anchor field">§</a><code>range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;</code></span><div class="docblock"><p>The byte range in the source string where this SOS sequence is located.</p>
+<p>This is a half-open range <code>[start..end)</code> that includes:</p>
+<ul>
+<li>The introducer: <code>ESC X</code> (2 bytes)</li>
+<li>The string data (variable length)</li>
+<li>The terminator: ST (<code>ESC \</code>, 2 bytes) or 0x9C (1 byte)</li>
+</ul>
+<p>If no ST terminator is found, the range extends to the end of the input.</p>
+</div></div></div><section id="variant.ST" class="variant"><a href="#variant.ST" class="anchor">§</a><h3 class="code-header">ST</h3></section><div class="docblock"><p>ST (String Terminator) segment.</p>
+<p>This variant represents a standalone String Terminator sequence. While ST
+is typically used to terminate OSC, DCS, SOS, PM, and APC sequences, this
+variant represents an ST that appears independently.</p>
+<h4 id="structure-4"><a class="doc-anchor" href="#structure-4">§</a>Structure</h4>
+<ul>
+<li><strong>Sequence</strong>: ESC \ (or 0x9C in 8-bit mode)</li>
+</ul>
+<h4 id="usage-1"><a class="doc-anchor" href="#usage-1">§</a>Usage</h4>
+<p>In normal parsing, ST is consumed as part of the sequence it terminates
+(OSC, DCS, etc.). This variant only appears when ST is encountered without
+a corresponding opening sequence, which is unusual but possible in malformed
+or edge-case input.</p>
+<h4 id="examples-18"><a class="doc-anchor" href="#examples-18">§</a>Examples</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"Text\x1b\\"</span>; <span class="comment">// Standalone ST
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// Will have Text span followed by ST span
+</span><span class="kw">if let </span><span class="prelude-val">Some</span>(Span::ST { range }) = spans.iter().find(|s| <span class="macro">matches!</span>(s, Span::ST { .. })) {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"\x1b\\"</span>);
+}</code></pre></div><h4 id="fields-9"><a class="doc-anchor" href="#fields-9">§</a>Fields</h4>
+<ul>
+<li><code>range</code>: Byte range of the ST sequence (always 2 bytes for ESC )</li>
+</ul>
+</div><div class="sub-variant" id="variant.ST.fields"><h4>Fields</h4><div class="sub-variant-field"><span id="variant.ST.field.range" class="section-header"><a href="#variant.ST.field.range" class="anchor field">§</a><code>range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;</code></span><div class="docblock"><p>The byte range in the source string where this ST sequence is located.</p>
+<p>This is a half-open range <code>[start..end)</code> that includes the 2-byte
+ST sequence: <code>ESC \</code> (0x1B 0x5C).</p>
+<p>The range length is always 2 for the 7-bit form (ESC ), or 1 for
+the 8-bit form (0x9C).</p>
+</div></div></div><section id="variant.PM" class="variant"><a href="#variant.PM" class="anchor">§</a><h3 class="code-header">PM</h3></section><div class="docblock"><p>PM (Privacy Message) segment.</p>
+<p>This variant represents Privacy Message sequences, which are part of the C1
+control set. PM sequences are rarely used and their specific purpose depends
+on the terminal implementation. They were designed for security-related
+terminal communications.</p>
+<h4 id="structure-5"><a class="doc-anchor" href="#structure-5">§</a>Structure</h4>
+<ul>
+<li><strong>Introducer</strong>: ESC ^ (or 0x9E in 8-bit mode)</li>
+<li><strong>Data</strong>: Privacy-related message data</li>
+<li><strong>Terminator</strong>: ST (ESC ) or 0x9C</li>
+</ul>
+<h4 id="usage-2"><a class="doc-anchor" href="#usage-2">§</a>Usage</h4>
+<p>PM sequences are extremely rare in modern terminal applications and most
+terminals don’t implement special handling for them. They are included
+for completeness in ANSI escape sequence parsing.</p>
+<h4 id="examples-19"><a class="doc-anchor" href="#examples-19">§</a>Examples</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1b^private data\x1b\\"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::PM { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"\x1b^private data\x1b\\"</span>);
+}</code></pre></div><h4 id="fields-10"><a class="doc-anchor" href="#fields-10">§</a>Fields</h4>
+<ul>
+<li><code>range</code>: Byte range of the complete PM sequence including terminators</li>
+</ul>
+</div><div class="sub-variant" id="variant.PM.fields"><h4>Fields</h4><div class="sub-variant-field"><span id="variant.PM.field.range" class="section-header"><a href="#variant.PM.field.range" class="anchor field">§</a><code>range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;</code></span><div class="docblock"><p>The byte range in the source string where this PM sequence is located.</p>
+<p>This is a half-open range <code>[start..end)</code> that includes:</p>
+<ul>
+<li>The introducer: <code>ESC ^</code> (2 bytes)</li>
+<li>The message data (variable length)</li>
+<li>The terminator: ST (<code>ESC \</code>, 2 bytes) or 0x9C (1 byte)</li>
+</ul>
+<p>If no ST terminator is found, the range extends to the end of the input.</p>
+</div></div></div><section id="variant.APC" class="variant"><a href="#variant.APC" class="anchor">§</a><h3 class="code-header">APC</h3></section><div class="docblock"><p>APC (Application Program Command) segment.</p>
+<p>This variant represents Application Program Command sequences used for
+application-specific communication with the terminal. APC allows applications
+to send custom commands that may be interpreted by the terminal or ignored.</p>
+<h4 id="structure-6"><a class="doc-anchor" href="#structure-6">§</a>Structure</h4>
+<ul>
+<li><strong>Introducer</strong>: ESC _ (or 0x9F in 8-bit mode)</li>
+<li><strong>Data</strong>: Application-specific command data</li>
+<li><strong>Terminator</strong>: ST (ESC ) or 0x9C</li>
+</ul>
+<h4 id="usage-3"><a class="doc-anchor" href="#usage-3">§</a>Usage</h4>
+<p>APC sequences are used by some terminals for:</p>
+<ul>
+<li>tmux passthrough sequences</li>
+<li>Terminal-specific extensions</li>
+<li>Application-to-terminal communication protocols</li>
+</ul>
+<h4 id="examples-20"><a class="doc-anchor" href="#examples-20">§</a>Examples</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1b_Gcommand=value\x1b\\"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::APC { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>input[range.clone()], <span class="string">"\x1b_Gcommand=value\x1b\\"</span>);
+}</code></pre></div><h4 id="fields-11"><a class="doc-anchor" href="#fields-11">§</a>Fields</h4>
+<ul>
+<li><code>range</code>: Byte range of the complete APC sequence including terminators</li>
+</ul>
+</div><div class="sub-variant" id="variant.APC.fields"><h4>Fields</h4><div class="sub-variant-field"><span id="variant.APC.field.range" class="section-header"><a href="#variant.APC.field.range" class="anchor field">§</a><code>range: <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a>&gt;</code></span><div class="docblock"><p>The byte range in the source string where this APC sequence is located.</p>
+<p>This is a half-open range <code>[start..end)</code> that includes:</p>
+<ul>
+<li>The introducer: <code>ESC _</code> (2 bytes)</li>
+<li>The command data (variable length)</li>
+<li>The terminator: ST (<code>ESC \</code>, 2 bytes) or 0x9C (1 byte)</li>
+</ul>
+<p>If no ST terminator is found, the range extends to the end of the input.</p>
+<h5 id="examples-21"><a class="doc-anchor" href="#examples-21">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1b_application data\x1b\\"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::APC { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(range.start, <span class="number">0</span>);
+    <span class="macro">assert_eq!</span>(range.end, <span class="number">20</span>); <span class="comment">// Full sequence
+</span>}</code></pre></div></div></div></div></div><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Span" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/utility/spanned.rs.html#1826-2340">Source</a><a href="#impl-Span" class="anchor">§</a><h3 class="code-header">impl <a class="enum" href="enum.Span.html" title="enum termionix_ansicodec::utility::Span">Span</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.len" class="method"><a class="src rightside" href="../../src/termionix_ansicodec/utility/spanned.rs.html#1949-1963">Source</a><h4 class="code-header">pub fn <a href="#method.len" class="fn">len</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a></h4></section></summary><div class="docblock"><p>Returns the byte length of this span.</p>
+<p>This method calculates the number of bytes occupied by this span in the source
+string by computing <code>range.end - range.start</code>. The length represents the total
+number of bytes, not the number of characters (which may differ for Unicode text).</p>
+<h5 id="returns"><a class="doc-anchor" href="#returns">§</a>Returns</h5>
+<p>The number of bytes in this span’s range. For all span variants, this is always
+<code>end - start</code>.</p>
+<h5 id="performance"><a class="doc-anchor" href="#performance">§</a>Performance</h5>
+<p>This is an O(1) operation that performs simple integer subtraction on the range
+boundaries.</p>
+<h5 id="examples-22"><a class="doc-anchor" href="#examples-22">§</a>Examples</h5><h6 id="ascii-text-length"><a class="doc-anchor" href="#ascii-text-length">§</a>ASCII Text Length</h6>
+<p>For ASCII text, the byte length equals the character count:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"Hello"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::ASCII { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(spans[<span class="number">0</span>].len(), <span class="number">5</span>);
+    <span class="macro">assert_eq!</span>(range.len(), <span class="number">5</span>); <span class="comment">// Same as span.len()
+</span>}</code></pre></div><h6 id="unicode-text-length"><a class="doc-anchor" href="#unicode-text-length">§</a>Unicode Text Length</h6>
+<p>For Unicode text, the byte length is greater than the character count:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"世界"</span>; <span class="comment">// Two characters, 6 bytes (3 bytes each)
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::Unicode { range } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(spans[<span class="number">0</span>].len(), <span class="number">6</span>); <span class="comment">// Byte length
+    </span><span class="macro">assert_eq!</span>(input.chars().count(), <span class="number">2</span>); <span class="comment">// Character count
+</span>}</code></pre></div><h6 id="ansi-escape-sequence-length"><a class="doc-anchor" href="#ansi-escape-sequence-length">§</a>ANSI Escape Sequence Length</h6>
+<p>For ANSI sequences, includes all bytes including escape codes:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"\x1b[31m"</span>; <span class="comment">// Red color CSI sequence
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::CSI { range, .. } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(spans[<span class="number">0</span>].len(), <span class="number">5</span>); <span class="comment">// ESC [ 3 1 m
+</span>}</code></pre></div><h6 id="control-code-length"><a class="doc-anchor" href="#control-code-length">§</a>Control Code Length</h6>
+<p>Control codes can be merged, so length may be greater than 1:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span, ControlCode};
+
+<span class="kw">let </span>input = <span class="string">"\n\n\n"</span>; <span class="comment">// Three newlines merged
+</span><span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>Span::Control { range, value } = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>] {
+    <span class="macro">assert_eq!</span>(spans[<span class="number">0</span>].len(), <span class="number">3</span>); <span class="comment">// Three bytes
+    </span><span class="macro">assert_eq!</span>(<span class="kw-2">*</span>value, ControlCode::LF);
+}</code></pre></div><h6 id="empty-span-check"><a class="doc-anchor" href="#empty-span-check">§</a>Empty Span Check</h6>
+<p>While rare, you can check if a span is empty (though the parser doesn’t
+create empty spans):</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::Span;
+<span class="kw">use </span>std::ops::Range;
+
+<span class="comment">// Manual span creation (not from parsing)
+</span><span class="kw">let </span>span = Span::ASCII { range: <span class="number">5</span>..<span class="number">5 </span>};
+<span class="macro">assert_eq!</span>(span.len(), <span class="number">0</span>); <span class="comment">// Empty range</span></code></pre></div><h6 id="computing-total-length"><a class="doc-anchor" href="#computing-total-length">§</a>Computing Total Length</h6>
+<p>Sum all span lengths to get total byte length:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SpannedString;
+
+<span class="kw">let </span>input = <span class="string">"Hello\nWorld"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">let </span>total_bytes: usize = spans.iter().map(|s| s.len()).sum();
+<span class="macro">assert_eq!</span>(total_bytes, <span class="number">11</span>);
+<span class="macro">assert_eq!</span>(total_bytes, input.len());</code></pre></div><h5 id="use-cases"><a class="doc-anchor" href="#use-cases">§</a>Use Cases</h5>
+<ul>
+<li><strong>Buffer allocation</strong>: Determine how many bytes to allocate for extraction</li>
+<li><strong>Progress tracking</strong>: Calculate processing progress through a string</li>
+<li><strong>Statistics</strong>: Analyze the composition of an ANSI string by span types</li>
+<li><strong>Validation</strong>: Ensure spans cover the expected byte ranges</li>
+</ul>
+<h5 id="see-also-1"><a class="doc-anchor" href="#see-also-1">§</a>See Also</h5>
+<ul>
+<li><a href="enum.Span.html#method.start" title="method termionix_ansicodec::utility::Span::start"><code>start()</code></a> - Get the starting byte position</li>
+<li><a href="enum.Span.html#method.end" title="method termionix_ansicodec::utility::Span::end"><code>end()</code></a> - Get the ending byte position</li>
+<li><a href="struct.SpannedString.html#method.len" title="method termionix_ansicodec::utility::SpannedString::len"><code>SpannedString::len()</code></a> - Get the total length of all spans</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.start" class="method"><a class="src rightside" href="../../src/termionix_ansicodec/utility/spanned.rs.html#2113-2127">Source</a><h4 class="code-header">pub fn <a href="#method.start" class="fn">start</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a></h4></section></summary><div class="docblock"><p>Returns the starting byte position of this span in the source string.</p>
+<p>This method returns the inclusive start of the byte range, representing the first
+byte that belongs to this span. The position is zero-based and suitable for direct
+use with slice indexing operations.</p>
+<h5 id="returns-1"><a class="doc-anchor" href="#returns-1">§</a>Returns</h5>
+<p>The zero-based byte offset where this span begins (inclusive). This is the <code>start</code>
+field of the span’s internal <code>range</code>.</p>
+<h5 id="performance-1"><a class="doc-anchor" href="#performance-1">§</a>Performance</h5>
+<p>This is an O(1) operation that simply returns the start value from the range.</p>
+<h5 id="examples-23"><a class="doc-anchor" href="#examples-23">§</a>Examples</h5><h6 id="basic-usage"><a class="doc-anchor" href="#basic-usage">§</a>Basic Usage</h6>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"Hello World"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// First span starts at the beginning
+</span><span class="macro">assert_eq!</span>(spans[<span class="number">0</span>].start(), <span class="number">0</span>);</code></pre></div><h6 id="multiple-spans"><a class="doc-anchor" href="#multiple-spans">§</a>Multiple Spans</h6>
+<p>Consecutive spans have adjacent start positions:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"Hello\nWorld"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// "Hello" starts at 0
+</span><span class="macro">assert_eq!</span>(spans[<span class="number">0</span>].start(), <span class="number">0</span>);
+
+<span class="comment">// "\n" starts at 5 (after "Hello")
+</span><span class="macro">assert_eq!</span>(spans[<span class="number">1</span>].start(), <span class="number">5</span>);
+
+<span class="comment">// "World" starts at 6 (after "\n")
+</span><span class="macro">assert_eq!</span>(spans[<span class="number">2</span>].start(), <span class="number">6</span>);</code></pre></div><h6 id="finding-span-positions"><a class="doc-anchor" href="#finding-span-positions">§</a>Finding Span Positions</h6>
+<p>Locate specific content by finding spans with certain start positions:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"One\nTwo\nThree"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// Find the span that starts after the first newline
+</span><span class="kw">let </span>after_first_newline = spans.iter()
+    .find(|s| s.start() &gt;= <span class="number">4</span>)
+    .unwrap();</code></pre></div><h6 id="extracting-content-by-position"><a class="doc-anchor" href="#extracting-content-by-position">§</a>Extracting Content by Position</h6>
+<p>Use start position to extract content from the source string:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"Hello\x1b[31mRed\x1b[0m"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// Extract the first 5 bytes
+</span><span class="kw">let </span>text = <span class="kw-2">&amp;</span>input[spans[<span class="number">0</span>].start()..spans[<span class="number">0</span>].end()];
+<span class="macro">assert_eq!</span>(text, <span class="string">"Hello"</span>);</code></pre></div><h6 id="checking-continuity"><a class="doc-anchor" href="#checking-continuity">§</a>Checking Continuity</h6>
+<p>Verify that spans are contiguous (no gaps):</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SpannedString;
+
+<span class="kw">let </span>input = <span class="string">"Hello World"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// Check that each span starts where the previous one ended
+</span><span class="kw">for </span>i <span class="kw">in </span><span class="number">1</span>..spans.count() {
+    <span class="macro">assert_eq!</span>(spans[i].start(), spans[i-<span class="number">1</span>].end());
+}</code></pre></div><h6 id="computing-relative-positions"><a class="doc-anchor" href="#computing-relative-positions">§</a>Computing Relative Positions</h6>
+<p>Calculate positions relative to other spans:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"ABCDEF"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">let </span>first_start = spans[<span class="number">0</span>].start();
+<span class="comment">// All positions are relative to the first span
+</span><span class="kw">for </span>span <span class="kw">in </span>spans.iter() {
+    <span class="kw">let </span>offset = span.start() - first_start;
+    <span class="macro">println!</span>(<span class="string">"Span at offset {}"</span>, offset);
+}</code></pre></div><h6 id="finding-overlapping-ranges"><a class="doc-anchor" href="#finding-overlapping-ranges">§</a>Finding Overlapping Ranges</h6>
+<p>Check if a span overlaps with a given byte position:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SpannedString;
+
+<span class="kw">let </span>input = <span class="string">"Hello World"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+<span class="kw">let </span>position = <span class="number">7</span>; <span class="comment">// Looking for byte 7
+
+</span><span class="kw">let </span>containing_span = spans.iter()
+    .find(|s| s.start() &lt;= position &amp;&amp; position &lt; s.end());</code></pre></div><h5 id="use-cases-1"><a class="doc-anchor" href="#use-cases-1">§</a>Use Cases</h5>
+<ul>
+<li><strong>Substring extraction</strong>: Determine where to start extracting content</li>
+<li><strong>Position mapping</strong>: Map byte positions to span boundaries</li>
+<li><strong>Gap detection</strong>: Find gaps between spans in parsed strings</li>
+<li><strong>Range validation</strong>: Verify span ranges are within expected bounds</li>
+<li><strong>Content navigation</strong>: Jump to specific positions in the source string</li>
+</ul>
+<h5 id="notes"><a class="doc-anchor" href="#notes">§</a>Notes</h5>
+<ul>
+<li>The start position is always less than or equal to the end position</li>
+<li>For a properly parsed <code>SpannedString</code>, the first span starts at byte 0</li>
+<li>Adjacent spans have <code>span_n.end() == span_n+1.start()</code></li>
+</ul>
+<h5 id="see-also-2"><a class="doc-anchor" href="#see-also-2">§</a>See Also</h5>
+<ul>
+<li><a href="enum.Span.html#method.end" title="method termionix_ansicodec::utility::Span::end"><code>end()</code></a> - Get the ending byte position</li>
+<li><a href="enum.Span.html#method.len" title="method termionix_ansicodec::utility::Span::len"><code>len()</code></a> - Get the byte length of the span</li>
+<li><a href="struct.SpannedString.html#method.parse" title="associated function termionix_ansicodec::utility::SpannedString::parse"><code>SpannedString::parse</code></a> - Creates spans with correct positions</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.end" class="method"><a class="src rightside" href="../../src/termionix_ansicodec/utility/spanned.rs.html#2325-2339">Source</a><h4 class="code-header">pub fn <a href="#method.end" class="fn">end</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.usize.html">usize</a></h4></section></summary><div class="docblock"><p>Returns the ending byte position of this span in the source string.</p>
+<p>This method returns the exclusive end of the byte range, representing one past the
+last byte that belongs to this span. This follows standard Rust range semantics
+where <code>range.end</code> is not included in the range.</p>
+<h5 id="returns-2"><a class="doc-anchor" href="#returns-2">§</a>Returns</h5>
+<p>The zero-based byte offset where this span ends (exclusive). This is the <code>end</code>
+field of the span’s internal <code>range</code>.</p>
+<h5 id="range-semantics-1"><a class="doc-anchor" href="#range-semantics-1">§</a>Range Semantics</h5>
+<p>The end position follows Rust’s half-open range convention:</p>
+<ul>
+<li><code>start</code> is inclusive (first byte of the span)</li>
+<li><code>end</code> is exclusive (one past the last byte)</li>
+<li>Valid bytes are at positions <code>[start..end)</code></li>
+<li>Length is always <code>end - start</code></li>
+</ul>
+<h5 id="performance-2"><a class="doc-anchor" href="#performance-2">§</a>Performance</h5>
+<p>This is an O(1) operation that simply returns the end value from the range.</p>
+<h5 id="examples-24"><a class="doc-anchor" href="#examples-24">§</a>Examples</h5><h6 id="basic-usage-1"><a class="doc-anchor" href="#basic-usage-1">§</a>Basic Usage</h6>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"Hello"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="macro">assert_eq!</span>(spans[<span class="number">0</span>].start(), <span class="number">0</span>);
+<span class="macro">assert_eq!</span>(spans[<span class="number">0</span>].end(), <span class="number">5</span>);
+
+<span class="comment">// Extract using the range
+</span><span class="kw">let </span>text = <span class="kw-2">&amp;</span>input[spans[<span class="number">0</span>].start()..spans[<span class="number">0</span>].end()];
+<span class="macro">assert_eq!</span>(text, <span class="string">"Hello"</span>);</code></pre></div><h6 id="half-open-range-semantics"><a class="doc-anchor" href="#half-open-range-semantics">§</a>Half-Open Range Semantics</h6>
+<p>The end position is exclusive, so it’s one past the last byte:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"ABC"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">let </span>span = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>];
+<span class="macro">assert_eq!</span>(span.start(), <span class="number">0</span>); <span class="comment">// First byte is 'A'
+</span><span class="macro">assert_eq!</span>(span.end(), <span class="number">3</span>);   <span class="comment">// One past 'C' (which is at index 2)
+</span><span class="macro">assert_eq!</span>(span.len(), <span class="number">3</span>);   <span class="comment">// Length is end - start</span></code></pre></div><h6 id="consecutive-spans"><a class="doc-anchor" href="#consecutive-spans">§</a>Consecutive Spans</h6>
+<p>For adjacent spans, one’s end equals the next’s start:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"AB"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// Single span "AB"
+</span><span class="macro">assert_eq!</span>(spans[<span class="number">0</span>].start(), <span class="number">0</span>);
+<span class="macro">assert_eq!</span>(spans[<span class="number">0</span>].end(), <span class="number">2</span>);</code></pre></div>
+<p>With multiple spans:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"A\nB"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// "A" ends where "\n" begins
+</span><span class="macro">assert_eq!</span>(spans[<span class="number">0</span>].end(), <span class="number">1</span>);
+<span class="macro">assert_eq!</span>(spans[<span class="number">1</span>].start(), <span class="number">1</span>);
+
+<span class="comment">// "\n" ends where "B" begins
+</span><span class="macro">assert_eq!</span>(spans[<span class="number">1</span>].end(), <span class="number">2</span>);
+<span class="macro">assert_eq!</span>(spans[<span class="number">2</span>].start(), <span class="number">2</span>);</code></pre></div><h6 id="direct-slice-indexing"><a class="doc-anchor" href="#direct-slice-indexing">§</a>Direct Slice Indexing</h6>
+<p>Use start and end directly with slice indexing:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"Hello World"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">for </span>span <span class="kw">in </span>spans.iter() {
+    <span class="kw">let </span>content = <span class="kw-2">&amp;</span>input[span.start()..span.end()];
+    <span class="macro">println!</span>(<span class="string">"Span content: {:?}"</span>, content);
+}</code></pre></div><h6 id="finding-the-last-byte"><a class="doc-anchor" href="#finding-the-last-byte">§</a>Finding the Last Byte</h6>
+<p>The last byte of a span is at position <code>end - 1</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::{SpannedString, Span};
+
+<span class="kw">let </span>input = <span class="string">"Hello"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">let </span>span = <span class="kw-2">&amp;</span>spans[<span class="number">0</span>];
+<span class="kw">let </span>last_byte_pos = span.end() - <span class="number">1</span>;
+<span class="macro">assert_eq!</span>(input.as_bytes()[last_byte_pos], <span class="string">b'o'</span>);</code></pre></div><h6 id="calculating-coverage"><a class="doc-anchor" href="#calculating-coverage">§</a>Calculating Coverage</h6>
+<p>Find the total byte range covered by all spans:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SpannedString;
+
+<span class="kw">let </span>input = <span class="string">"Hello World"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">if let </span>(<span class="prelude-val">Some</span>(first), <span class="prelude-val">Some</span>(last)) = (spans.iter().next(), spans.iter().last()) {
+    <span class="kw">let </span>total_start = first.start();
+    <span class="kw">let </span>total_end = last.end();
+    <span class="macro">assert_eq!</span>(total_end - total_start, input.len());
+}</code></pre></div><h6 id="checking-span-boundaries"><a class="doc-anchor" href="#checking-span-boundaries">§</a>Checking Span Boundaries</h6>
+<p>Verify that spans cover the entire input with no gaps:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SpannedString;
+
+<span class="kw">let </span>input = <span class="string">"Hello World"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="comment">// First span should start at 0
+</span><span class="macro">assert_eq!</span>(spans[<span class="number">0</span>].start(), <span class="number">0</span>);
+
+<span class="comment">// Last span should end at input length
+</span><span class="kw">let </span>last_idx = spans.count() - <span class="number">1</span>;
+<span class="macro">assert_eq!</span>(spans[last_idx].end(), input.len());
+
+<span class="comment">// Each span should start where previous ended
+</span><span class="kw">for </span>i <span class="kw">in </span><span class="number">1</span>..spans.count() {
+    <span class="macro">assert_eq!</span>(spans[i].start(), spans[i-<span class="number">1</span>].end());
+}</code></pre></div><h6 id="computing-span-offsets"><a class="doc-anchor" href="#computing-span-offsets">§</a>Computing Span Offsets</h6>
+<p>Calculate how far into the string each span ends:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_ansicodec::SpannedString;
+
+<span class="kw">let </span>input = <span class="string">"One\nTwo\nThree"</span>;
+<span class="kw">let </span>spans = SpannedString::parse(input);
+
+<span class="kw">for </span>(i, span) <span class="kw">in </span>spans.iter().enumerate() {
+    <span class="kw">let </span>progress = (span.end() <span class="kw">as </span>f64 / input.len() <span class="kw">as </span>f64) * <span class="number">100.0</span>;
+    <span class="macro">println!</span>(<span class="string">"Span {} ends at {:.1}% through the string"</span>, i, progress);
+}</code></pre></div><h5 id="use-cases-2"><a class="doc-anchor" href="#use-cases-2">§</a>Use Cases</h5>
+<ul>
+<li><strong>Content extraction</strong>: Determine where to stop extracting content</li>
+<li><strong>Range operations</strong>: Create ranges for slice indexing</li>
+<li><strong>Boundary checking</strong>: Verify spans don’t exceed string bounds</li>
+<li><strong>Gap analysis</strong>: Find gaps between non-contiguous spans</li>
+<li><strong>Progress calculation</strong>: Track parsing or processing progress</li>
+</ul>
+<h5 id="notes-1"><a class="doc-anchor" href="#notes-1">§</a>Notes</h5>
+<ul>
+<li>The end position is always greater than or equal to the start position</li>
+<li><code>end()</code> returns a value one past the last valid byte index</li>
+<li>For empty spans (rare), <code>start() == end()</code></li>
+<li>The last span’s end typically equals the source string’s length</li>
+</ul>
+<h5 id="see-also-3"><a class="doc-anchor" href="#see-also-3">§</a>See Also</h5>
+<ul>
+<li><a href="enum.Span.html#method.start" title="method termionix_ansicodec::utility::Span::start"><code>start()</code></a> - Get the starting byte position</li>
+<li><a href="enum.Span.html#method.len" title="method termionix_ansicodec::utility::Span::len"><code>len()</code></a> - Get the byte length of the span</li>
+<li><a href="struct.SpannedString.html#method.len" title="method termionix_ansicodec::utility::SpannedString::len"><code>SpannedString::len()</code></a> - Get the total length from first to last span</li>
+</ul>
+</div></details></div></details></div><h2 id="trait-implementations" class="section-header">Trait Implementations<a href="#trait-implementations" class="anchor">§</a></h2><div id="trait-implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Clone-for-Span" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/utility/spanned.rs.html#1022">Source</a><a href="#impl-Clone-for-Span" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="enum" href="enum.Span.html" title="enum termionix_ansicodec::utility::Span">Span</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone" class="method trait-impl"><a class="src rightside" href="../../src/termionix_ansicodec/utility/spanned.rs.html#1022">Source</a><a href="#method.clone" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#tymethod.clone" class="fn">clone</a>(&amp;self) -&gt; <a class="enum" href="enum.Span.html" title="enum termionix_ansicodec::utility::Span">Span</a></h4></section></summary><div class='docblock'>Returns a duplicate of the value. <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#tymethod.clone">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_from" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/clone.rs.html#245-247">Source</a></span><a href="#method.clone_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#method.clone_from" class="fn">clone_from</a>(&amp;mut self, source: &amp;Self)</h4></section></summary><div class='docblock'>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html#method.clone_from">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Debug-for-Span" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/utility/spanned.rs.html#1022">Source</a><a href="#impl-Debug-for-Span" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="enum" href="enum.Span.html" title="enum termionix_ansicodec::utility::Span">Span</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt" class="method trait-impl"><a class="src rightside" href="../../src/termionix_ansicodec/utility/spanned.rs.html#1022">Source</a><a href="#method.fmt" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Debug.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="type" href="https://doc.rust-lang.org/1.93.0/core/fmt/type.Result.html" title="type core::fmt::Result">Result</a></h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/1.93.0/core/fmt/trait.Debug.html#tymethod.fmt">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-PartialEq-for-Span" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/utility/spanned.rs.html#1022">Source</a><a href="#impl-PartialEq-for-Span" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialEq.html" title="trait core::cmp::PartialEq">PartialEq</a> for <a class="enum" href="enum.Span.html" title="enum termionix_ansicodec::utility::Span">Span</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.eq" class="method trait-impl"><a class="src rightside" href="../../src/termionix_ansicodec/utility/spanned.rs.html#1022">Source</a><a href="#method.eq" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialEq.html#tymethod.eq" class="fn">eq</a>(&amp;self, other: &amp;<a class="enum" href="enum.Span.html" title="enum termionix_ansicodec::utility::Span">Span</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class='docblock'>Tests for <code>self</code> and <code>other</code> values to be equal, and is used by <code>==</code>.</div></details><details class="toggle method-toggle" open><summary><section id="method.ne" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.93.0/src/core/cmp.rs.html#264">Source</a></span><a href="#method.ne" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.PartialEq.html#method.ne" class="fn">ne</a>(&amp;self, other: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;Rhs</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.bool.html">bool</a></h4></section></summary><div class='docblock'>Tests for <code>!=</code>. The default implementation is almost always sufficient,
+and should not be overridden without very good reason.</div></details></div></details><section id="impl-Eq-for-Span" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/utility/spanned.rs.html#1022">Source</a><a href="#impl-Eq-for-Span" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/cmp/trait.Eq.html" title="trait core::cmp::Eq">Eq</a> for <a class="enum" href="enum.Span.html" title="enum termionix_ansicodec::utility::Span">Span</a></h3></section><section id="impl-StructuralPartialEq-for-Span" class="impl"><a class="src rightside" href="../../src/termionix_ansicodec/utility/spanned.rs.html#1022">Source</a><a href="#impl-StructuralPartialEq-for-Span" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.StructuralPartialEq.html" title="trait core::marker::StructuralPartialEq">StructuralPartialEq</a> for <a class="enum" href="enum.Span.html" title="enum termionix_ansicodec::utility::Span">Span</a></h3></section></div><h2 id="synthetic-implementations" class="section-header">Auto Trait Implementations<a href="#synthetic-implementations" class="anchor">§</a></h2><div id="synthetic-implementations-list"><section id="impl-Freeze-for-Span" class="impl"><a href="#impl-Freeze-for-Span" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Freeze.html" title="trait core::marker::Freeze">Freeze</a> for <a class="enum" href="enum.Span.html" title="enum termionix_ansicodec::utility::Span">Span</a></h3></section><section id="impl-RefUnwindSafe-for-Span" class="impl"><a href="#impl-RefUnwindSafe-for-Span" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/panic/unwind_safe/trait.RefUnwindSafe.html" title="trait core::panic::unwind_safe::RefUnwindSafe">RefUnwindSafe</a> for <a class="enum" href="enum.Span.html" title="enum termionix_ansicodec::utility::Span">Span</a></h3></section><section id="impl-Send-for-Span" class="impl"><a href="#impl-Send-for-Span" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> for <a class="enum" href="enum.Span.html" title="enum termionix_ansicodec::utility::Span">Span</a></h3></section><section id="impl-Sync-for-Span" class="impl"><a href="#impl-Sync-for-Span" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> for <a class="enum" href="enum.Span.html" title="enum termionix_ansicodec::utility::Span">Span</a></h3></section><section id="impl-Unpin-for-Span" class="impl"><a href="#impl-Unpin-for-Span" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Unpin.html" title="trait core::marker::Unpin">Unpin</a> for <a class="enum" href="enum.Span.html" title="enum termionix_ansicodec::utility::Span">Span</a></h3></section><section id="impl-UnwindSafe-for-Span" class="impl"><a href="#impl-UnwindSafe-for-Span" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/panic/unwind_safe/trait.UnwindSafe.html" title="trait core::panic::unwind_safe::UnwindSafe">UnwindSafe</a> for <a class="enum" href="enum.Span.html" title="enum termionix_ansicodec::utility::Span">Span</a></h3></section></div><h2 id="blanket-implementations" class="section-header">Blanket Implementations<a href="#blanket-implementations" class="anchor">§</a></h2><div id="blanket-implementations-list"><details class="toggle implementors-toggle"><summary><section id="impl-Any-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/any.rs.html#138">Source</a><a href="#impl-Any-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/any/trait.Any.html" title="trait core::any::Any">Any</a> for T<div class="where">where
+    T: 'static + ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.type_id" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/any.rs.html#139">Source</a><a href="#method.type_id" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/any/trait.Any.html#tymethod.type_id" class="fn">type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.93.0/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></h4></section></summary><div class='docblock'>Gets the <code>TypeId</code> of <code>self</code>. <a href="https://doc.rust-lang.org/1.93.0/core/any/trait.Any.html#tymethod.type_id">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Borrow%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#212">Source</a><a href="#impl-Borrow%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#214">Source</a><a href="#method.borrow" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html#tymethod.borrow" class="fn">borrow</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;T</a></h4></section></summary><div class='docblock'>Immutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.Borrow.html#tymethod.borrow">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-BorrowMut%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#221">Source</a><a href="#impl-BorrowMut%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.BorrowMut.html" title="trait core::borrow::BorrowMut">BorrowMut</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.93.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow_mut" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/borrow.rs.html#222">Source</a><a href="#method.borrow_mut" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut" class="fn">borrow_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;mut T</a></h4></section></summary><div class='docblock'>Mutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.93.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-CloneToUninit-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/clone.rs.html#547">Source</a><a href="#impl-CloneToUninit-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.CloneToUninit.html" title="trait core::clone::CloneToUninit">CloneToUninit</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone_to_uninit" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/clone.rs.html#549">Source</a><a href="#method.clone_to_uninit" class="anchor">§</a><h4 class="code-header">unsafe fn <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit" class="fn">clone_to_uninit</a>(&amp;self, dest: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.pointer.html">*mut </a><a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.u8.html">u8</a>)</h4></section></summary><span class="item-info"><div class="stab unstable"><span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>clone_to_uninit</code>)</span></div></span><div class='docblock'>Performs copy-assignment from <code>self</code> to <code>dest</code>. <a href="https://doc.rust-lang.org/1.93.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-From%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#785">Source</a><a href="#impl-From%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#788">Source</a><a href="#method.from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html#tymethod.from" class="fn">from</a>(t: T) -&gt; T</h4></section></summary><div class="docblock"><p>Returns the argument unchanged.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Instrument-for-T" class="impl"><a href="#impl-Instrument-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; Instrument for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.instrument" class="method trait-impl"><a href="#method.instrument" class="anchor">§</a><h4 class="code-header">fn <a class="fn">instrument</a>(self, span: Span) -&gt; Instrumented&lt;Self&gt;</h4></section></summary><div class='docblock'>Instruments this type with the provided [<code>Span</code>], returning an
+<code>Instrumented</code> wrapper. <a>Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.in_current_span" class="method trait-impl"><a href="#method.in_current_span" class="anchor">§</a><h4 class="code-header">fn <a class="fn">in_current_span</a>(self) -&gt; Instrumented&lt;Self&gt;</h4></section></summary><div class='docblock'>Instruments this type with the <a href="super::Span::current()">current</a> <a href="crate::Span"><code>Span</code></a>, returning an
+<code>Instrumented</code> wrapper. <a>Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Into%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#767-769">Source</a><a href="#impl-Into%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#777">Source</a><a href="#method.into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html#tymethod.into" class="fn">into</a>(self) -&gt; U</h4></section></summary><div class="docblock"><p>Calls <code>U::from(self)</code>.</p>
+<p>That is, this conversion is whatever the implementation of
+<code><a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for U</code> chooses to do.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-ToOwned-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#85-87">Source</a><a href="#impl-ToOwned-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html" title="trait alloc::borrow::ToOwned">ToOwned</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Owned" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#89">Source</a><a href="#associatedtype.Owned" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#associatedtype.Owned" class="associatedtype">Owned</a> = T</h4></section></summary><div class='docblock'>The resulting type after obtaining ownership.</div></details><details class="toggle method-toggle" open><summary><section id="method.to_owned" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#90">Source</a><a href="#method.to_owned" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned" class="fn">to_owned</a>(&amp;self) -&gt; T</h4></section></summary><div class='docblock'>Creates owned data from borrowed data, usually by cloning. <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/alloc/borrow.rs.html#94">Source</a><a href="#method.clone_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#method.clone_into" class="fn">clone_into</a>(&amp;self, target: <a class="primitive" href="https://doc.rust-lang.org/1.93.0/std/primitive.reference.html">&amp;mut T</a>)</h4></section></summary><div class='docblock'>Uses borrowed data to replace owned data, usually by cloning. <a href="https://doc.rust-lang.org/1.93.0/alloc/borrow/trait.ToOwned.html#method.clone_into">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryFrom%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#827-829">Source</a><a href="#impl-TryFrom%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error-1" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#831">Source</a><a href="#associatedtype.Error-1" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" class="associatedtype">Error</a> = <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/convert/enum.Infallible.html" title="enum core::convert::Infallible">Infallible</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#834">Source</a><a href="#method.try_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#tymethod.try_from" class="fn">try_from</a>(value: U) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;T, &lt;T as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryInto%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#811-813">Source</a><a href="#impl-TryInto%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryInto.html" title="trait core::convert::TryInto">TryInto</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#815">Source</a><a href="#associatedtype.Error" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryInto.html#associatedtype.Error" class="associatedtype">Error</a> = &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.93.0/src/core/convert/mod.rs.html#818">Source</a><a href="#method.try_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryInto.html#tymethod.try_into" class="fn">try_into</a>(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.93.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;U, &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-WithSubscriber-for-T" class="impl"><a href="#impl-WithSubscriber-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; WithSubscriber for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.with_subscriber" class="method trait-impl"><a href="#method.with_subscriber" class="anchor">§</a><h4 class="code-header">fn <a class="fn">with_subscriber</a>&lt;S&gt;(self, subscriber: S) -&gt; WithDispatch&lt;Self&gt;<div class="where">where
+    S: <a class="trait" href="https://doc.rust-lang.org/1.93.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;Dispatch&gt;,</div></h4></section></summary><div class='docblock'>Attaches the provided <a href="super::Subscriber"><code>Subscriber</code></a> to this type, returning a
+[<code>WithDispatch</code>] wrapper. <a>Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.with_current_subscriber" class="method trait-impl"><a href="#method.with_current_subscriber" class="anchor">§</a><h4 class="code-header">fn <a class="fn">with_current_subscriber</a>(self) -&gt; WithDispatch&lt;Self&gt;</h4></section></summary><div class='docblock'>Attaches the current <a href="dispatcher#setting-the-default-subscriber">default</a> <a href="super::Subscriber"><code>Subscriber</code></a> to this type, returning a
+[<code>WithDispatch</code>] wrapper. <a>Read more</a></div></details></div></details></div></section></div></main></body></html>

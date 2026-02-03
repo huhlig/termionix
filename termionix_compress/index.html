@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Dynamic Compression Stream"><title>termionix_compress - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-ca0dd0c4.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="termionix_compress" data-themes="" data-resource-suffix="" data-rustdoc-version="1.93.0 (254b59607 2026-01-19)" data-channel="1.93.0" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-a3946164.js" data-settings-js="settings-c38705f0.js" ><script src="../static.files/storage-e2aeef58.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-a410ff4d.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-263c88ec.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Crate termionix_compress</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../termionix_compress/index.html">termionix_<wbr>compress</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section id="rustdoc-toc"><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#dynamic-compression-stream" title="Dynamic Compression Stream">Dynamic Compression Stream</a><ul><li><a href="#features" title="Features">Features</a></li><li><a href="#basic-usage" title="Basic Usage">Basic Usage</a></li><li><a href="#algorithm-selection" title="Algorithm Selection">Algorithm Selection</a></li><li><a href="#important-notes" title="Important Notes">Important Notes</a></li><li><a href="#implementation-details" title="Implementation Details">Implementation Details</a></li><li><a href="#performance-considerations" title="Performance Considerations">Performance Considerations</a></li></ul></li></ul><h3><a href="#structs">Crate Items</a></h3><ul class="block"><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li><li><a href="#traits" title="Traits">Traits</a></li></ul></section><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><h1>Crate <span>termionix_<wbr>compress</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/termionix_compress/lib.rs.html#17-1701">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="dynamic-compression-stream"><a class="doc-anchor" href="#dynamic-compression-stream">§</a>Dynamic Compression Stream</h2>
+<p>This module provides a flexible compression wrapper for asynchronous streams that supports
+runtime algorithm switching. It enables transparent compression and decompression of data
+flowing through async I/O streams.</p>
+<h3 id="features"><a class="doc-anchor" href="#features">§</a>Features</h3>
+<ul>
+<li><strong>Multiple Compression Algorithms</strong>: Supports Gzip, Deflate, Brotli, Zlib, Zstd, and uncompressed modes</li>
+<li><strong>Runtime Algorithm Switching</strong>: Change compression algorithms on-the-fly during stream operation</li>
+<li><strong>Async I/O Compatible</strong>: Implements both <code>AsyncRead</code> and <code>AsyncWrite</code> traits</li>
+<li><strong>Zero-copy Operations</strong>: Built on <code>pin-project-lite</code> for efficient pinning</li>
+<li><strong>Type-safe</strong>: Strongly typed algorithm selection via the <code>Algorithm</code> enum</li>
+</ul>
+<h3 id="basic-usage"><a class="doc-anchor" href="#basic-usage">§</a>Basic Usage</h3><h4 id="creating-a-compression-stream"><a class="doc-anchor" href="#creating-a-compression-stream">§</a>Creating a Compression Stream</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_compress::{CompressionStream, CompressionAlgorithm};
+<span class="kw">use </span>tokio::net::TcpStream;
+<span class="kw">use </span>tokio::io::{AsyncWriteExt, AsyncReadExt};
+
+<span class="comment">// Connect to a server
+</span><span class="kw">let </span>stream = TcpStream::connect(<span class="string">"127.0.0.1:8080"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+
+<span class="comment">// Wrap with Gzip compression
+</span><span class="kw">let </span><span class="kw-2">mut </span>compressed = CompressionStream::new(stream, CompressionAlgorithm::Gzip);
+
+<span class="comment">// Write data - it will be compressed automatically
+</span>compressed.write_all(<span class="string">b"Hello, world!"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+compressed.flush().<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div><h4 id="switching-compression-algorithms"><a class="doc-anchor" href="#switching-compression-algorithms">§</a>Switching Compression Algorithms</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_compress::{CompressionStream, CompressionAlgorithm};
+<span class="kw">use </span>tokio::io::AsyncWriteExt;
+
+<span class="kw">let </span><span class="kw-2">mut </span>compressed = CompressionStream::new(stream, CompressionAlgorithm::None);
+
+<span class="comment">// Write uncompressed data
+</span>compressed.write_all(<span class="string">b"uncompressed"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+
+<span class="comment">// Switch to Gzip compression
+</span>compressed.switch_algorithm(CompressionAlgorithm::Gzip).<span class="kw">await</span><span class="question-mark">?</span>;
+
+<span class="comment">// Subsequent writes will be Gzip compressed
+</span>compressed.write_all(<span class="string">b"compressed"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+compressed.shutdown().<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div><h4 id="reading-from-a-compression-stream"><a class="doc-anchor" href="#reading-from-a-compression-stream">§</a>Reading from a Compression Stream</h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>termionix_compress::{CompressionStream, CompressionAlgorithm};
+<span class="kw">use </span>tokio::io::AsyncReadExt;
+
+<span class="kw">let </span><span class="kw-2">mut </span>compressed = CompressionStream::new(stream, CompressionAlgorithm::Gzip);
+
+<span class="kw">let </span><span class="kw-2">mut </span>buffer = <span class="macro">vec!</span>[<span class="number">0u8</span>; <span class="number">1024</span>];
+<span class="kw">let </span>n = compressed.read(<span class="kw-2">&amp;mut </span>buffer).<span class="kw">await</span><span class="question-mark">?</span>;
+<span class="macro">println!</span>(<span class="string">"Read {} bytes"</span>, n);</code></pre></div><h3 id="algorithm-selection"><a class="doc-anchor" href="#algorithm-selection">§</a>Algorithm Selection</h3>
+<p>The <code>Algorithm</code> enum provides several compression options:</p>
+<ul>
+<li><strong><code>Algorithm::None</code></strong>: No compression (pass-through mode)</li>
+<li><strong><code>Algorithm::Gzip</code></strong>: Popular general-purpose compression</li>
+<li><strong><code>Algorithm::Deflate</code></strong>: Raw DEFLATE compression (no headers/footers)</li>
+<li><strong><code>Algorithm::Brotli</code></strong>: Modern compression with high ratios</li>
+<li><strong><code>Algorithm::Zlib</code></strong>: DEFLATE with Zlib wrapper</li>
+<li><strong><code>Algorithm::Zstd</code></strong>: Fast compression with tunable ratios</li>
+</ul>
+<h3 id="important-notes"><a class="doc-anchor" href="#important-notes">§</a>Important Notes</h3><h4 id="algorithm-switching"><a class="doc-anchor" href="#algorithm-switching">§</a>Algorithm Switching</h4>
+<p>When switching algorithms:</p>
+<ol>
+<li>The current compression stream is flushed and finalized</li>
+<li>Pending data is written to ensure compression state is complete</li>
+<li>A new compression context is created with the new algorithm</li>
+<li>The underlying stream continues without interruption</li>
+</ol>
+<h4 id="stream-finalization"><a class="doc-anchor" href="#stream-finalization">§</a>Stream Finalization</h4>
+<p>Always call <code>shutdown()</code> when done writing to ensure:</p>
+<ul>
+<li>All buffered data is compressed and written</li>
+<li>Compression footers/trailers are properly written</li>
+<li>The stream is properly finalized</li>
+</ul>
+<h3 id="implementation-details"><a class="doc-anchor" href="#implementation-details">§</a>Implementation Details</h3>
+<p>The <code>CompressionStream</code> is a thin wrapper around <code>InnerStream</code>, which is an enum
+containing the actual compression encoder for the selected algorithm. This design
+allows for efficient runtime polymorphism without dynamic dispatch overhead.</p>
+<h3 id="performance-considerations"><a class="doc-anchor" href="#performance-considerations">§</a>Performance Considerations</h3>
+<ul>
+<li><strong>No Compression</strong>: Zero overhead, data passes through unchanged</li>
+<li><strong>Compression Overhead</strong>: Each algorithm has different CPU/compression tradeoffs</li>
+<li><strong>Algorithm Switching</strong>: Requires flushing and recreating compression state</li>
+<li><strong>Buffer Management</strong>: Internal buffers are reused where possible</li>
+</ul>
+</div></details><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.CompressionReader.html" title="struct termionix_compress::CompressionReader">Compression<wbr>Reader</a></dt><dd>A decompression wrapper for read-only streams</dd><dt><a class="struct" href="struct.CompressionStream.html" title="struct termionix_compress::CompressionStream">Compression<wbr>Stream</a></dt><dd>A dynamic compression wrapper that allows switching compression on-the-fly.</dd><dt><a class="struct" href="struct.CompressionWriter.html" title="struct termionix_compress::CompressionWriter">Compression<wbr>Writer</a></dt><dd>A compression wrapper for write-only streams</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.CompressionAlgorithm.html" title="enum termionix_compress::CompressionAlgorithm">Compression<wbr>Algorithm</a></dt><dd>Compression algorithm selection for stream processing.</dd></dl><h2 id="traits" class="section-header">Traits<a href="#traits" class="anchor">§</a></h2><dl class="item-table"><dt><a class="trait" href="trait.AsyncStream.html" title="trait termionix_compress::AsyncStream">Async<wbr>Stream</a></dt></dl></section></div></main></body></html>

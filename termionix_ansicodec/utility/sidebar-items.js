@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Span"],"fn":["strip_ansi_codes"],"struct":["SpannedString","StyledString"]};
